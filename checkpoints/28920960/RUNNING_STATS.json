@@ -1,0 +1,16 @@
+{
+    "cumulative_model_updates": 1260,
+    "cumulative_timesteps": 28920960,
+    "epoch": 432,
+    "reward_running_stats": {
+        "count": 21600,
+        "mean": [
+            1.264743710381059
+        ],
+        "shape": 1,
+        "var": [
+            643944.0286089057
+        ]
+    },
+    "run_id": "h5g2p1rt"
+}
