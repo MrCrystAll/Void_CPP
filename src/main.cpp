@@ -11,6 +11,7 @@
 #include "RLBotClient.h"
 #include "LoggedCombinedReward.h"
 #include "LoggerUtils.h"
+#include "WandbConfig.h"
 
 using namespace RLGPC; // RLGymPPO
 using namespace RLGSC; // RLGymSim
@@ -172,9 +173,9 @@ int main() {
 	cfg.sendMetrics = true; // Send metrics
 	cfg.renderMode = false; // Don't render
 
-	cfg.metricsGroupName = "cryy_salt";
-	cfg.metricsProjectName = "cpp_loggers";
-	cfg.metricsRunName = "cpp_loggers_run";
+	cfg.metricsGroupName = WANDB_ENTITY;
+	cfg.metricsProjectName = WANDB_PROJECT;
+	cfg.metricsRunName = WANDB_RUN_NAME;
 
 	// Make the learner with the environment creation function and the config we just made
 	Learner learner = Learner(EnvCreateFunc, cfg);

@@ -47,8 +47,8 @@ def make_models_from_dicts(policy_state_dict, critic_state_dict):
 	return policy, critic
 	
 def main():
-	if len(sys.argv) != 3:
-		sys.exit("Invalid argument count, arguments should be \"<to_cpp/to_python> <checkpoint path>\"")
+	if len(sys.argv) != 4:
+		sys.exit("Invalid argument count, arguments should be \"<to_cpp/to_python> <checkpoint path> <output_path>\"")
 
 	to_arg = sys.argv[1]
 	if to_arg == 'to_cpp':
@@ -59,6 +59,7 @@ def main():
 		sys.exit("Invalid arguments, please specify \"-save\" or \"-load\" for the first argument.")
 		
 	path = sys.argv[2]
+	output_path = sys.argv[3]
 	
 	device = torch.device('cpu')
 	
@@ -97,7 +98,6 @@ def main():
 		critic_optim = torch.optim.Adam(critic_py.parameters())
 		
 		print("Saving for rlgym-ppo...")
-		output_path = "python_checkpoint"
 		os.makedirs(output_path, exist_ok = True)
 		
 		policy_state_dict = rename_model_state_dict(policy.state_dict())
