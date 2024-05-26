@@ -29,18 +29,25 @@ std::vector<std::string> names = {
 void OnStep(GameInst* gameInst, const RLGSC::Gym::StepResult& stepResult, Report& gameMetrics) {
 
 	auto& gameState = stepResult.state;
-	((LoggedCombinedReward*)(gameInst->match->rewardFn))->LogRewards(gameMetrics);
+	try
+	{
+		((LoggedCombinedReward*)(gameInst->match->rewardFn))->LogRewards(gameMetrics);
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << "Couldn't log rewards: " << e.what() << std::endl;
+	}
 
 	for (auto& player : gameState.players) {
 		// Track average player speed
 		float speed = player.phys.vel.Length();
-		gameMetrics.AccumAvg("player_speed", speed);
+		gameMetrics.AccumAvg(METRICS_HEADER + std::string("player_speed"), speed);
 
 		// Track ball touch ratio
-		gameMetrics.AccumAvg("ball_touch_ratio", player.ballTouchedStep);
+		gameMetrics.AccumAvg(METRICS_HEADER + std::string("ball_touch_ratio"), player.ballTouchedStep);
 
 		// Track in-air ratio
-		gameMetrics.AccumAvg("in_air_ratio", !player.carState.isOnGround);
+		gameMetrics.AccumAvg(METRICS_HEADER + std::string("in_air_ratio"), !player.carState.isOnGround);
 	}
 }
 
@@ -60,18 +67,18 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 	// Get metrics for every gameInst
 	auto allGameMetrics = learner->GetAllGameMetrics();
 	for (auto& gameReport : allGameMetrics) {
-		avgPlayerSpeed += gameReport.GetAvg("player_speed");
-		avgBallTouchRatio += gameReport.GetAvg("ball_touch_ratio");
-		avgAirRatio += gameReport.GetAvg("in_air_ratio");
+		avgPlayerSpeed += gameReport.GetAvg(METRICS_HEADER + std::string("player_speed"));
+		avgBallTouchRatio += gameReport.GetAvg(METRICS_HEADER + std::string("ball_touch_ratio"));
+		avgAirRatio += gameReport.GetAvg(METRICS_HEADER + std::string("in_air_ratio"));
 
 		for (int i = 0; i < names.size(); i++) {
 			rewards[i] += gameReport.GetAvg(REWARD_HEADER + names[i]);
 		}
 	}
 
-	allMetrics["player_speed"] = avgPlayerSpeed.Get();
-	allMetrics["ball_touch_ratio"] = avgBallTouchRatio.Get();
-	allMetrics["in_air_ratio"] = avgAirRatio.Get();
+	allMetrics[METRICS_HEADER + std::string("player_speed")] = avgPlayerSpeed.Get();
+	allMetrics[METRICS_HEADER + std::string("ball_touch_ratio")] = avgBallTouchRatio.Get();
+	allMetrics[METRICS_HEADER + std::string("in_air_ratio")] = avgAirRatio.Get();
 
 	for (int i = 0; i < rewards.size(); i++) {
 		allMetrics[REWARD_HEADER + names[i]] = rewards[i].Get();

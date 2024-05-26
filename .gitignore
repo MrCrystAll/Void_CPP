@@ -61,3 +61,5 @@ RLBotCPP
 RLGymPPO_CPP
 wandb
 checkpoints
+python_scripts/__pycache__
+/python_scripts/__pycache__/metric_receiver.cpython-39.pyc
