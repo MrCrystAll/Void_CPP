@@ -12,15 +12,14 @@
 #include "LoggedCombinedReward.h"
 #include "LoggerUtils.h"
 #include "WandbConfig.h"
+#include <Rewards.h>
+#include <States.h>
 
 using namespace RLGPC; // RLGymPPO
 using namespace RLGSC; // RLGymSim
 
 std::vector<std::string> names = {
-	"FaceBall",
-	"VelocityPlayerToBall",
-	"VelocityBallToGoal",
-	"Event"
+	"PinchReward"
 };
 
 // This is our step callback, it's called every step from every RocketSim game
@@ -39,10 +38,14 @@ void OnStep(GameInst* gameInst, const RLGSC::Gym::StepResult& stepResult, Report
 		std::cout << "Couldn't log rewards: " << e.what() << std::endl;
 	}
 
+	gameMetrics.AccumAvg(METRICS_HEADER + std::string("ball_speed"), gameState.ball.vel.Length());
+
 	for (auto& player : gameState.players) {
 		// Track average player speed
 		float speed = player.phys.vel.Length();
 		gameMetrics.AccumAvg(METRICS_HEADER + std::string("player_speed"), speed);
+
+		
 
 		// Track ball touch ratio
 		gameMetrics.AccumAvg(METRICS_HEADER + std::string("ball_touch_ratio"), player.ballTouchedStep);
@@ -59,6 +62,7 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 	AvgTracker avgPlayerSpeed = {};
 	AvgTracker avgBallTouchRatio = {};
 	AvgTracker avgAirRatio = {};
+	AvgTracker avgBallSpeed = {};
 	std::vector<AvgTracker> rewards = {};
 
 	for (int i = 0; i < names.size(); i++) {
@@ -71,6 +75,7 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 		avgPlayerSpeed += gameReport.GetAvg(METRICS_HEADER + std::string("player_speed"));
 		avgBallTouchRatio += gameReport.GetAvg(METRICS_HEADER + std::string("ball_touch_ratio"));
 		avgAirRatio += gameReport.GetAvg(METRICS_HEADER + std::string("in_air_ratio"));
+		avgBallSpeed += gameReport.GetAvg(METRICS_HEADER + std::string("ball_speed"));
 
 		for (int i = 0; i < names.size(); i++) {
 			rewards[i] += gameReport.GetAvg(REWARD_HEADER + names[i]);
@@ -80,6 +85,7 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 	allMetrics[METRICS_HEADER + std::string("player_speed")] = avgPlayerSpeed.Get();
 	allMetrics[METRICS_HEADER + std::string("ball_touch_ratio")] = avgBallTouchRatio.Get();
 	allMetrics[METRICS_HEADER + std::string("in_air_ratio")] = avgAirRatio.Get();
+	allMetrics[METRICS_HEADER + std::string("ball_speed")] = avgBallSpeed.Get();
 
 	for (int i = 0; i < rewards.size(); i++) {
 		allMetrics[REWARD_HEADER + names[i]] = rewards[i].Get();
@@ -96,17 +102,7 @@ EnvCreateResult EnvCreateFunc() {
 
 	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc(), weight, name }
 		{
-			// Small reward for facing the ball
-			{ new FaceBallReward(), 0.1f , names[0]},
-
-			// Moderate reward for going towards the ball
-			{ new VelocityPlayerToBallReward(), 0.5f , names[1]},
-
-			// Bigger reward for having the ball go towards the goal
-			{ new VelocityBallToGoalReward(), 1.0f , names[2]},
-
-			// Giant reward for scoring, giant penalty for being scored on
-			{ new EventReward({.teamGoal = 1.f, .concede = -1.f, .touch = 0.1f}), 50.f , names[3]},
+			{new PinchReward(0.8f, 0.8f, 300.0f, 0.1f, 150.0f, 20.0f, 1.0f, 0.1f), 1.0f, names[0]}
 		},
 		false
 	);
@@ -118,7 +114,7 @@ EnvCreateResult EnvCreateFunc() {
 
 	auto obs = new DefaultOBS();
 	auto actionParser = new DiscreteAction();
-	auto stateSetter = new RandomState(true, true, true);
+	auto stateSetter = new WallPinchSetter();
 
 	Match* match = new Match(
 		rewards,
@@ -127,8 +123,8 @@ EnvCreateResult EnvCreateFunc() {
 		actionParser,
 		stateSetter,
 
-		3, // Team size
-		true // Spawn opponents
+		1, // Team size
+		false // Spawn opponents
 	);
 
 	Gym* gym = new Gym(match, TICK_SKIP);

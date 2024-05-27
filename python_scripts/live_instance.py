@@ -14,7 +14,7 @@ from rlgym_sim.utils.obs_builders.default_obs import DefaultObs
 from rlgym_sim.utils.terminal_conditions.common_conditions import TimeoutCondition, GoalScoredCondition
 from rlgym_tools.extra_action_parsers.lookup_act import LookupAction
 
-from setters import TeamSizeSetter
+from setters import TeamSizeSetter, PinchSetter
 from utils import get_latest_model_path, live_log
 
 # endregion
@@ -22,21 +22,21 @@ from utils import get_latest_model_path, live_log
 tick_skip = 8
 STEP_TIME = tick_skip / 120.
 
-spawn_opponents = True
-blue_count = 3
-orange_count = 3 if spawn_opponents else False
+spawn_opponents = False
+blue_count = 1
+orange_count = 3 if spawn_opponents else 0
 
 state_mutator = TeamSizeSetter(
     setters=(
-        RandomState(),
+        PinchSetter(),
         # dynamic_replay
     ),
     weights=(1,),
-    gm_probs=(0, 0, 1)
+    gm_probs=(1, 0, 0)
 )
 reward_fn = ConstantReward()
 
-total_timeout = 20
+total_timeout = 12
 termination_conditions = [
     GoalScoredCondition(),
     TimeoutCondition(int(total_timeout / STEP_TIME)),
@@ -47,10 +47,8 @@ termination_conditions = [
 action_parser = LookupAction()
 obs_builder = DefaultObs()
 
-print(action_parser.get_action_space().shape)
-
 agent = PPOLearner(
-    obs_space_size=165,
+    obs_space_size=70,
     act_space_size=action_parser.get_action_space().n,
     device="cuda",
     batch_size=10_000,
@@ -69,7 +67,7 @@ agent = PPOLearner(
 # region ========================= Live instance Settings =============================
 deterministic = True
 
-model_to_load = "checkpoints/89765280"
+model_to_load = "checkpoints/pinchv4"
 
 minutes_before_update = 15
 seconds_before_update = 0
@@ -107,7 +105,7 @@ def create_env(sim: bool = True):
             team_size=blue_count,
             spawn_opponents=spawn_opponents,
             game_speed=1,
-            launch_preference=LaunchPreference.EPIC
+            launch_preference=LaunchPreference.STEAM
         )
 
     return rlgym_env
@@ -160,11 +158,11 @@ if __name__ == "__main__":
                 print_live_state()
 
             with torch.no_grad():
-                actions = np.array([agent.policy.get_action(o, deterministic)[0] for o in obs])
+                actions = np.array([agent.policy.get_action(obs, deterministic=deterministic)[0]])
                 actions = actions.reshape((*actions.shape, 1))
 
             obs, reward, terminated, info = env.step(actions)
-            rewards.append(sum(reward) / len(reward))
+            rewards.append(reward)
 
             if time.time() - current_time >= time_before_update:
                 model_reload()
