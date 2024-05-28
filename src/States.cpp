@@ -17,6 +17,8 @@ RLGSC::GameState WallPinchSetter::ResetState(Arena* arena)
         cs.angVel = Vec(0, 0, 0);
         Angle angle = Angle(0.90 * M_PI, 0, 0);
         cs.rotMat = angle.ToRotMat();
+
+        car->SetState(cs);
     }
 
 
