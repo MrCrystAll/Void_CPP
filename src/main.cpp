@@ -19,8 +19,12 @@ using namespace RLGPC; // RLGymPPO
 using namespace RLGSC; // RLGymSim
 
 std::vector<std::string> names = {
-	"PinchReward"
+	"PinchReward",
+	"FaceBallReward",
+	"TouchReward"
 };
+
+float maxBallVel = 0.;
 
 // This is our step callback, it's called every step from every RocketSim game
 // WARNING: This is called from multiple threads, often simultaneously, 
@@ -38,14 +42,17 @@ void OnStep(GameInst* gameInst, const RLGSC::Gym::StepResult& stepResult, Report
 		std::cout << "Couldn't log rewards: " << e.what() << std::endl;
 	}
 
-	gameMetrics.AccumAvg(METRICS_HEADER + std::string("ball_speed"), gameState.ball.vel.Length());
+	float ballVel = gameState.ball.vel.Length();
+
+	gameMetrics.AccumAvg(METRICS_HEADER + std::string("ball_speed"), ballVel);
+	if (ballVel > maxBallVel) {
+		maxBallVel = ballVel;
+	}
 
 	for (auto& player : gameState.players) {
 		// Track average player speed
 		float speed = player.phys.vel.Length();
 		gameMetrics.AccumAvg(METRICS_HEADER + std::string("player_speed"), speed);
-
-		
 
 		// Track ball touch ratio
 		gameMetrics.AccumAvg(METRICS_HEADER + std::string("ball_touch_ratio"), player.ballTouchedStep);
@@ -90,6 +97,9 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 	for (int i = 0; i < rewards.size(); i++) {
 		allMetrics[REWARD_HEADER + names[i]] = rewards[i].Get();
 	}
+	
+	allMetrics[METRICS_HEADER + std::string("max_ball_speed")] = maxBallVel;
+	maxBallVel = 0;
 	std::cout << "End of iteration callback" << std::endl;
 }
 
@@ -102,7 +112,9 @@ EnvCreateResult EnvCreateFunc() {
 
 	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc(), weight, name }
 		{
-			{new PinchReward(0.8f, 0.8f, 300.0f, 0.1f, 150.0f, 20.0f, 1.0f, 0.1f), 1.0f, names[0]}
+			{new PinchReward(0.9f, 0.9f, 300.0f, 0.1f, 300.0f, 40.0f, 2.0f, 0.01f), 100.0f, names[0]},
+			{new FaceBallReward(), 10.0f, names[1]},
+			{new TouchBallReward(2.0f), 200.0f, names[2] }
 		},
 		false
 	);

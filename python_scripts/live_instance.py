@@ -67,7 +67,7 @@ agent = PPOLearner(
 # region ========================= Live instance Settings =============================
 deterministic = True
 
-model_to_load = "checkpoints/pinchv4"
+model_to_load = "checkpoints/pinchv7"
 
 minutes_before_update = 15
 seconds_before_update = 0
