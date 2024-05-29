@@ -39,7 +39,7 @@ float PinchReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameS
 			enterCloseWallVel = state.ball.vel.Length2D();
 		}
 	}
-	if (lastCloseToWall and not closeToWall) {
+	if (lastCloseToWall and not closeToWall and not player.carState.isOnGround) {
 
 		lastBallAccel = (state.ball.vel.Length2D() - enterCloseWallVel) / RLConst::BALL_MAX_SPEED;
 		nbStepsSinceLastHit = 0;

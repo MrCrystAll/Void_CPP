@@ -14,14 +14,14 @@
 #include "WandbConfig.h"
 #include <Rewards.h>
 #include <States.h>
+#include <TerminalConditions.h>
 
 using namespace RLGPC; // RLGymPPO
 using namespace RLGSC; // RLGymSim
 
 std::vector<std::string> names = {
 	"PinchReward",
-	"FaceBallReward",
-	"TouchReward"
+	"FaceBallReward"
 };
 
 float maxBallVel = 0.;
@@ -106,21 +106,20 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 // Create the RLGymSim environment for each of our games
 EnvCreateResult EnvCreateFunc() {
 	constexpr int TICK_SKIP = 8;
-	constexpr float NO_TOUCH_TIMEOUT_SECS = 3.f;
+	constexpr float NO_TOUCH_TIMEOUT_SECS = 7.f;
 
 	int tsPerIter = 200 * 1000;
 
 	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc(), weight, name }
 		{
-			{new PinchReward(0.9f, 0.9f, 300.0f, 0.1f, 300.0f, 40.0f, 2.0f, 0.01f), 100.0f, names[0]},
-			{new FaceBallReward(), 10.0f, names[1]},
-			{new TouchBallReward(2.0f), 200.0f, names[2] }
+			{new PinchReward(0.9f, 0.9f, 300.0f, 0.1f, 300.0f, 40.0f, 2.0f, 0.01f), 10.0f, names[0]},
+			{new FaceBallReward(), 1.0f, names[1]}
 		},
 		false
 	);
 
 	std::vector<TerminalCondition*> terminalConditions = {
-		new NoTouchCondition(NO_TOUCH_TIMEOUT_SECS * 120 / TICK_SKIP),
+		new TimeoutCondition(NO_TOUCH_TIMEOUT_SECS * 120 / TICK_SKIP),
 		new GoalScoreCondition()
 	};
 
@@ -151,8 +150,8 @@ int main() {
 	LearnerConfig cfg = {};
 
 	// Play around with these to see what the optimal is for your machine, more isn't always better
-	cfg.numThreads = 1;
-	cfg.numGamesPerThread = 1;
+	cfg.numThreads = 8;
+	cfg.numGamesPerThread = 16;
 
 	// We want a large itr/batch size
 	// You'll want to increase this as your bot improves, up to an extent
@@ -178,8 +177,8 @@ int main() {
 	cfg.ppo.policyLayerSizes = { 256, 256, 256 };
 	cfg.ppo.criticLayerSizes = { 256, 256, 256 };
 	
-	cfg.sendMetrics = false; // Send metrics
-	cfg.renderMode = true; // Don't render
+	cfg.sendMetrics = true; // Send metrics
+	cfg.renderMode = false; // Don't render
 
 	cfg.metricsGroupName = WANDB_ENTITY;
 	cfg.metricsProjectName = WANDB_PROJECT;
