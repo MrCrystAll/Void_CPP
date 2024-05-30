@@ -36,6 +36,7 @@ void OnStep(GameInst* gameInst, const RLGSC::Gym::StepResult& stepResult, Report
 	try
 	{
 		((LoggedCombinedReward*)(gameInst->match->rewardFn))->LogRewards(gameMetrics);
+		//std::cout << std::get<1>(((LoggedCombinedReward*)(gameInst->match->rewardFn))->lastRewards[0]) << std::endl;
 	}
 	catch (const std::exception& e)
 	{
@@ -112,8 +113,8 @@ EnvCreateResult EnvCreateFunc() {
 
 	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc(), weight, name }
 		{
-			{new PinchReward(0.9f, 0.9f, 300.0f, 0.1f, 300.0f, 40.0f, 2.0f, 0.01f), 10.0f, names[0]},
-			{new FaceBallReward(), 1.0f, names[1]}
+			{new PinchReward(0.9f, 0.9f, 2000.0f, 0.1f, 100.0f, 40.0f, 2.0f, 1000.0f, 10.0f, 0.1f, 4000.0f), 2.0f, names[0]},
+			{new FaceBallReward(), 0.05f, names[1]}
 		},
 		false
 	);
@@ -125,7 +126,7 @@ EnvCreateResult EnvCreateFunc() {
 
 	auto obs = new DefaultOBS();
 	auto actionParser = new DiscreteAction();
-	auto stateSetter = new WallPinchSetter();
+	auto stateSetter = new WallPinchSetter(400.0f, 0.2f);
 
 	Match* match = new Match(
 		rewards,
@@ -150,8 +151,8 @@ int main() {
 	LearnerConfig cfg = {};
 
 	// Play around with these to see what the optimal is for your machine, more isn't always better
-	cfg.numThreads = 8;
-	cfg.numGamesPerThread = 16;
+	cfg.numThreads = 4;
+	cfg.numGamesPerThread = 8;
 
 	// We want a large itr/batch size
 	// You'll want to increase this as your bot improves, up to an extent
@@ -177,8 +178,8 @@ int main() {
 	cfg.ppo.policyLayerSizes = { 256, 256, 256 };
 	cfg.ppo.criticLayerSizes = { 256, 256, 256 };
 	
-	cfg.sendMetrics = true; // Send metrics
-	cfg.renderMode = false; // Don't render
+	cfg.sendMetrics = false; // Send metrics
+	cfg.renderMode = not cfg.sendMetrics; // Don't render
 
 	cfg.metricsGroupName = WANDB_ENTITY;
 	cfg.metricsProjectName = WANDB_PROJECT;
