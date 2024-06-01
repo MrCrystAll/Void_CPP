@@ -88,7 +88,7 @@ float PinchReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameS
 				float ballAccel = (state.ball.vel.Length2D() - lastBallSpeed) / RLConst::BALL_MAX_SPEED;
 
 				AddToChanges("Ball touch", ballHandling.touchW);
-				AddToChanges("Ball touch", ballAccel * ballHandling.ballVelW);
+				AddToChanges("Ball accel", ballAccel * ballHandling.ballVelW);
 
 				reward += ballHandling.touchW;
 				reward += ballAccel * ballHandling.ballVelW;
@@ -104,4 +104,19 @@ float PinchReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameS
 
 
     return reward;
+}
+
+void PinchReward::ClearChanges()
+{
+	LoggableReward::ClearChanges();
+	AddToChanges("Speed matching", 0, true);
+	AddToChanges("Player distance to ball", 0, true);
+	AddToChanges("Direction matching", 0, true);
+	AddToChanges("Creeping distance reward", 0, true);
+	AddToChanges("Creeping grounded", 0, true);
+	AddToChanges("Creeping flip", 0, true);
+	AddToChanges("Ball flip", 0, true);
+	AddToChanges("Ball touch", 0, true);
+	AddToChanges("Ball accel", 0, true);
+
 }
