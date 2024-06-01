@@ -1,5 +1,4 @@
 import sys
-
 import wandb
 
 from typing import Dict, Any

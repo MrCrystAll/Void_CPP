@@ -29,8 +29,8 @@ public:
 	RLGPC::PolicyInferUnit* policyInferUnit;
 
 	// Queued action and current action
-	RLGSC::Action 
-		action = {}, 
+	RLGSC::Action
+		action = {},
 		controls = {};
 
 	// Persistent info

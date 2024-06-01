@@ -20,8 +20,7 @@ using namespace RLGPC; // RLGymPPO
 using namespace RLGSC; // RLGymSim
 
 std::vector<std::string> names = {
-	"PinchReward",
-	"FaceBallReward"
+	"PinchReward"
 };
 
 float maxBallVel = 0.;
@@ -99,7 +98,7 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 		allMetrics[REWARD_HEADER + names[i]] = rewards[i].Get();
 	}
 	
-	allMetrics[METRICS_HEADER + std::string("max_ball_speed")] = maxBallVel;
+	allMetrics[METRICS_HEADER + std::string("max_ball_speed")] = maxBallVel / CommonValues::BALL_MAX_SPEED * 216;
 	maxBallVel = 0;
 	std::cout << "End of iteration callback" << std::endl;
 }
@@ -111,10 +110,43 @@ EnvCreateResult EnvCreateFunc() {
 
 	int tsPerIter = 200 * 1000;
 
+	PinchReward::PinchArgs args(
+		{
+			.creepingDistance = 2000.0f,
+			.groundBanDistance = 1000.0f,
+			.maxDistToTrigger = 4000.0f,
+		},
+		{
+			.hasFlipReward = 3.0f,
+			.hasFlipRewardWhenBall = 20.0f,
+			.hasFlipPunishment = -3.0f,
+			.hasFlipPunishmentWhenBall = -20.0f,
+			.maxDistance = 50.0f
+		},
+		{
+			.similarityBallAgentReward = 0.1f,
+			.similarityBallAgentThresh = 0.9f,
+			.similarityBallWallThresh = 0.9f,
+		},
+		{
+			.groundBanPunishment = -0.1f,
+			.groundBanReward = 1.0f,
+			.creepingDistanceReward = 0.001f
+		},
+		{
+			.ballDistReduction = 100.0f,
+			.ballVelW = 50.0f,
+			.speedMatchW = 1.0f,
+			.touchW = 1.0f
+		},
+		{
+			.wallMinHeightToPinch = 150.0f
+		}
+	);
+
 	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc(), weight, name }
 		{
-			{new PinchReward(0.9f, 0.9f, 2000.0f, 0.1f, 100.0f, 40.0f, 2.0f, 1000.0f, 10.0f, 0.1f, 4000.0f), 2.0f, names[0]},
-			{new FaceBallReward(), 0.05f, names[1]}
+			{new PinchReward(args), 1.0f, names[0]}
 		},
 		false
 	);
@@ -126,7 +158,7 @@ EnvCreateResult EnvCreateFunc() {
 
 	auto obs = new DefaultOBS();
 	auto actionParser = new DiscreteAction();
-	auto stateSetter = new WallPinchSetter(400.0f, 0.2f);
+	auto stateSetter = new WallPinchSetter(400.0f, 200.0f, 0.5f);
 
 	Match* match = new Match(
 		rewards,
@@ -151,8 +183,8 @@ int main() {
 	LearnerConfig cfg = {};
 
 	// Play around with these to see what the optimal is for your machine, more isn't always better
-	cfg.numThreads = 4;
-	cfg.numGamesPerThread = 8;
+	cfg.numThreads = 8;
+	cfg.numGamesPerThread = 16;
 
 	// We want a large itr/batch size
 	// You'll want to increase this as your bot improves, up to an extent
@@ -178,8 +210,9 @@ int main() {
 	cfg.ppo.policyLayerSizes = { 256, 256, 256 };
 	cfg.ppo.criticLayerSizes = { 256, 256, 256 };
 	
-	cfg.sendMetrics = false; // Send metrics
-	cfg.renderMode = not cfg.sendMetrics; // Don't render
+	cfg.sendMetrics = true; // Send metrics
+	cfg.renderMode = false; // render
+	cfg.renderDuringTraining = false; //Activate that so it doesn't override
 
 	cfg.metricsGroupName = WANDB_ENTITY;
 	cfg.metricsProjectName = WANDB_PROJECT;

@@ -14,7 +14,7 @@ rlbot::Bot* BotFactory(int index, int team, std::string name) {
 	return new RLBotBot(index, team, name, g_RLBotParams);
 }
 
-RLBotBot::RLBotBot(int _index, int _team, std::string _name, const RLBotParams& params) 
+RLBotBot::RLBotBot(int _index, int _team, std::string _name, const RLBotParams& params)
 	: rlbot::Bot(_index, _team, _name), params(params) {
 
 	RG_LOG("Creating RLBot bot: index " << _index << ", name: " << name << "...");
@@ -85,7 +85,8 @@ GameState ToGameState(rlbot::GameTickPacket& gameTickPacket) {
 
 		// Just set all boost pads to on
 		std::fill(gs.boostPads.begin(), gs.boostPads.end(), 1);
-	} else {
+	}
+	else {
 		for (int i = 0; i < CommonValues::BOOST_LOCATIONS_AMOUNT; i++) {
 			gs.boostPads[i] = boostPadStates->Get(i)->isActive();
 			gs.boostPadsInv[CommonValues::BOOST_LOCATIONS_AMOUNT - i - 1] = gs.boostPads[i];
@@ -109,12 +110,7 @@ rlbot::Controller RLBotBot::GetOutput(rlbot::GameTickPacket gameTickPacket) {
 
 	if (updateAction) {
 		updateAction = false;
-
-		ActionSet prevActions(gs.players.size());
-		prevActions[index] = controls;
-
-		auto actions = policyInferUnit->InferPolicy(gs, prevActions, true);
-		action = actions[index];
+		action = policyInferUnit->InferPolicySingle(localPlayer, gs, controls, true);
 	}
 
 	if (ticks >= params.tickSkip || ticks == -1) {
