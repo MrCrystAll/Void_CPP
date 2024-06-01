@@ -15,7 +15,45 @@ LoggedCombinedReward::LoggedCombinedReward(std::vector<std::tuple<RewardFunction
 }
 
 void LoggedCombinedReward::LogRewards(RLGPC::Report& report) {
+
 	for (int i = 0; i < lastRewards.size(); i++) {
+		try {
+			((LoggableReward*)rewardFuncs[i])->Log(report, names[i], rewardWeights[i]);
+		}
+		catch (std::exception e) {
+			std::cout << e.what() << std::endl;
+		}
 		report.AccumAvg(REWARD_HEADER + std::get<0>(lastRewards[i]), std::get<1>(lastRewards[i]));
 	}
+}
+
+void LoggableReward::Log(RLGPC::Report& report, std::string name, float weight)
+{
+	for (std::pair change : changes) {
+		report.AccumAvg(REWARD_HEADER + name + "/" + change.first, change.second.size() > 0 ? std::accumulate(change.second.begin(), change.second.end(), 0.0f) / change.second.size() * weight : 0.0f);
+	}
+}
+
+void LoggableReward::AddToChanges(std::string name, float val)
+{
+	for (std::pair change : changes)
+	{
+		if (change.first == name) {
+			change.second.push_back(val);
+			return;
+		}
+	}
+
+	changes.push_back({ name, {val} });
+}
+
+void LoggableReward::ClearChanges()
+{
+	changes.clear();
+}
+
+RLGSC::FList LoggableReward::GetAllRewards(const RLGSC::GameState& state, const RLGSC::ActionSet& prevActions, bool final)
+{
+	ClearChanges();
+	return RewardFunction::GetAllRewards(state, prevActions, final);
 }

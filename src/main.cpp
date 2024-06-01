@@ -71,6 +71,7 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 	AvgTracker avgAirRatio = {};
 	AvgTracker avgBallSpeed = {};
 	std::vector<AvgTracker> rewards = {};
+	std::map<std::string, AvgTracker> rTrackers = {};
 
 	for (int i = 0; i < names.size(); i++) {
 		rewards.push_back({});
@@ -78,25 +79,51 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 	
 	// Get metrics for every gameInst
 	auto allGameMetrics = learner->GetAllGameMetrics();
+
+	std::cout << "Gathering all rewards metrics" << std::endl;
+
+	for (auto metric : allGameMetrics[0].data) {
+		if (metric.first.starts_with(REWARD_HEADER)) {
+			if (metric.first.ends_with("_avg_total")) {
+				rTrackers[metric.first.substr(0, metric.first.size() - 10)] += 0;
+			}
+			else if (!metric.first.ends_with("_avg_count")) {
+				rTrackers[metric.first] += 0;
+			}
+		}
+	}
+
+	std::cout << "Gathering all avg" << std::endl;
+
 	for (auto& gameReport : allGameMetrics) {
 		avgPlayerSpeed += gameReport.GetAvg(METRICS_HEADER + std::string("player_speed"));
 		avgBallTouchRatio += gameReport.GetAvg(METRICS_HEADER + std::string("ball_touch_ratio"));
 		avgAirRatio += gameReport.GetAvg(METRICS_HEADER + std::string("in_air_ratio"));
 		avgBallSpeed += gameReport.GetAvg(METRICS_HEADER + std::string("ball_speed"));
 
-		for (int i = 0; i < names.size(); i++) {
-			rewards[i] += gameReport.GetAvg(REWARD_HEADER + names[i]);
+		for (auto& tracker : rTrackers) {
+			if(gameReport.Has(tracker.first) or gameReport.Has(tracker.first + "_avg_total"))
+			{
+				tracker.second += gameReport.GetAvg(tracker.first);
+			}
 		}
 	}
+
+	std::cout << "Gathered all rewards metrics" << std::endl;
 
 	allMetrics[METRICS_HEADER + std::string("player_speed")] = avgPlayerSpeed.Get();
 	allMetrics[METRICS_HEADER + std::string("ball_touch_ratio")] = avgBallTouchRatio.Get();
 	allMetrics[METRICS_HEADER + std::string("in_air_ratio")] = avgAirRatio.Get();
 	allMetrics[METRICS_HEADER + std::string("ball_speed")] = avgBallSpeed.Get();
 
-	for (int i = 0; i < rewards.size(); i++) {
-		allMetrics[REWARD_HEADER + names[i]] = rewards[i].Get();
+	std::cout << "All in the report (start)" << std::endl;
+
+	for (auto tracker : rTrackers) {
+		allMetrics[tracker.first] = tracker.second.Get();
 	}
+
+	std::cout << "All in the report (end)" << std::endl;
+
 	
 	allMetrics[METRICS_HEADER + std::string("max_ball_speed")] = maxBallVel / CommonValues::BALL_MAX_SPEED * 216;
 	maxBallVel = 0;
@@ -107,8 +134,6 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 EnvCreateResult EnvCreateFunc() {
 	constexpr int TICK_SKIP = 8;
 	constexpr float NO_TOUCH_TIMEOUT_SECS = 7.f;
-
-	int tsPerIter = 200 * 1000;
 
 	PinchReward::PinchArgs args(
 		{
@@ -188,10 +213,10 @@ int main() {
 
 	// We want a large itr/batch size
 	// You'll want to increase this as your bot improves, up to an extent
-	int tsPerItr = 200 * 1000;
+	int tsPerItr = 20 * 1000;
 	cfg.timestepsPerIteration = tsPerItr;
 	cfg.ppo.batchSize = tsPerItr;
-	cfg.ppo.miniBatchSize = 25 * 1000; // Lower this if too much VRAM is being allocated
+	cfg.ppo.miniBatchSize = 25 * 100; // Lower this if too much VRAM is being allocated
 	cfg.expBufferSize = tsPerItr * 3;
 	
 	// This is just set to 1 to match rlgym-ppo example

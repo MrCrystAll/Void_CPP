@@ -1,7 +1,9 @@
 #pragma once
 #include <RLGymSim_CPP/Utils/RewardFunctions/RewardFunction.h>
+#include "LoggedCombinedReward.h"
 
-class PinchReward : public RLGSC::RewardFunction {
+
+class PinchReward : public LoggableReward {
 public:
 
 	//All the distances

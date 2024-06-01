@@ -38,32 +38,47 @@ float PinchReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameS
 			float speedDiff = std::max(0.01f, std::abs(state.ball.vel.Dist(player.carState.vel)) / RLGSC::CommonValues::SUPERSONIC_THRESHOLD);
 			float directionSimilarity = agentDir.Dot(ballDir);
 
-			reward += 1 / pow(speedDiff, 0.1f) * ballHandling.speedMatchW;
-			reward -= state.ball.pos.Dist(player.carState.pos) / ballHandling.ballDistReduction;
-			reward += directionSimilarity >= similarity.similarityBallAgentThresh ? similarity.similarityBallAgentReward : 0;
+			float speedMatchingBonus = 1 / pow(speedDiff, 0.1f) * ballHandling.speedMatchW;
+			float ballDistPunish = state.ball.pos.Dist(player.carState.pos) / ballHandling.ballDistReduction;
+			float directionMatchBonus = directionSimilarity >= similarity.similarityBallAgentThresh ? similarity.similarityBallAgentReward : 0;
+
+			AddToChanges("Speed matching", speedMatchingBonus);
+			AddToChanges("Player distance to ball", -ballDistPunish);
+			AddToChanges("Direction matching", directionMatchBonus);
+
+			reward += speedMatchingBonus;
+			reward -= ballDistPunish;
+			reward += directionMatchBonus;
 		}
 
 		//Creeping distance
 		else {
 			//Being in this zone is good already, get some snacks
 			reward += groundHandling.creepingDistanceReward;
+			AddToChanges("Creeping distance reward", groundHandling.creepingDistanceReward);
 
 			float agentDistToIntercept = Vec(RLGSC::CommonValues::SIDE_WALL_X * targetDir, player.carState.pos.y, 0).Dist2D(player.carState.pos);
 
 			//Being in the ground ban zone
 			if (agentDistToIntercept <= distances.groundBanDistance) {
 				//If grounded, get spanked, else, you're doing great
-				reward += player.carState.isOnGround ? groundHandling.groundBanPunishment : groundHandling.groundBanReward;
+				float groundChange = player.carState.isOnGround ? groundHandling.groundBanPunishment : groundHandling.groundBanReward;
+				AddToChanges("Creeping grounded", groundChange);
+				reward += groundChange;
 
 				//If still relatively far
 				if (state.ball.pos.Dist(player.carState.pos) > flipHandling.maxDistance + RLGSC::CommonValues::BALL_RADIUS) {
 					//Don't use your flip or punished
-					reward += player.hasFlip ? flipHandling.hasFlipReward : flipHandling.hasFlipPunishment;
+					float flipChange = player.hasFlip ? flipHandling.hasFlipReward : flipHandling.hasFlipPunishment;
+					AddToChanges("Creeping flip", flipChange);					
+					reward += flipChange;
 				}
 				else {
 					if (player.ballTouchedStep) {
 						//You still got your flip when hitting the ball ? punished, else good
-						reward += !player.hasFlip ? flipHandling.hasFlipPunishmentWhenBall : flipHandling.hasFlipPunishmentWhenBall;
+						float flipBallChange = !player.hasFlip ? flipHandling.hasFlipPunishmentWhenBall : flipHandling.hasFlipPunishmentWhenBall;
+						AddToChanges("Ball flip", flipBallChange);
+						reward += flipBallChange;
 					}
 				}
 			}
@@ -71,6 +86,10 @@ float PinchReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameS
 			//Accel reward on ball hit
 			if (player.ballTouchedStep and state.ball.pos.z >= wallHandling.wallMinHeightToPinch) {
 				float ballAccel = (state.ball.vel.Length2D() - lastBallSpeed) / RLConst::BALL_MAX_SPEED;
+
+				AddToChanges("Ball touch", ballHandling.touchW);
+				AddToChanges("Ball touch", ballAccel * ballHandling.ballVelW);
+
 				reward += ballHandling.touchW;
 				reward += ballAccel * ballHandling.ballVelW;
 				
