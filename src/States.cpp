@@ -16,8 +16,8 @@ RLGSC::GameState WallPinchSetter::ResetState(Arena* arena)
     std::uniform_int_distribution<> distribPos(0, posVariance);
     std::uniform_int_distribution<> distribVel(0, velVariance);
     std::uniform_int_distribution<> distribOrient(-orientVariance, orientVariance);
-    int ballPosX = distribPos(gen) + 2000 * dir;
-    int ballVelX = distribVel(gen) + 1400 * dir;
+    int ballPosX = (distribPos(gen) + 2000) * dir;
+    int ballVelX = (distribVel(gen) + 1400) * dir;
 
     int carPosX = (distribPos(gen) + 300) * dir * -1 + ballPosX;
     int carVelX = (distribVel(gen) + 300) * dir;
