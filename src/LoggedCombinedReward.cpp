@@ -34,17 +34,29 @@ void LoggableReward::Log(RLGPC::Report& report, std::string name, float weight)
 	}
 }
 
-void LoggableReward::AddToChanges(std::string name, float val)
+void LoggableReward::AddToChanges(std::string name, float val, bool empty)
 {
-	for (std::pair change : changes)
+	for (std::pair<std::string, RLGSC::FList>& change : changes)
 	{
 		if (change.first == name) {
-			change.second.push_back(val);
+			if (empty) {
+				change.second = {};
+			}
+			else {
+				
+				change.second.push_back(val);
+			}
 			return;
 		}
 	}
 
-	changes.push_back({ name, {val} });
+	if (empty) {
+		changes.push_back({ name, {} });
+	}
+	else {
+		changes.push_back({ name, {val} });
+	}
+	
 }
 
 void LoggableReward::ClearChanges()

@@ -7,7 +7,7 @@ class LoggableReward : public RLGSC::RewardFunction {
 public:
 	virtual void Log(RLGPC::Report& report, std::string name, float weight = 1.0f);
 
-	virtual void AddToChanges(std::string name, float val);
+	virtual void AddToChanges(std::string name, float val, bool empty = false);
 	virtual void ClearChanges();
 	virtual RLGSC::FList GetAllRewards(const RLGSC::GameState& state, const RLGSC::ActionSet& prevActions, bool final) override;
 	std::vector<std::pair<std::string, RLGSC::FList>> changes = {};

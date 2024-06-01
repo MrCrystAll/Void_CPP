@@ -96,6 +96,7 @@ public:
 
 	virtual void Reset(const RLGSC::GameState& initialState);
 	virtual float GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction);
+	virtual void ClearChanges() override;
 private:
 	Distances distances;
 	FlipHandling flipHandling;
