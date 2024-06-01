@@ -80,7 +80,6 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 	// Get metrics for every gameInst
 	auto allGameMetrics = learner->GetAllGameMetrics();
 
-	std::cout << "Gathering all rewards metrics" << std::endl;
 
 	for (auto metric : allGameMetrics[0].data) {
 		if (metric.first.starts_with(REWARD_HEADER)) {
@@ -93,7 +92,6 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 		}
 	}
 
-	std::cout << "Gathering all avg" << std::endl;
 
 	for (auto& gameReport : allGameMetrics) {
 		avgPlayerSpeed += gameReport.GetAvg(METRICS_HEADER + std::string("player_speed"));
@@ -109,20 +107,17 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 		}
 	}
 
-	std::cout << "Gathered all rewards metrics" << std::endl;
 
 	allMetrics[METRICS_HEADER + std::string("player_speed")] = avgPlayerSpeed.Get();
 	allMetrics[METRICS_HEADER + std::string("ball_touch_ratio")] = avgBallTouchRatio.Get();
 	allMetrics[METRICS_HEADER + std::string("in_air_ratio")] = avgAirRatio.Get();
 	allMetrics[METRICS_HEADER + std::string("ball_speed")] = avgBallSpeed.Get();
 
-	std::cout << "All in the report (start)" << std::endl;
 
 	for (auto tracker : rTrackers) {
 		allMetrics[tracker.first] = tracker.second.Get();
 	}
 
-	std::cout << "All in the report (end)" << std::endl;
 
 	
 	allMetrics[METRICS_HEADER + std::string("max_ball_speed")] = maxBallVel / CommonValues::BALL_MAX_SPEED * 216;
@@ -213,10 +208,10 @@ int main() {
 
 	// We want a large itr/batch size
 	// You'll want to increase this as your bot improves, up to an extent
-	int tsPerItr = 20 * 1000;
+	int tsPerItr = 200 * 1000;
 	cfg.timestepsPerIteration = tsPerItr;
 	cfg.ppo.batchSize = tsPerItr;
-	cfg.ppo.miniBatchSize = 25 * 100; // Lower this if too much VRAM is being allocated
+	cfg.ppo.miniBatchSize = 250 * 100; // Lower this if too much VRAM is being allocated
 	cfg.expBufferSize = tsPerItr * 3;
 	
 	// This is just set to 1 to match rlgym-ppo example
