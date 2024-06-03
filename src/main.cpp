@@ -15,12 +15,12 @@
 #include <Rewards.h>
 #include <States.h>
 #include <TerminalConditions.h>
+#include <Loggers.h>
 
 using namespace RLGPC; // RLGymPPO
 using namespace RLGSC; // RLGymSim
 
-std::vector<std::string> names = {
-	"PinchReward"
+std::vector<Logger*> loggers = {
 };
 
 float maxBallVel = 0.;
@@ -44,38 +44,21 @@ void OnStep(GameInst* gameInst, const RLGSC::Gym::StepResult& stepResult, Report
 
 	float ballVel = gameState.ball.vel.Length();
 
-	gameMetrics.AccumAvg(METRICS_HEADER + std::string("ball_speed"), ballVel);
 	if (ballVel > maxBallVel) {
 		maxBallVel = ballVel;
 	}
 
-	for (auto& player : gameState.players) {
-		// Track average player speed
-		float speed = player.phys.vel.Length();
-		gameMetrics.AccumAvg(METRICS_HEADER + std::string("player_speed"), speed);
-
-		// Track ball touch ratio
-		gameMetrics.AccumAvg(METRICS_HEADER + std::string("ball_touch_ratio"), player.ballTouchedStep);
-
-		// Track in-air ratio
-		gameMetrics.AccumAvg(METRICS_HEADER + std::string("in_air_ratio"), !player.carState.isOnGround);
+	for (Logger* l : loggers) {
+		l->Log(gameMetrics, gameState);
 	}
 }
 
 // This is our iteration callback, it's called every time we complete an iteration, after learning
 // Here we can add custom metrics to the metrics report, for example
 void OnIteration(Learner* learner, Report& allMetrics) {
-
-	AvgTracker avgPlayerSpeed = {};
-	AvgTracker avgBallTouchRatio = {};
-	AvgTracker avgAirRatio = {};
-	AvgTracker avgBallSpeed = {};
-	std::vector<AvgTracker> rewards = {};
+	std::map<std::string, AvgTracker> mTrackersAvg = {};
+	std::map<std::string, float> mTrackers = {};
 	std::map<std::string, AvgTracker> rTrackers = {};
-
-	for (int i = 0; i < names.size(); i++) {
-		rewards.push_back({});
-	}
 	
 	// Get metrics for every gameInst
 	auto allGameMetrics = learner->GetAllGameMetrics();
@@ -92,12 +75,26 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 		}
 	}
 
+	for (const Logger* l : loggers) {
+		for (const Metric& m : l->metrics) {
+			if (m.isAvg) {
+				mTrackersAvg[METRICS_HEADER + m.name] += 0;
+			}
+			else {
+				mTrackers[METRICS_HEADER + m.name] += 0;
+			}
+		}
+	}
+
 
 	for (auto& gameReport : allGameMetrics) {
-		avgPlayerSpeed += gameReport.GetAvg(METRICS_HEADER + std::string("player_speed"));
-		avgBallTouchRatio += gameReport.GetAvg(METRICS_HEADER + std::string("ball_touch_ratio"));
-		avgAirRatio += gameReport.GetAvg(METRICS_HEADER + std::string("in_air_ratio"));
-		avgBallSpeed += gameReport.GetAvg(METRICS_HEADER + std::string("ball_speed"));
+		for (auto& val : mTrackers) {
+			val.second += gameReport[val.first];
+		}
+
+		for (auto& tracker : mTrackersAvg) {
+			tracker.second += gameReport.GetAvg(tracker.first);
+		}
 
 		for (auto& tracker : rTrackers) {
 			if(gameReport.Has(tracker.first) or gameReport.Has(tracker.first + "_avg_total"))
@@ -107,18 +104,17 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 		}
 	}
 
-
-	allMetrics[METRICS_HEADER + std::string("player_speed")] = avgPlayerSpeed.Get();
-	allMetrics[METRICS_HEADER + std::string("ball_touch_ratio")] = avgBallTouchRatio.Get();
-	allMetrics[METRICS_HEADER + std::string("in_air_ratio")] = avgAirRatio.Get();
-	allMetrics[METRICS_HEADER + std::string("ball_speed")] = avgBallSpeed.Get();
-
-
-	for (auto tracker : rTrackers) {
+	for (const auto& tracker : rTrackers) {
 		allMetrics[tracker.first] = tracker.second.Get();
 	}
 
+	for (const auto& tracker : mTrackers) {
+		allMetrics[tracker.first] = tracker.second;
+	}
 
+	for (const auto& tracker : mTrackersAvg) {
+		allMetrics[tracker.first] = tracker.second.Get();
+	}
 	
 	allMetrics[METRICS_HEADER + std::string("max_ball_speed")] = maxBallVel / CommonValues::BALL_MAX_SPEED * 216;
 	maxBallVel = 0;
@@ -137,14 +133,14 @@ EnvCreateResult EnvCreateFunc() {
 			.maxDistToTrigger = 4000.0f,
 		},
 		{
-			.hasFlipReward = 3.0f,
+			.hasFlipReward = 1.0f,
 			.hasFlipRewardWhenBall = 20.0f,
-			.hasFlipPunishment = -3.0f,
+			.hasFlipPunishment = 1.0f,
 			.hasFlipPunishmentWhenBall = -20.0f,
 			.maxDistance = 50.0f
 		},
 		{
-			.similarityBallAgentReward = 0.1f,
+			.similarityBallAgentReward = 1.0f,
 			.similarityBallAgentThresh = 0.9f,
 			.similarityBallWallThresh = 0.9f,
 		},
@@ -154,10 +150,10 @@ EnvCreateResult EnvCreateFunc() {
 			.creepingDistanceReward = 0.001f
 		},
 		{
-			.ballDistReduction = 100.0f,
-			.ballVelW = 50.0f,
+			.ballDistReduction = 500.0f,
+			.ballVelW = 1000.0f,
 			.speedMatchW = 1.0f,
-			.touchW = 1.0f
+			.touchW = 100.0f
 		},
 		{
 			.wallMinHeightToPinch = 150.0f
@@ -166,7 +162,7 @@ EnvCreateResult EnvCreateFunc() {
 
 	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc(), weight, name }
 		{
-			{new PinchReward(args), 1.0f, names[0]}
+			{new PinchReward(args), 1.0f, "PinchReward"}
 		},
 		false
 	);
@@ -232,6 +228,7 @@ int main() {
 	
 	cfg.sendMetrics = true; // Send metrics
 	cfg.renderMode = false; // render
+	cfg.renderTimeScale = 1.0f;
 	cfg.renderDuringTraining = false; //Activate that so it doesn't override
 
 	cfg.metricsGroupName = WANDB_ENTITY;

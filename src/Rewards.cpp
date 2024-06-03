@@ -42,20 +42,15 @@ float PinchReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameS
 			float ballDistPunish = state.ball.pos.Dist(player.carState.pos) / ballHandling.ballDistReduction;
 			float directionMatchBonus = directionSimilarity >= similarity.similarityBallAgentThresh ? similarity.similarityBallAgentReward : 0;
 
-			AddToChanges("Speed matching", speedMatchingBonus);
-			AddToChanges("Player distance to ball", -ballDistPunish);
-			AddToChanges("Direction matching", directionMatchBonus);
-
-			reward += speedMatchingBonus;
-			reward -= ballDistPunish;
-			reward += directionMatchBonus;
+			AddChange(reward, "Speed matching", speedMatchingBonus);
+			AddChange(reward, "Player distance to ball", -ballDistPunish);
+			AddChange(reward, "Direction matching", directionMatchBonus);
 		}
 
 		//Creeping distance
 		else {
 			//Being in this zone is good already, get some snacks
-			reward += groundHandling.creepingDistanceReward;
-			AddToChanges("Creeping distance reward", groundHandling.creepingDistanceReward);
+			AddChange(reward, "Creeping distance reward", groundHandling.creepingDistanceReward);
 
 			float agentDistToIntercept = Vec(RLGSC::CommonValues::SIDE_WALL_X * targetDir, player.carState.pos.y, 0).Dist2D(player.carState.pos);
 
@@ -63,22 +58,19 @@ float PinchReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameS
 			if (agentDistToIntercept <= distances.groundBanDistance) {
 				//If grounded, get spanked, else, you're doing great
 				float groundChange = player.carState.isOnGround ? groundHandling.groundBanPunishment : groundHandling.groundBanReward;
-				AddToChanges("Creeping grounded", groundChange);
-				reward += groundChange;
+				AddChange(reward, "Creeping grounded", groundChange);
 
 				//If still relatively far
 				if (state.ball.pos.Dist(player.carState.pos) > flipHandling.maxDistance + RLGSC::CommonValues::BALL_RADIUS) {
 					//Don't use your flip or punished
 					float flipChange = player.hasFlip ? flipHandling.hasFlipReward : flipHandling.hasFlipPunishment;
-					AddToChanges("Creeping flip", flipChange);					
-					reward += flipChange;
+					AddChange(reward, "Creeping flip", flipChange);
 				}
 				else {
 					if (player.ballTouchedStep) {
 						//You still got your flip when hitting the ball ? punished, else good
 						float flipBallChange = !player.hasFlip ? flipHandling.hasFlipPunishmentWhenBall : flipHandling.hasFlipPunishmentWhenBall;
-						AddToChanges("Ball flip", flipBallChange);
-						reward += flipBallChange;
+						AddChange(reward, "Ball flip", flipBallChange);
 					}
 				}
 			}
@@ -87,18 +79,11 @@ float PinchReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameS
 			if (player.ballTouchedStep and state.ball.pos.z >= wallHandling.wallMinHeightToPinch) {
 				float ballAccel = (state.ball.vel.Length2D() - lastBallSpeed) / RLConst::BALL_MAX_SPEED;
 
-				AddToChanges("Ball touch", ballHandling.touchW);
-				AddToChanges("Ball accel", ballAccel * ballHandling.ballVelW);
-
-				reward += ballHandling.touchW;
-				reward += ballAccel * ballHandling.ballVelW;
-				
+				AddChange(reward, "Ball touch", ballHandling.touchW);
+				AddChange(reward, "Ball accel", ballAccel * ballHandling.ballVelW);				
 			}
 		}
-
-
 	}
-
 
 	lastBallSpeed = state.ball.vel.Length2D();
 
@@ -108,15 +93,16 @@ float PinchReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameS
 
 void PinchReward::ClearChanges()
 {
+	float temp = 0;
 	LoggableReward::ClearChanges();
-	AddToChanges("Speed matching", 0, true);
-	AddToChanges("Player distance to ball", 0, true);
-	AddToChanges("Direction matching", 0, true);
-	AddToChanges("Creeping distance reward", 0, true);
-	AddToChanges("Creeping grounded", 0, true);
-	AddToChanges("Creeping flip", 0, true);
-	AddToChanges("Ball flip", 0, true);
-	AddToChanges("Ball touch", 0, true);
-	AddToChanges("Ball accel", 0, true);
+	AddChange(temp, "Speed matching", 0, true);
+	AddChange(temp, "Player distance to ball", 0, true);
+	AddChange(temp, "Direction matching", 0, true);
+	AddChange(temp, "Creeping distance reward", 0, true);
+	AddChange(temp, "Creeping grounded", 0, true);
+	AddChange(temp, "Creeping flip", 0, true);
+	AddChange(temp, "Ball flip", 0, true);
+	AddChange(temp, "Ball touch", 0, true);
+	AddChange(temp, "Ball accel", 0, true);
 
 }

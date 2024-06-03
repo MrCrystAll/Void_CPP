@@ -27,11 +27,36 @@ class TeamSizeSetter(StateSetter):
         
 class PinchSetter(StateSetter):
     def reset(self, state_wrapper: StateWrapper):
-        state_wrapper.ball.set_pos(-2000, -3000, BALL_RADIUS)
+        state_wrapper.ball.set_pos(-2000, -3200, BALL_RADIUS)
         state_wrapper.ball.set_lin_vel(-1400, 400, 10)
         
-        state_wrapper.cars[0].set_pos(-1600, -3200, 20)
-        state_wrapper.cars[0].set_lin_vel(-700, 400, 10)
+        state_wrapper.cars[0].set_pos(-1700, -3200, 20)
+        state_wrapper.cars[0].set_lin_vel(-300, 400, 10)
         state_wrapper.cars[0].set_rot(yaw=0.90 * np.pi)
+        state_wrapper.cars[0].boost = 100
+        
+        return state_wrapper
+    
+class RandomPinchSetter(StateSetter):
+    def __init__(self, pos_variance: int, vel_variance: int, orient_variance):
+        self.pos_variance = pos_variance
+        self.vel_variance = vel_variance
+        self.orient_variance = orient_variance
+    
+    def reset(self, state_wrapper: StateWrapper):
+        
+        dir = int(random.uniform(0, 1) > 0.5)
+        dir = -1 if dir == 0 else 1
+        
+        orientation = 0.9 * np.pi
+        orientation = orientation if dir == -1 else np.pi - orientation
+        
+        state_wrapper.ball.set_pos((random.randint(0, self.pos_variance) + 2000) * dir, -3000, BALL_RADIUS)
+        state_wrapper.ball.set_lin_vel((random.randint(0, self.vel_variance) + 1400) * dir, 400, 10)
+        
+        state_wrapper.cars[0].set_pos((random.randint(0, self.pos_variance) + 300) * dir * -1 + state_wrapper.ball.position[0], -3200, 20)
+        state_wrapper.cars[0].set_lin_vel((random.randint(0, self.vel_variance) + 300) * dir, 400, 10)
+        state_wrapper.cars[0].set_rot(yaw=orientation)
+        state_wrapper.cars[0].boost = 100
         
         return state_wrapper

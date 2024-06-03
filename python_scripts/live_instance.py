@@ -8,13 +8,11 @@ import torch
 from rlgym.gamelaunch import LaunchPreference
 from rlgym_ppo.ppo import PPOLearner
 from rlgym_sim.utils.reward_functions.common_rewards.misc_rewards import ConstantReward
-from rlgym_sim.utils.state_setters.random_state import RandomState
-from rlgym_sim.utils.action_parsers.discrete_act import DiscreteAction
-from rlgym_sim.utils.obs_builders.default_obs import DefaultObs
 from rlgym_sim.utils.terminal_conditions.common_conditions import TimeoutCondition, GoalScoredCondition
-from rlgym_tools.extra_action_parsers.lookup_act import LookupAction
+from parsers import NectoAction
+from obsBuilders import DefaultObsCpp
 
-from setters import TeamSizeSetter, PinchSetter
+from setters import RandomPinchSetter, TeamSizeSetter, PinchSetter
 from utils import get_latest_model_path, live_log
 
 # endregion
@@ -28,7 +26,7 @@ orange_count = 3 if spawn_opponents else 0
 
 state_mutator = TeamSizeSetter(
     setters=(
-        PinchSetter(),
+        RandomPinchSetter(400, 200, 0.5),
         # dynamic_replay
     ),
     weights=(1,),
@@ -36,7 +34,7 @@ state_mutator = TeamSizeSetter(
 )
 reward_fn = ConstantReward()
 
-total_timeout = 12
+total_timeout = 7
 termination_conditions = [
     GoalScoredCondition(),
     TimeoutCondition(int(total_timeout / STEP_TIME)),
@@ -44,8 +42,8 @@ termination_conditions = [
 # endregion
 # region ========================= Model Settings =============================
 
-action_parser = LookupAction()
-obs_builder = DefaultObs()
+action_parser = NectoAction()
+obs_builder = DefaultObsCpp()
 
 agent = PPOLearner(
     obs_space_size=70,
@@ -67,7 +65,7 @@ agent = PPOLearner(
 # region ========================= Live instance Settings =============================
 deterministic = True
 
-model_to_load = "checkpoints/pinchv7"
+model_to_load = "checkpoints/pinchv9"
 
 minutes_before_update = 15
 seconds_before_update = 0
@@ -113,7 +111,7 @@ def create_env(sim: bool = True):
 
 def model_reload():
     global agent, current_time
-    latest_model_path = get_latest_model_path("data/rl_model")
+    latest_model_path = get_latest_model_path("checkpoints")
     agent.load_from(latest_model_path)
     live_log("Model reloaded")
     current_time = time.time()
@@ -155,7 +153,7 @@ if __name__ == "__main__":
         while not terminated:
             if time.time() - refresh_time >= 1:
                 refresh_time = time.time()
-                print_live_state()
+                # print_live_state()
 
             with torch.no_grad():
                 actions = np.array([agent.policy.get_action(obs, deterministic=deterministic)[0]])
@@ -166,5 +164,7 @@ if __name__ == "__main__":
 
             if time.time() - current_time >= time_before_update:
                 model_reload()
+                
+            time.sleep(STEP_TIME)
 
 # endregion
