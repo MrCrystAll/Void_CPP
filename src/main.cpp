@@ -153,7 +153,11 @@ EnvCreateResult EnvCreateFunc() {
 			.ballDistReduction = 500.0f,
 			.ballVelW = 1000.0f,
 			.speedMatchW = 1.0f,
-			.touchW = 100.0f
+			.touchW = 100.0f,
+			.agentDistToBallThresh = 500.0f,
+			.ballOffsetX = 200.0f,
+			.ballOffsetY = 200.0f,
+			.behindTheBallReward = 0.01f
 		},
 		{
 			.wallMinHeightToPinch = 150.0f

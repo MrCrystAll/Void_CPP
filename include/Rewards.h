@@ -73,6 +73,17 @@ public:
 
 		//Touch weight
 		float touchW = 1.0f;
+
+		//Distance between agent and ball where the agent receives a reward
+		float agentDistToBallThresh = 550.0f;
+
+		//Allowed offset off the ball on the x axis
+		float ballOffsetX = 150.0f;
+
+		//Allowed offset off the ball on the y axis
+		float ballOffsetY = 150.0f;
+
+		float behindTheBallReward = 0.01f;
 	};
 
 	//All the wall handling

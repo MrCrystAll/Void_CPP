@@ -29,6 +29,10 @@ float PinchReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameS
 
 	float wallInterceptionY = (ballDir.y / ballDir.x) * (RLGSC::CommonValues::SIDE_WALL_X * targetDir - state.ball.pos.x) + state.ball.pos.y;
 	Vec interceptPoint = Vec(RLGSC::CommonValues::SIDE_WALL_X * targetDir, wallInterceptionY, 0);
+
+	Vec agentToBall = state.ball.pos - player.carState.pos;
+	float agentToBallDist = agentToBall.Length();
+
 	
 	//First thing, detect if we trigger based on ball dist to wall intercept
 	if (state.ball.pos.Dist2D(interceptPoint) < distances.maxDistToTrigger) {
@@ -37,6 +41,12 @@ float PinchReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameS
 			//Match direction and speed
 			float speedDiff = std::max(0.01f, std::abs(state.ball.vel.Dist(player.carState.vel)) / RLGSC::CommonValues::SUPERSONIC_THRESHOLD);
 			float directionSimilarity = agentDir.Dot(ballDir);
+
+			if (agentToBallDist < ballHandling.agentDistToBallThresh) {
+				if (abs(agentToBall.x) < ballHandling.ballOffsetX and abs(agentToBall.y) < ballHandling.ballOffsetY) {
+					AddChange(reward, "Behind the ball", ballHandling.behindTheBallReward);
+				}
+			}
 
 			float speedMatchingBonus = 1 / pow(speedDiff, 0.1f) * ballHandling.speedMatchW;
 			float ballDistPunish = state.ball.pos.Dist(player.carState.pos) / ballHandling.ballDistReduction;
