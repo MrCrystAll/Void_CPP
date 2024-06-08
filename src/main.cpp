@@ -27,7 +27,7 @@ std::vector<Logger*> loggers = {
 	//Players loggers
 	new PlayerLoggers::PlayerBallTouchLogger(),
 	new PlayerLoggers::PlayerInAirLogger(),
-	new PlayerLoggers::PlayerBallTouchLogger(),
+	new PlayerLoggers::PlayerSpeedLogger(),
 };
 
 float maxBallVel = 0.;
@@ -181,7 +181,7 @@ EnvCreateResult EnvCreateFunc() {
 			{
 				.similarityBallAgentReward = 4.0f,
 				.similarityBallAgentThresh = 0.9f,
-				.speedMatchW = 0.08f
+				.speedMatchW = 0.1f
 			},
 			.ballGroundHandling =
 			{
@@ -189,7 +189,7 @@ EnvCreateResult EnvCreateFunc() {
 				.ballDistReduction = 2000.0f,
 				.ballOffsetX = 250.0f,
 				.ballOffsetY = 250.0f,
-				.behindTheBallReward = 5.0f,
+				.behindTheBallReward = 3.0f,
 			},
 			.distWallThresh = 50.0f + RLGSC::CommonValues::BALL_RADIUS,
 			.groundThresh = 250.0f,
@@ -200,17 +200,19 @@ EnvCreateResult EnvCreateFunc() {
 		{
 			.ballDistReduction = 50.0f,
 			.ballHeightW = 20.0f,
-			.underTheBallReward = 100.0f,
+			.underTheBallReward = 1000.0f,
 			.underBallOffsetY = 350.0f
 		},
 		{
 			.distToCeilThresh = RLGSC::CommonValues::BALL_RADIUS + 50.0f,
-			.onCeilingReward = 15.0f
+			.onCeilingReward = 15.0f,
+			.banZoneHeight = 1500.0f,
+			.groundedBan = 0.01f
 		},
 		{
 			.ballHandling =
 			{
-				.ballVelW = 50.0f,
+				.ballVelW = 5000.0f,
 				.touchW = 20.0f
 			}
 		}
@@ -233,7 +235,7 @@ EnvCreateResult EnvCreateFunc() {
 
 	auto obs = new DefaultOBS();
 	auto actionParser = new DiscreteAction();
-	auto stateSetter = new CeilingPinchSetter();
+	auto stateSetter = new OverfittingCeilingPinchSetter();
 
 	Match* match = new Match(
 		rewards,

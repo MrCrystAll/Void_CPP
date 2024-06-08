@@ -175,3 +175,25 @@ void WeightedSampleSetter::BuildArenaConfig(Arena* arena)
         }
     }
 }
+
+RLGSC::GameState OverfittingCeilingPinchSetter::ResetState(Arena* arena)
+{
+
+    BallState bs = {};
+    bs.pos = { -2100, -3000, RLGSC::CommonValues::BALL_RADIUS };
+    bs.vel = { -150, 100, 10 };
+
+    arena->ball->SetState(bs);
+
+    for (Car* c : arena->GetCars()) {
+        CarState cs = {};
+        cs.pos = { -1800, -3000, 17 };
+        Angle angle = Angle(1.00f * M_PI);
+        cs.rotMat = angle.ToRotMat();
+        cs.boost = 100;
+
+        c->SetState(cs);
+    }
+
+    return RLGSC::GameState(arena);
+}

@@ -38,3 +38,8 @@ private:
 	float orientVariance;
 	float velVariance;
 };
+
+class OverfittingCeilingPinchSetter : public RLGSC::StateSetter {
+public:
+	virtual RLGSC::GameState ResetState(Arena* arena);
+};
