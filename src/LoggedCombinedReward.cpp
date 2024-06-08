@@ -30,11 +30,13 @@ void LoggedCombinedReward::LogRewards(RLGPC::Report& report) {
 void LoggableReward::Log(RLGPC::Report& report, std::string name, float weight)
 {
 	for (std::pair change : changes) {
-		report.AccumAvg(REWARD_HEADER + name + "/" + change.first, change.second.size() > 0 ? std::accumulate(change.second.begin(), change.second.end(), 0.0f) / change.second.size() * weight : 0.0f);
+		float value = change.second.size() > 0 ? std::accumulate(change.second.begin(), change.second.end(), 0.0f) / change.second.size() * weight : 0.0f;
+		//std::cout << change.first << ": " << value << std::endl;
+		report.AccumAvg(REWARD_HEADER + name + "/" + change.first, value);
 	}
 }
 
-void LoggableReward::AddChange(float& value, std::string name, float change, bool empty)
+void LoggableReward::AddLog(float& value, std::string name, float change, bool empty)
 {
 	value += change;
 	for (std::pair<std::string, RLGSC::FList>& changeDone : changes)

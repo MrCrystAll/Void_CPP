@@ -21,6 +21,13 @@ using namespace RLGPC; // RLGymPPO
 using namespace RLGSC; // RLGymSim
 
 std::vector<Logger*> loggers = {
+	//Ball Loggers
+	new BallLoggers::BallSpeedLogger(),
+
+	//Players loggers
+	new PlayerLoggers::PlayerBallTouchLogger(),
+	new PlayerLoggers::PlayerInAirLogger(),
+	new PlayerLoggers::PlayerBallTouchLogger(),
 };
 
 float maxBallVel = 0.;
@@ -35,7 +42,7 @@ void OnStep(GameInst* gameInst, const RLGSC::Gym::StepResult& stepResult, Report
 	try
 	{
 		((LoggedCombinedReward*)(gameInst->match->rewardFn))->LogRewards(gameMetrics);
-		//std::cout << std::get<1>(((LoggedCombinedReward*)(gameInst->match->rewardFn))->lastRewards[0]) << std::endl;
+		//std::cout <<"Rw: " <<  std::get<1>(((LoggedCombinedReward*)(gameInst->match->rewardFn))->lastRewards[0]) << std::endl;
 	}
 	catch (const std::exception& e)
 	{
@@ -126,7 +133,7 @@ EnvCreateResult EnvCreateFunc() {
 	constexpr int TICK_SKIP = 8;
 	constexpr float NO_TOUCH_TIMEOUT_SECS = 7.f;
 
-	PinchReward::PinchArgs args(
+	PinchWallSetupReward::PinchWallSetupArgs args(
 		{
 			.creepingDistance = 2000.0f,
 			.groundBanDistance = 1000.0f,
@@ -134,10 +141,10 @@ EnvCreateResult EnvCreateFunc() {
 		},
 		{
 			.hasFlipReward = 1.0f,
-			.hasFlipRewardWhenBall = 20.0f,
 			.hasFlipPunishment = 1.0f,
-			.hasFlipPunishmentWhenBall = -20.0f,
-			.maxDistance = 50.0f
+			.maxDistance = 50.0f,
+			.hasFlipRewardWhenBall = 20.0f,
+			.hasFlipPunishmentWhenBall = -20.0f
 		},
 		{
 			.similarityBallAgentReward = 1.0f,
@@ -151,9 +158,7 @@ EnvCreateResult EnvCreateFunc() {
 		},
 		{
 			.ballDistReduction = 500.0f,
-			.ballVelW = 1000.0f,
 			.speedMatchW = 1.0f,
-			.touchW = 100.0f,
 			.agentDistToBallThresh = 500.0f,
 			.ballOffsetX = 200.0f,
 			.ballOffsetY = 200.0f,
@@ -161,12 +166,62 @@ EnvCreateResult EnvCreateFunc() {
 		},
 		{
 			.wallMinHeightToPinch = 150.0f
+		},
+		{
+			.ballHandling = {
+				.ballVelW = 1000.0f,
+				.touchW = 20.0f
+			}
 		}
 	);
 
+	PinchCeilingSetupReward::PinchCeilingSetupArgs pinchCeilingArgs = {
+		{
+			.agentSimilarity =
+			{
+				.similarityBallAgentReward = 4.0f,
+				.similarityBallAgentThresh = 0.9f,
+				.speedMatchW = 0.08f
+			},
+			.ballGroundHandling =
+			{
+				.agentDistToBallThresh = 550.0f,
+				.ballDistReduction = 2000.0f,
+				.ballOffsetX = 250.0f,
+				.ballOffsetY = 250.0f,
+				.behindTheBallReward = 5.0f,
+			},
+			.distWallThresh = 50.0f + RLGSC::CommonValues::BALL_RADIUS,
+			.groundThresh = 250.0f,
+			.touchReward = 20.0f,
+			.wallAgentAndBallThreshold = 0.8f,
+			.wallAgentAndBallPunishment = -2.0f
+		},
+		{
+			.ballDistReduction = 50.0f,
+			.ballHeightW = 20.0f,
+			.underTheBallReward = 100.0f,
+			.underBallOffsetY = 350.0f
+		},
+		{
+			.distToCeilThresh = RLGSC::CommonValues::BALL_RADIUS + 50.0f,
+			.onCeilingReward = 15.0f
+		},
+		{
+			.ballHandling =
+			{
+				.ballVelW = 50.0f,
+				.touchW = 20.0f
+			}
+		}
+	};
+
 	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc(), weight, name }
 		{
-			{new PinchReward(args), 1.0f, "PinchReward"}
+			//{new PinchWallSetupReward(args), 1.0f, "WallPinchReward"},
+			{new PinchCeilingSetupReward(pinchCeilingArgs), 1.0f, "CeilingPinchReward"},
+			//{new PinchCornerSetupReward({}), 1.0f, "CornerPinchReward"},
+			//{new PinchTeamSetupReward({}), 1.0f, "TeamPinchReward"},
 		},
 		false
 	);
@@ -178,7 +233,7 @@ EnvCreateResult EnvCreateFunc() {
 
 	auto obs = new DefaultOBS();
 	auto actionParser = new DiscreteAction();
-	auto stateSetter = new WallPinchSetter(400.0f, 200.0f, 0.5f);
+	auto stateSetter = new CeilingPinchSetter();
 
 	Match* match = new Match(
 		rewards,
@@ -231,8 +286,8 @@ int main() {
 	cfg.ppo.criticLayerSizes = { 256, 256, 256 };
 	
 	cfg.sendMetrics = true; // Send metrics
-	cfg.renderMode = false; // render
-	cfg.renderTimeScale = 1.0f;
+	cfg.renderMode = not cfg.sendMetrics; // render
+	cfg.renderTimeScale = 1.5f;
 	cfg.renderDuringTraining = false; //Activate that so it doesn't override
 
 	cfg.metricsGroupName = WANDB_ENTITY;
@@ -249,6 +304,8 @@ int main() {
 
 	// Start learning!
 	learner.Learn();
+
+	//RLBotClient::Run({ .port = 23233, .obsBuilder = new DefaultOBS(), .actionParser = new DiscreteAction(), .policyPath = "checkpoints/42011264", .obsSize = 70,  .policyLayerSizes = {256, 256, 256}, .tickSkip = 8 });
 	std::cout << "Learning done" << std::endl;
 
 	return 0;

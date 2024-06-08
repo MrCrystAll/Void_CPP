@@ -93,7 +93,7 @@ RLGSC::GameState CeilingPinchSetter::ResetState(Arena* arena)
 
 RLGSC::GameState WeightedSampleSetter::ResetState(Arena* arena)
 {
-    //Commented while multi gamemodes are disabled
+    //Commented while multi game modes are disabled
     //this->BuildArenaConfig(arena);
 
     float weightSum = 0;
@@ -126,7 +126,7 @@ RLGSC::GameState WeightedSampleSetter::ResetState(Arena* arena)
 
 void WeightedSampleSetter::BuildArenaConfig(Arena* arena)
 {
-    //Based on gm probs, choose gamemode
+    //Based on gm probs, choose game mode
     float maxTeamSize = gmProbs.size();
 
     std::random_device rd;  // a seed source for the random number engine

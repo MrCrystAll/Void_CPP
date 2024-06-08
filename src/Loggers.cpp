@@ -6,7 +6,7 @@ void Logger::Log(RLGPC::Report& report, RLGSC::GameState state)
 	RLGSC::FList data = GetMetrics(state);
 	int size = data.size();
 	if (data.size() != metrics.size()) {
-		VOID_WARN("Expected " << metrics.size() << " metrics, got " << data.size());
+		VOID_ERR("Expected " << metrics.size() << " metrics, got " << data.size());
 		size = data.size() > metrics.size() ? metrics.size() : data.size();
 	}
 
@@ -22,26 +22,22 @@ void Logger::Log(RLGPC::Report& report, RLGSC::GameState state)
 
 RLGSC::FList BallLoggers::BallSpeedLogger::GetMetrics(RLGSC::GameState state)
 {
-	VOID_LOG(metrics[0].name);
 	return { state.ball.vel.Length() };
 }
 
 RLGSC::FList BallLoggers::BallVelocityLogger::GetMetrics(RLGSC::GameState state)
 {
-	VOID_LOG(metrics[0].name);
 	return { DECOMPOSED_VECTOR(state.ball.vel) };
 }
 
 
 RLGSC::FList BallLoggers::BallPositionLogger::GetMetrics(RLGSC::GameState state)
 {
-	VOID_LOG(metrics[0].name);
 	return { DECOMPOSED_VECTOR(state.ball.pos) };
 }
 
 RLGSC::FList PlayerLoggers::PlayerSpeedLogger::GetMetrics(RLGSC::GameState state)
 {
-	VOID_LOG(metrics[0].name);
 	float sum = 0;
 	for (const RLGSC::PlayerData& p : state.players) {
 		sum += p.carState.vel.Length();
@@ -52,7 +48,6 @@ RLGSC::FList PlayerLoggers::PlayerSpeedLogger::GetMetrics(RLGSC::GameState state
 
 RLGSC::FList PlayerLoggers::PlayerBallTouchLogger::GetMetrics(RLGSC::GameState state)
 {
-	VOID_LOG(metrics[0].name);
 	float sum = 0;
 	for (const RLGSC::PlayerData& p : state.players) {
 		sum += p.ballTouchedStep;
@@ -63,7 +58,6 @@ RLGSC::FList PlayerLoggers::PlayerBallTouchLogger::GetMetrics(RLGSC::GameState s
 
 RLGSC::FList PlayerLoggers::PlayerInAirLogger::GetMetrics(RLGSC::GameState state)
 {
-	VOID_LOG(metrics[0].name);
 
 	float sum = 0;
 	for (const RLGSC::PlayerData& p : state.players) {

@@ -17,15 +17,15 @@ public:
 	virtual void Log(RLGPC::Report& report, RLGSC::GameState state);
 	virtual void Reset() {}
 protected:
-	RLGSC::FList virtual GetMetrics(RLGSC::GameState state) = 0;
+	Logger(std::vector<Metric> metrics) : metrics(metrics) {};
+	RLGSC::FList virtual GetMetrics(RLGSC::GameState state) { return {}; };
 };
 
 namespace BallLoggers {
 	class BallSpeedLogger : public Logger {
 	public:
-		std::vector<Metric> metrics = {
-			{.name = "ball_speed"}
-		};
+		BallSpeedLogger() : Logger({ {.name = "ball_speed"}}) {};
+
 	protected:
 		RLGSC::FList virtual GetMetrics(RLGSC::GameState state) override;
 	};
@@ -33,22 +33,22 @@ namespace BallLoggers {
 
 	class BallVelocityLogger : public Logger {
 	public:
-		std::vector<Metric> metrics = {
+		BallVelocityLogger() : Logger({
 			{.name = "ball_vel_x"},
 			{.name = "ball_vel_y"},
 			{.name = "ball_vel_z"},
-		};
+			}) {};
 	protected:
 		virtual RLGSC::FList GetMetrics(RLGSC::GameState state) override;
 	};
 
 	class BallPositionLogger : public Logger {
 	public:
-		std::vector<Metric> metrics = {
+		BallPositionLogger() : Logger({
 			{.name = "ball_pos_x"},
 			{.name = "ball_pos_y"},
 			{.name = "ball_pos_z"},
-		};
+			}) {};
 	protected:
 		virtual RLGSC::FList GetMetrics(RLGSC::GameState state) override;
 	};
@@ -57,27 +57,27 @@ namespace BallLoggers {
 namespace PlayerLoggers {
 	class PlayerSpeedLogger : public Logger {
 	public:
-		std::vector<Metric> metrics = {
+		PlayerSpeedLogger(): Logger({
 			{.name = "player_speed"}
-		};
+			}) {};
 	protected:
 		virtual RLGSC::FList GetMetrics(RLGSC::GameState state) override;
 	};
 
 	class PlayerBallTouchLogger : public Logger {
 	public:
-		std::vector<Metric> metrics = {
-			{.name = "ball_touch_ratio"}
-		};
+		PlayerBallTouchLogger(): Logger({
+				{.name = "ball_touch_ratio"}
+			}) {};
 	protected:
 		virtual RLGSC::FList GetMetrics(RLGSC::GameState state) override;
 	};
 
 	class PlayerInAirLogger : public Logger {
 	public:
-		std::vector<Metric> metrics = {
+		PlayerInAirLogger(): Logger({
 			{.name = "in_air_ratio"}
-		};
+			}) {};
 	protected:
 		virtual RLGSC::FList GetMetrics(RLGSC::GameState state) override;
 	};
