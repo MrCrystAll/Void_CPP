@@ -66,3 +66,18 @@ RLGSC::FList PlayerLoggers::PlayerInAirLogger::GetMetrics(RLGSC::GameState state
 
 	return { sum / state.players.size() };
 }
+
+RLGSC::FList BallLoggers::BallHeightLogger::GetMetrics(RLGSC::GameState state)
+{
+	return {state.ball.pos.z};
+}
+
+RLGSC::FList PlayerLoggers::PlayerHeightLogger::GetMetrics(RLGSC::GameState state)
+{
+	float sum = 0;
+	for (const RLGSC::PlayerData& p : state.players) {
+		sum += p.carState.pos.z;
+	}
+
+	return { sum / state.players.size() };
+}

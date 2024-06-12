@@ -158,7 +158,7 @@ float PinchCeilingSetupReward::GetReward(const RLGSC::PlayerData& player, const 
 
 		if (agentToBallDist < config.groundHandling.ballGroundHandling.agentDistToBallThresh) {
 			if (abs(agentToBall.x) < config.groundHandling.ballGroundHandling.ballOffsetX and abs(agentToBall.y) < config.groundHandling.ballGroundHandling.ballOffsetY) {
-				AddLog(reward, "Behind the ball (Ground)", config.groundHandling.ballGroundHandling.behindTheBallReward);
+				AddLog(reward, "Ground/Behind the ball", config.groundHandling.ballGroundHandling.behindTheBallReward);
 			}
 		}
 
@@ -177,13 +177,13 @@ float PinchCeilingSetupReward::GetReward(const RLGSC::PlayerData& player, const 
 		//You're matching the ball's direction ? Here, a snack
 		float directionMatchBonus = directionSimilarity >= config.groundHandling.agentSimilarity.similarityBallAgentThresh ? config.groundHandling.agentSimilarity.similarityBallAgentReward : 0;
 
-		AddLog(reward, "Speed matching (Ground)", speedMatchingBonus);
-		AddLog(reward, "Wall alignment punishment (Ground)", wallComparisonPunish);
-		AddLog(reward, "Player distance to ball (Ground)", -ballDistPunish);
-		AddLog(reward, "Direction matching (Ground)", directionMatchBonus);
+		AddLog(reward, "Ground/Speed matching", speedMatchingBonus);
+		AddLog(reward, "Ground/Wall alignment punishment", wallComparisonPunish);
+		AddLog(reward, "Ground/Player distance to ball", -ballDistPunish);
+		AddLog(reward, "Ground/Direction matching", directionMatchBonus);
 
 		if (player.ballTouchedStep) {
-			AddLog(reward, "Ball touch (Ground)", config.groundHandling.touchReward);
+			AddLog(reward, "Ground/Ball touch", config.groundHandling.touchReward);
 		}
 	}
 
@@ -193,28 +193,28 @@ float PinchCeilingSetupReward::GetReward(const RLGSC::PlayerData& player, const 
 	) {
 
 		if (agentState.pos.z < ball.pos.z and std::abs(agentState.pos.y) > std::abs(ball.pos.y - config.wallHandling.underBallOffsetY) and std::abs(agentState.pos.y) < std::abs(ball.pos.y + config.wallHandling.underBallOffsetY)) {
-			AddLog(reward, "Under the ball (Wall)", config.wallHandling.underTheBallReward);
+			AddLog(reward, "Wall/Under the ball", config.wallHandling.underTheBallReward);
 		}
 
 		float ballDistPunish = state.ball.pos.Dist(player.carState.pos) / config.wallHandling.ballDistReduction;
-		AddLog(reward, "Agent dist to ball (Wall)", -ballDistPunish);
+		AddLog(reward, "Wall/Agent dist to ball", -ballDistPunish);
 		
 		//Reward for ball height ?
-		AddLog(reward, "Ball height (Wall)", ball.pos.z / RLGSC::CommonValues::CEILING_Z * config.wallHandling.ballHeightW);
+		AddLog(reward, "Wall/Ball height", ball.pos.z / RLGSC::CommonValues::CEILING_Z * config.wallHandling.ballHeightW);
 	}
 
 	if (player.carState.pos.z > config.ceilingHandling.banZoneHeight) {
-		AddLog(reward, "Ground ban (Ceiling)", config.ceilingHandling.groundedBan);
+		AddLog(reward, "Ceiling/Ground ban", config.ceilingHandling.groundedBan);
 	}
 
 	//If within ceiling range
 	if (ball.pos.z > RLGSC::CommonValues::CEILING_Z - config.ceilingHandling.distToCeilThresh) {
 		//Already good being there, get some snack
-		AddLog(reward, "Ceiling zone", config.ceilingHandling.onCeilingReward);
+		AddLog(reward, "Ceiling/Ceiling zone", config.ceilingHandling.onCeilingReward);
 		
 		//Touching the ball and ceiling range ? Sure thing buddy
 		if (player.ballTouchedStep) {
-			AddLog(reward, "Ceiling pinch", this->pinchReward.GetReward(player, state, prevAction));
+			AddLog(reward, "Ceiling/Ceiling pinch", this->pinchReward.GetReward(player, state, prevAction));
 		}
 	}
 
@@ -224,18 +224,18 @@ float PinchCeilingSetupReward::GetReward(const RLGSC::PlayerData& player, const 
 void PinchCeilingSetupReward::ClearChanges()
 {
 	float temp;
-	AddLog(temp, "Behind the ball (Ground)", 0, true);
-	AddLog(temp, "Speed matching (Ground)" , 0, true);
-	AddLog(temp, "Wall alignment punishment (Ground)", 0, true);
-	AddLog(temp, "Player distance to ball (Ground)", 0, true);
-	AddLog(temp, "Direction matching (Ground)", 0, true);
-	AddLog(temp, "Ball touch (Ground)", 0, true);
-	AddLog(temp, "Under the ball (Wall)", 0, true);
-	AddLog(temp, "Agent dist to ball (Wall)", 0, true);
-	AddLog(temp, "Ball height (Wall)", 0, true);
-	AddLog(temp, "Ground ban (Ceiling)", 0, true);
-	AddLog(temp, "Ceiling zone", 0, true);
-	AddLog(temp, "Ceiling pinch", 0, true);
+	AddLog(temp, "Ground/Behind the ball", 0, true);
+	AddLog(temp, "Ground/Speed matching" , 0, true);
+	AddLog(temp, "Ground/Wall alignment punishment", 0, true);
+	AddLog(temp, "Ground/Player distance to ball", 0, true);
+	AddLog(temp, "Ground/Direction matching", 0, true);
+	AddLog(temp, "Ground/Ball touch", 0, true);
+	AddLog(temp, "Wall/Under the ball", 0, true);
+	AddLog(temp, "Wall/Agent dist to ball", 0, true);
+	AddLog(temp, "Wall/Ball height", 0, true);
+	AddLog(temp, "Ceiling/Ground ban", 0, true);
+	AddLog(temp, "Ceiling/Ceiling zone", 0, true);
+	AddLog(temp, "Ceiling/Ceiling pinch", 0, true);
 	this->pinchReward.ClearChanges();
 }
 

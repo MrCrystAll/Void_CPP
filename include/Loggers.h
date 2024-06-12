@@ -52,6 +52,15 @@ namespace BallLoggers {
 	protected:
 		virtual RLGSC::FList GetMetrics(RLGSC::GameState state) override;
 	};
+
+	class BallHeightLogger : public Logger {
+	public:
+		BallHeightLogger() : Logger({
+			{.name = "ball_height"},
+			}) {};
+	protected:
+		virtual RLGSC::FList GetMetrics(RLGSC::GameState state) override;
+	};
 }
 
 namespace PlayerLoggers {
@@ -77,6 +86,15 @@ namespace PlayerLoggers {
 	public:
 		PlayerInAirLogger(): Logger({
 			{.name = "in_air_ratio"}
+			}) {};
+	protected:
+		virtual RLGSC::FList GetMetrics(RLGSC::GameState state) override;
+	};
+
+	class PlayerHeightLogger : public Logger {
+	public:
+		PlayerHeightLogger() : Logger({
+			{.name = "player_height"},
 			}) {};
 	protected:
 		virtual RLGSC::FList GetMetrics(RLGSC::GameState state) override;

@@ -23,11 +23,13 @@ using namespace RLGSC; // RLGymSim
 std::vector<Logger*> loggers = {
 	//Ball Loggers
 	new BallLoggers::BallSpeedLogger(),
+	new BallLoggers::BallHeightLogger(),
 
 	//Players loggers
 	new PlayerLoggers::PlayerBallTouchLogger(),
 	new PlayerLoggers::PlayerInAirLogger(),
 	new PlayerLoggers::PlayerSpeedLogger(),
+	new PlayerLoggers::PlayerHeightLogger()
 };
 
 float maxBallVel = 0.;
@@ -179,7 +181,7 @@ EnvCreateResult EnvCreateFunc() {
 		{
 			.agentSimilarity =
 			{
-				.similarityBallAgentReward = 4.0f,
+				.similarityBallAgentReward = 1.0f,
 				.similarityBallAgentThresh = 0.9f,
 				.speedMatchW = 0.1f
 			},
@@ -189,11 +191,11 @@ EnvCreateResult EnvCreateFunc() {
 				.ballDistReduction = 2000.0f,
 				.ballOffsetX = 250.0f,
 				.ballOffsetY = 250.0f,
-				.behindTheBallReward = 3.0f,
+				.behindTheBallReward = 3.5f,
 			},
 			.distWallThresh = 50.0f + RLGSC::CommonValues::BALL_RADIUS,
 			.groundThresh = 250.0f,
-			.touchReward = 20.0f,
+			.touchReward = 40.0f,
 			.wallAgentAndBallThreshold = 0.8f,
 			.wallAgentAndBallPunishment = -2.0f
 		},
@@ -291,6 +293,8 @@ int main() {
 	cfg.renderMode = not cfg.sendMetrics; // render
 	cfg.renderTimeScale = 1.5f;
 	cfg.renderDuringTraining = false; //Activate that so it doesn't override
+
+	cfg.checkpointsToKeep = 30;
 
 	cfg.metricsGroupName = WANDB_ENTITY;
 	cfg.metricsProjectName = WANDB_PROJECT;
