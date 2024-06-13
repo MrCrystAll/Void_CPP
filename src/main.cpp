@@ -202,20 +202,21 @@ EnvCreateResult EnvCreateFunc() {
 		{
 			.ballDistReduction = 50.0f,
 			.ballHeightW = 20.0f,
-			.underTheBallReward = 1000.0f,
+			.underTheBallReward = 50.0f,
 			.underBallOffsetY = 350.0f
 		},
 		{
 			.distToCeilThresh = RLGSC::CommonValues::BALL_RADIUS + 50.0f,
-			.onCeilingReward = 15.0f,
+			.onCeilingReward = 10.0f,
 			.banZoneHeight = 1500.0f,
-			.groundedBan = 0.01f
+			.groundedBan = -1500.0f,
+			.ungroundedReward = 30.0f
 		},
 		{
 			.ballHandling =
 			{
-				.ballVelW = 5000.0f,
-				.touchW = 20.0f
+				.ballVelW = 50000.0f,
+				.touchW = 200.0f
 			}
 		}
 	};

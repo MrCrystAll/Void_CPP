@@ -204,7 +204,8 @@ float PinchCeilingSetupReward::GetReward(const RLGSC::PlayerData& player, const 
 	}
 
 	if (player.carState.pos.z > config.ceilingHandling.banZoneHeight) {
-		AddLog(reward, "Ceiling/Ground ban", config.ceilingHandling.groundedBan);
+		if (player.carState.isOnGround) AddLog(reward, "Ceiling/Ground ban", config.ceilingHandling.groundedBan);
+		else AddLog(reward, "Ceiling/Off Ground Reward", config.ceilingHandling.ungroundedReward);
 	}
 
 	//If within ceiling range
@@ -234,6 +235,8 @@ void PinchCeilingSetupReward::ClearChanges()
 	AddLog(temp, "Wall/Agent dist to ball", 0, true);
 	AddLog(temp, "Wall/Ball height", 0, true);
 	AddLog(temp, "Ceiling/Ground ban", 0, true);
+	AddLog(temp, "Ceiling/Off Ground Reward", 0, true);
+	AddLog(temp, "Ceiling/Off Ground Reward", 0, true);
 	AddLog(temp, "Ceiling/Ceiling zone", 0, true);
 	AddLog(temp, "Ceiling/Ceiling pinch", 0, true);
 	this->pinchReward.ClearChanges();

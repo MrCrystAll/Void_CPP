@@ -188,7 +188,10 @@ public:
 		float banZoneHeight = 1500.0f;
 
 		//Punishment for being grounded in the ground ban zone
-		float groundedBan = 1.0f;
+		float groundedBan = -1.0f;
+
+		//Punishment for being grounded in the ground ban zone
+		float ungroundedReward = 1.0f;
 	};
 
 	struct GroundHandling {
