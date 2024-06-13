@@ -290,7 +290,7 @@ int main() {
 	cfg.ppo.policyLayerSizes = { 256, 256, 256 };
 	cfg.ppo.criticLayerSizes = { 256, 256, 256 };
 	
-	cfg.sendMetrics = true; // Send metrics
+	cfg.sendMetrics = false; // Send metrics
 	cfg.renderMode = not cfg.sendMetrics; // render
 	cfg.renderTimeScale = 1.5f;
 	cfg.renderDuringTraining = false; //Activate that so it doesn't override

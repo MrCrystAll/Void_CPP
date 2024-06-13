@@ -140,7 +140,7 @@ void PinchCeilingSetupReward::Reset(const RLGSC::GameState& initialState)
 float PinchCeilingSetupReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction)
 {
 	float reward = 0.0f;
-	auto ballDir = state.ball.pos.Normalized();
+	auto ballDir = state.ball.vel.Normalized();
 	auto agentDir = player.carState.vel.Normalized();
 	short targetDir = ballDir.x < 0 ? -1 : 1;
 
@@ -400,4 +400,29 @@ void PinchTeamSetupReward::Log(RLGPC::Report& report, std::string name, float we
 {
 	LoggableReward::Log(report, name, weight);
 	this->pinchReward.Log(report, name, weight);
+}
+
+void PinchGroundSetupReward::Reset(const RLGSC::GameState& initialState)
+{
+}
+
+float PinchGroundSetupReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction)
+{
+	float reward = 0.0f;
+
+
+	/* Pseudo algorithm idea */
+
+	return reward;
+}
+
+void PinchGroundSetupReward::Log(RLGPC::Report& report, std::string name, float weight)
+{
+	LoggableReward::Log(report, name, weight);
+	this->pinchReward.Log(report, name, weight);
+}
+
+void PinchGroundSetupReward::ClearChanges()
+{
+	this->pinchReward.ClearChanges();
 }
