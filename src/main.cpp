@@ -209,8 +209,8 @@ EnvCreateResult EnvCreateFunc() {
 			.distToCeilThresh = RLGSC::CommonValues::BALL_RADIUS + 50.0f,
 			.onCeilingReward = 10.0f,
 			.banZoneHeight = 1500.0f,
-			.groundedBan = -1500.0f,
-			.ungroundedReward = 30.0f
+			.groundedBan = -35.0f,
+			.ungroundedReward = 6.0f
 		},
 		{
 			.ballHandling =
@@ -238,7 +238,7 @@ EnvCreateResult EnvCreateFunc() {
 
 	auto obs = new DefaultOBS();
 	auto actionParser = new DiscreteAction();
-	auto stateSetter = new OverfittingCeilingPinchSetter();
+	auto stateSetter = new CeilingPinchSetter();
 
 	Match* match = new Match(
 		rewards,
@@ -290,7 +290,7 @@ int main() {
 	cfg.ppo.policyLayerSizes = { 256, 256, 256 };
 	cfg.ppo.criticLayerSizes = { 256, 256, 256 };
 	
-	cfg.sendMetrics = false; // Send metrics
+	cfg.sendMetrics = true; // Send metrics
 	cfg.renderMode = not cfg.sendMetrics; // render
 	cfg.renderTimeScale = 1.5f;
 	cfg.renderDuringTraining = false; //Activate that so it doesn't override

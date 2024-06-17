@@ -60,3 +60,16 @@ class RandomPinchSetter(StateSetter):
         state_wrapper.cars[0].boost = 100
         
         return state_wrapper
+    
+    
+class OverfitCeilingPinchSetter(StateSetter):
+    def reset(self, state_wrapper: StateWrapper):
+        
+        state_wrapper.ball.set_pos(-2100, -3000, BALL_RADIUS)
+        state_wrapper.ball.set_lin_vel(-150, 100, 10)
+        
+        state_wrapper.cars[0].set_pos(-1800, -3000, 17)
+        state_wrapper.cars[0].set_rot(yaw=np.pi)
+        state_wrapper.cars[0].boost = 1
+        
+        return state_wrapper

@@ -21,6 +21,11 @@ float PinchReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameS
 	AddLog(reward, "Ball touch", config.ballHandling.touchW);
 	AddLog(reward, "Ball accel", ballAccel * config.ballHandling.ballVelW);
 
+	float ballGoalSimilarity = ((player.team == Team::ORANGE ? RLGSC::CommonValues::BLUE_GOAL_CENTER : RLGSC::CommonValues::ORANGE_GOAL_CENTER) - state.ball.pos).Normalized().Dot(state.ball.vel.Normalized());
+	if (ballGoalSimilarity < config.ballHandling.goalDirectionSimilarity) {
+		AddLog(reward, "Towards net", config.ballHandling.goalDirectionW);
+	}
+
 	lastBallSpeed = state.ball.vel.Length2D();
     return reward;
 }
@@ -31,6 +36,8 @@ void PinchReward::ClearChanges()
 	LoggableReward::ClearChanges();
 	AddLog(temp, "Ball touch", 0, true);
 	AddLog(temp, "Ball accel", 0, true);
+	AddLog(temp, "Towards net", 0, true);
+
 
 }
 
@@ -100,7 +107,7 @@ float PinchWallSetupReward::GetReward(const RLGSC::PlayerData& player, const RLG
 				//Accel reward on ball hit
 				else if (player.ballTouchedStep and state.ball.pos.z >= config.wallHandling.wallMinHeightToPinch) {
 					//You still got your flip when hitting the ball ? punished, else good
-					float flipBallChange = !player.hasFlip ? config.flipHandlingWallSetup.hasFlipPunishmentWhenBall : config.flipHandlingWallSetup.hasFlipPunishmentWhenBall;
+					float flipBallChange = !player.hasFlip ? config.flipHandlingWallSetup.hasFlipPunishmentWhenBall : config.flipHandlingWallSetup.hasFlipRewardWhenBall;
 					AddLog(reward, "Ball flip", flipBallChange);
 					AddLog(reward, "Pinch reward", this->pinchReward.GetReward(player, state, prevAction));
 				}
@@ -203,7 +210,7 @@ float PinchCeilingSetupReward::GetReward(const RLGSC::PlayerData& player, const 
 		AddLog(reward, "Wall/Ball height", ball.pos.z / RLGSC::CommonValues::CEILING_Z * config.wallHandling.ballHeightW);
 	}
 
-	if (player.carState.pos.z > config.ceilingHandling.banZoneHeight) {
+	if (player.carState.pos.z > config.ceilingHandling.banZoneHeight and ball.pos.z > config.ceilingHandling.banZoneHeight) {
 		if (player.carState.isOnGround) AddLog(reward, "Ceiling/Ground ban", config.ceilingHandling.groundedBan);
 		else AddLog(reward, "Ceiling/Off Ground Reward", config.ceilingHandling.ungroundedReward);
 	}
@@ -316,7 +323,7 @@ float PinchCornerSetupReward::GetReward(const RLGSC::PlayerData& player, const R
 			//Accel reward on ball hit
 			else if (player.ballTouchedStep and state.ball.pos.z >= config.wallHandling.wallMinHeightToPinch) {
 				//You still got your flip when hitting the ball ? punished, else good
-				float flipBallChange = !player.hasFlip ? config.flipHandlingWallSetup.hasFlipPunishmentWhenBall : config.flipHandlingWallSetup.hasFlipPunishmentWhenBall;
+				float flipBallChange = !player.hasFlip ? config.flipHandlingWallSetup.hasFlipPunishmentWhenBall : config.flipHandlingWallSetup.hasFlipRewardWhenBall;
 				AddLog(reward, "Ball flip", flipBallChange);
 				AddLog(reward, "Pinch reward", this->pinchReward.GetReward(player, state, prevAction));
 			}
@@ -360,18 +367,18 @@ Vec PinchCornerSetupReward::GetCornerIntersection(short xFwd, short yFwd, float 
 		}
 		else {
 			xOrientation = 1;
-			yOrientation = 1;
+			yOrientation = -1;
 		}
 	}
 	else {
 		//Bottom
 		if (yFwd < 0) {
-			xOrientation = 1;
+			xOrientation = -1;
 			yOrientation = -1;
 		}
 		else {
-			xOrientation = -1;
-			yOrientation = -1;
+			xOrientation = 1;
+			yOrientation = 1;
 		}
 	}
 

@@ -9,10 +9,12 @@ from rlgym.gamelaunch import LaunchPreference
 from rlgym_ppo.ppo import PPOLearner
 from rlgym_sim.utils.reward_functions.common_rewards.misc_rewards import ConstantReward
 from rlgym_sim.utils.terminal_conditions.common_conditions import TimeoutCondition, GoalScoredCondition
+from rlgym_sim.utils.state_setters.default_state import DefaultState
 from parsers import NectoAction
-from obsBuilders import DefaultObsCpp
+from obsBuilders import DefaultObsCpp, OnesObs
+from rlgym_tools.extra_action_parsers.lookup_act import LookupAction
 
-from setters import RandomPinchSetter, TeamSizeSetter, PinchSetter
+from setters import OverfitCeilingPinchSetter, RandomPinchSetter, TeamSizeSetter, PinchSetter
 from utils import get_latest_model_path, live_log
 
 # endregion
@@ -20,17 +22,17 @@ from utils import get_latest_model_path, live_log
 tick_skip = 8
 STEP_TIME = tick_skip / 120.
 
-spawn_opponents = False
-blue_count = 1
-orange_count = 3 if spawn_opponents else 0
+spawn_opponents = True
+blue_count = 2
+orange_count = 2 if spawn_opponents else 0
 
 state_mutator = TeamSizeSetter(
     setters=(
-        RandomPinchSetter(400, 200, 0.5),
+        DefaultState(),
         # dynamic_replay
     ),
     weights=(1,),
-    gm_probs=(1, 0, 0)
+    gm_probs=(0, 1, 0)
 )
 reward_fn = ConstantReward()
 
@@ -43,7 +45,7 @@ termination_conditions = [
 # region ========================= Model Settings =============================
 
 action_parser = NectoAction()
-obs_builder = DefaultObsCpp()
+obs_builder = OnesObs()
 
 agent = PPOLearner(
     obs_space_size=70,
@@ -138,14 +140,14 @@ if __name__ == "__main__":
 
     agent.load_from(model_to_load)
 
-    env = create_env(sim=False)
+    env = create_env(sim=True)
     current_time = time.time()
     refresh_time = current_time
     rewards = []
 
     while True:
-        playstyle_switch()
-        obs = env.reset()
+        # playstyle_switch()
+        obs, info = env.reset(return_info=True)
         if len(rewards) > 0:
             last_ep_reward = sum(rewards) / len(rewards)
         rewards = []
@@ -153,18 +155,18 @@ if __name__ == "__main__":
         while not terminated:
             if time.time() - refresh_time >= 1:
                 refresh_time = time.time()
-                # print_live_state()
+                print_live_state()
+                
+            print(obs)
 
             with torch.no_grad():
-                actions = np.array([agent.policy.get_action(obs, deterministic=deterministic)[0]])
+                actions = np.array([agent.policy.get_action(obs[i], deterministic=deterministic)[0] for i in range(blue_count + orange_count) ])
+                print(actions)
                 actions = actions.reshape((*actions.shape, 1))
 
             obs, reward, terminated, info = env.step(actions)
             rewards.append(reward)
-
             if time.time() - current_time >= time_before_update:
                 model_reload()
-                
-            time.sleep(STEP_TIME)
 
 # endregion

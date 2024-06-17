@@ -14,6 +14,12 @@ public:
 
 		//Touch weight
 		float touchW = 1.0f;
+
+		//Minimum similarity to match goal direction
+		float goalDirectionSimilarity = 0.8f;
+
+		//Reward for going towards the net
+		float goalDirectionW = 3.0f;
 	};
 
 	struct PinchArgs {

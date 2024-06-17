@@ -64,3 +64,5 @@ checkpoints
 /python_scripts/__pycache__
 /include/WandbConfig.h
 .venv
+/live_rewards
+/tools/cpp_checkpoint
