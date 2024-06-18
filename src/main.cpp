@@ -209,13 +209,13 @@ EnvCreateResult EnvCreateFunc() {
 			.distToCeilThresh = RLGSC::CommonValues::BALL_RADIUS + 50.0f,
 			.onCeilingReward = 10.0f,
 			.banZoneHeight = 1500.0f,
-			.groundedBan = -35.0f,
-			.ungroundedReward = 6.0f
+			.groundedBan = -350.0f,
+			.ungroundedReward = 60.0f
 		},
 		{
 			.ballHandling =
 			{
-				.ballVelW = 50000.0f,
+				.ballVelW = 20000.0f,
 				.touchW = 200.0f
 			}
 		}
