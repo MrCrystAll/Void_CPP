@@ -1,5 +1,6 @@
 #include "LoggedCombinedReward.h"
 #include "LoggerUtils.h"
+#include <any>
 
 LoggedCombinedReward::LoggedCombinedReward(std::vector<RewardFunction*> rewardFuncs, std::vector<float> rewardWeights, std::vector<std::string> names, bool ownsFuncs) :rewardFuncs(rewardFuncs), rewardWeights(rewardWeights), names(names), ownsFuncs(ownsFuncs), lastRewards() {
 	assert(rewardFuncs.size() == rewardWeights.size());
@@ -17,11 +18,9 @@ LoggedCombinedReward::LoggedCombinedReward(std::vector<std::tuple<RewardFunction
 void LoggedCombinedReward::LogRewards(RLGPC::Report& report) {
 
 	for (int i = 0; i < lastRewards.size(); i++) {
-		try {
-			((LoggableReward*)rewardFuncs[i])->Log(report, names[i], rewardWeights[i]);
-		}
-		catch (std::exception e) {
-			std::cout << e.what() << std::endl;
+		LoggableReward* lr = dynamic_cast<LoggableReward*>(rewardFuncs[i]);
+		if (lr != nullptr) {
+			lr->Log(report, names[i], rewardWeights[i]);
 		}
 		report.AccumAvg(REWARD_HEADER + std::get<0>(lastRewards[i]), std::get<1>(lastRewards[i]));
 	}
