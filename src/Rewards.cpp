@@ -50,7 +50,7 @@ void PinchWallSetupReward::Reset(const RLGSC::GameState& initialState)
 float PinchWallSetupReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction)
 {
 	float reward = 0.f;
-	auto ballDir = state.ball.pos.Normalized();
+	auto ballDir = state.ball.vel.Normalized();
 	auto agentDir = player.carState.vel.Normalized();
 	short targetDir = ballDir.x < 0 ? -1 : 1;
 
