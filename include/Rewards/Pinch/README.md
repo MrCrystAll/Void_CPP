@@ -1,9 +1,10 @@
 # Pinch rewards
 
-[Ceiling pinch](#ceiling-pinch)
-[Wall pinch](#wall-pinch)
-[Team pinch](#team-pinch)
-[Ground pinch](#ground-pinch)
+- [Ceiling pinch](#ceiling-pinch)
+- [Wall pinch](#wall-pinch)
+- [Team pinch](#team-pinch)
+- [Ground pinch](#ground-pinch)
+
 
 ## Ceiling pinch
 
