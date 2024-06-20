@@ -12,13 +12,18 @@
 #include "LoggedCombinedReward.h"
 #include "LoggerUtils.h"
 #include "WandbConfig.h"
-#include <Rewards.h>
+
+//Pinch
+#include "Rewards/Pinch/CeilingPinch.h"
+#include "Rewards/Pinch/WallPinch.h"
+
 #include <States.h>
 #include <TerminalConditions.h>
 #include <Loggers.h>
 
 using namespace RLGPC; // RLGymPPO
 using namespace RLGSC; // RLGymSim
+using namespace PINCH_NS;
 
 std::vector<Logger*> loggers = {
 	//Ball Loggers
