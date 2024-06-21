@@ -22,17 +22,17 @@ from utils import get_latest_model_path, live_log
 tick_skip = 8
 STEP_TIME = tick_skip / 120.
 
-spawn_opponents = True
-blue_count = 2
-orange_count = 2 if spawn_opponents else 0
+spawn_opponents = False
+blue_count = 1
+orange_count = 1 if spawn_opponents else 0
 
 state_mutator = TeamSizeSetter(
     setters=(
-        DefaultState(),
+        RandomPinchSetter(400, 200, 0.5),
         # dynamic_replay
     ),
     weights=(1,),
-    gm_probs=(0, 1, 0)
+    gm_probs=(1, 0, 0)
 )
 reward_fn = ConstantReward()
 
@@ -45,7 +45,7 @@ termination_conditions = [
 # region ========================= Model Settings =============================
 
 action_parser = NectoAction()
-obs_builder = OnesObs()
+obs_builder = DefaultObsCpp()
 
 agent = PPOLearner(
     obs_space_size=70,
@@ -140,7 +140,7 @@ if __name__ == "__main__":
 
     agent.load_from(model_to_load)
 
-    env = create_env(sim=True)
+    env = create_env(sim=False)
     current_time = time.time()
     refresh_time = current_time
     rewards = []
@@ -156,12 +156,9 @@ if __name__ == "__main__":
             if time.time() - refresh_time >= 1:
                 refresh_time = time.time()
                 print_live_state()
-                
-            print(obs)
 
             with torch.no_grad():
-                actions = np.array([agent.policy.get_action(obs[i], deterministic=deterministic)[0] for i in range(blue_count + orange_count) ])
-                print(actions)
+                actions = np.array([agent.policy.get_action(obs, deterministic=deterministic)[0]])
                 actions = actions.reshape((*actions.shape, 1))
 
             obs, reward, terminated, info = env.step(actions)

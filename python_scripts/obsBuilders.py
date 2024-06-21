@@ -38,6 +38,10 @@ class DefaultObsCpp(ObsBuilder):
             inverted = False
             ball = state.ball
             pads = state.boost_pads
+            
+        boost = previous_action[5]
+        previous_action[5] = previous_action[6]
+        previous_action[6] = boost
 
         obs = [ball.position * self.POS_COEF,
                ball.linear_velocity * self.LIN_VEL_COEF,
@@ -63,7 +67,7 @@ class DefaultObsCpp(ObsBuilder):
 
         obs.extend(allies)
         obs.extend(enemies)
-        return np.round(np.concatenate(obs), 4)
+        return np.concatenate(obs)
 
     def _add_player_to_obs(self, obs: List, player: PlayerData, inverted: bool):
         if inverted:

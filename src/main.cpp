@@ -4,7 +4,6 @@
 #include <RLGymSim_CPP/Utils/RewardFunctions/CombinedReward.h>
 #include <RLGymSim_CPP/Utils/TerminalConditions/NoTouchCondition.h>
 #include <RLGymSim_CPP/Utils/TerminalConditions/GoalScoreCondition.h>
-#include <RLGymSim_CPP/Utils/OBSBuilders/DefaultOBS.h>
 #include <RLGymSim_CPP/Utils/StateSetters/RandomState.h>
 #include <RLGymSim_CPP/Utils/ActionParsers/DiscreteAction.h>
 
@@ -12,6 +11,7 @@
 #include "LoggedCombinedReward.h"
 #include "LoggerUtils.h"
 #include "WandbConfig.h"
+#include "ObsBuilder.h"
 
 //Pinch
 #include "Rewards/Pinch/CeilingPinch.h"
@@ -243,7 +243,7 @@ EnvCreateResult EnvCreateFunc() {
 
 	auto obs = new DefaultOBS();
 	auto actionParser = new DiscreteAction();
-	auto stateSetter = new CeilingPinchSetter();
+	auto stateSetter = new WallPinchSetter();
 
 	Match* match = new Match(
 		rewards,
@@ -295,7 +295,7 @@ int main() {
 	cfg.ppo.policyLayerSizes = { 256, 256, 256 };
 	cfg.ppo.criticLayerSizes = { 256, 256, 256 };
 	
-	cfg.sendMetrics = true; // Send metrics
+	cfg.sendMetrics = false; // Send metrics
 	cfg.renderMode = not cfg.sendMetrics; // render
 	cfg.renderTimeScale = 1.5f;
 	cfg.renderDuringTraining = false; //Activate that so it doesn't override
@@ -306,12 +306,15 @@ int main() {
 	cfg.metricsProjectName = WANDB_PROJECT;
 	cfg.metricsRunName = WANDB_RUN_NAME;
 
+	cfg.deterministic = true;
+
 	// Make the learner with the environment creation function and the config we just made
 	Learner learner = Learner(EnvCreateFunc, cfg);
 
 	// Set up our callbacks
 	learner.stepCallback = OnStep;
 	learner.iterationCallback = OnIteration;
+
 
 
 	// Start learning!

@@ -60,11 +60,9 @@ class NectoAction(ActionParser):
                 boost = parsed_actions[-1][5]
                 parsed_actions[-1][5] = parsed_actions[-1][6]
                 parsed_actions[-1][6] = boost
-                parsed_actions[-1][7] = not parsed_actions[-1][7]
             else:
                 parsed_actions.append(action)
                 boost = parsed_actions[-1][5]
                 parsed_actions[-1][5] = parsed_actions[-1][6]
                 parsed_actions[-1][6] = boost
-                parsed_actions[-1][7] = not parsed_actions[-1][7]
         return np.asarray(parsed_actions)
