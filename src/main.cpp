@@ -20,6 +20,7 @@
 #include <States.h>
 #include <TerminalConditions.h>
 #include <Loggers.h>
+#include <LearnerConfigUtils.h>
 
 using namespace RLGPC; // RLGymPPO
 using namespace RLGSC; // RLGymSim
@@ -228,8 +229,8 @@ EnvCreateResult EnvCreateFunc() {
 
 	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc(), weight, name }
 		{
-			//{new PinchWallSetupReward(args), 1.0f, "WallPinchReward"},
-			{new PinchCeilingSetupReward(pinchCeilingArgs), 1.0f, "CeilingPinchReward"},
+			{new PinchWallSetupReward(args), 1.0f, "WallPinchReward"},
+			//{new PinchCeilingSetupReward(pinchCeilingArgs), 1.0f, "CeilingPinchReward"},
 			//{new PinchCornerSetupReward({}), 1.0f, "CornerPinchReward"},
 			//{new PinchTeamSetupReward({}), 1.0f, "TeamPinchReward"},
 		},
@@ -267,46 +268,7 @@ int main() {
 	// Make configuration for the learner
 	LearnerConfig cfg = {};
 
-	// Play around with these to see what the optimal is for your machine, more isn't always better
-	cfg.numThreads = 8;
-	cfg.numGamesPerThread = 16;
-
-	// We want a large itr/batch size
-	// You'll want to increase this as your bot improves, up to an extent
-	int tsPerItr = 200 * 1000;
-	cfg.timestepsPerIteration = tsPerItr;
-	cfg.ppo.batchSize = tsPerItr;
-	cfg.ppo.miniBatchSize = 250 * 100; // Lower this if too much VRAM is being allocated
-	cfg.expBufferSize = tsPerItr * 3;
-	
-	// This is just set to 1 to match rlgym-ppo example
-	// I've found the best value is somewhere between 2 and 4
-	// Increasing this will lower SPS, but increase step efficiency
-	cfg.ppo.epochs = 3; 
-
-	// Reasonable starting entropy
-	cfg.ppo.entCoef = 0.01f;
-
-	// Decently-strong learning rate to start, may start to be too high around 100m steps
-	cfg.ppo.policyLR = 8e-4;
-	cfg.ppo.criticLR = 8e-4;
-
-	// Default model size
-	cfg.ppo.policyLayerSizes = { 256, 256, 256 };
-	cfg.ppo.criticLayerSizes = { 256, 256, 256 };
-	
-	cfg.sendMetrics = false; // Send metrics
-	cfg.renderMode = not cfg.sendMetrics; // render
-	cfg.renderTimeScale = 1.5f;
-	cfg.renderDuringTraining = false; //Activate that so it doesn't override
-
-	cfg.checkpointsToKeep = 30;
-
-	cfg.metricsGroupName = WANDB_ENTITY;
-	cfg.metricsProjectName = WANDB_PROJECT;
-	cfg.metricsRunName = WANDB_RUN_NAME;
-
-	cfg.deterministic = true;
+	CONFIG(cfg)
 
 	// Make the learner with the environment creation function and the config we just made
 	Learner learner = Learner(EnvCreateFunc, cfg);
