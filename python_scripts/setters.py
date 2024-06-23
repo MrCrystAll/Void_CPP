@@ -33,7 +33,7 @@ class PinchSetter(StateSetter):
         state_wrapper.cars[0].set_pos(-1700, -3200, 20)
         state_wrapper.cars[0].set_lin_vel(-300, 400, 10)
         state_wrapper.cars[0].set_rot(yaw=0.90 * np.pi)
-        state_wrapper.cars[0].boost = 100
+        state_wrapper.cars[0].boost = 1
         
         return state_wrapper
     
@@ -57,7 +57,7 @@ class RandomPinchSetter(StateSetter):
         state_wrapper.cars[0].set_pos((random.randint(0, self.pos_variance) + 300) * dir * -1 + state_wrapper.ball.position[0], -3200, 20)
         state_wrapper.cars[0].set_lin_vel((random.randint(0, self.vel_variance) + 300) * dir, 400, 10)
         state_wrapper.cars[0].set_rot(yaw=orientation)
-        state_wrapper.cars[0].boost = 100
+        state_wrapper.cars[0].boost = 1
         
         return state_wrapper
     
