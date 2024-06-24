@@ -144,41 +144,41 @@ EnvCreateResult EnvCreateFunc() {
 	PinchWallSetupReward::PinchWallSetupArgs args(
 		{
 			.creepingDistance = 2000.0f,
-			.groundBanDistance = 1000.0f,
+			.groundBanDistance = 1500.0f,
 			.maxDistToTrigger = 4000.0f,
 		},
 		{
-			.hasFlipReward = 1.0f,
-			.hasFlipPunishment = 1.0f,
-			.maxDistance = 50.0f,
-			.hasFlipRewardWhenBall = 20.0f,
-			.hasFlipPunishmentWhenBall = -20.0f
+			.hasFlipReward = 0.8f,
+			.hasFlipPunishment = -1.5f,
+			.maxDistance = 250.0f
 		},
 		{
-			.similarityBallAgentReward = 1.0f,
+			.similarityBallAgentReward = 10.0f,
 			.similarityBallAgentThresh = 0.9f,
 			.similarityBallWallThresh = 0.9f,
 		},
 		{
-			.groundBanPunishment = -0.1f,
-			.groundBanReward = 1.0f,
-			.creepingDistanceReward = 0.001f
+			.groundBanPunishment = -10.0f,
+			.groundBanReward = 3.0f,
+			.creepingDistanceReward = 0.01f
 		},
 		{
 			.ballDistReduction = 500.0f,
-			.speedMatchW = 1.0f,
+			.speedMatchW = 2.0f,
 			.agentDistToBallThresh = 500.0f,
 			.ballOffsetX = 200.0f,
 			.ballOffsetY = 200.0f,
-			.behindTheBallReward = 0.01f
+			.behindTheBallReward = 100.0f
 		},
 		{
 			.wallMinHeightToPinch = 150.0f
 		},
 		{
 			.ballHandling = {
-				.ballVelW = 1000.0f,
-				.touchW = 20.0f
+				.ballVelW = 10000.0f,
+				.touchW = 200.0f,
+				.goalDirectionW = 300.0f,
+				.isFlippingW = 300.0f
 			}
 		}
 	);
@@ -276,8 +276,6 @@ int main() {
 	// Set up our callbacks
 	learner.stepCallback = OnStep;
 	learner.iterationCallback = OnIteration;
-
-
 
 	// Start learning!
 	learner.Learn();

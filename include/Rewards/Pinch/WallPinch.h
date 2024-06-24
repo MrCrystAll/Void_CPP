@@ -69,6 +69,9 @@ public:
 
 		//Distance where the reward will trigger
 		float maxDistToTrigger = 4000.0f;
+
+		//Distance where the intercept point becomes unchanged (until ball reaches ground level or player hit)
+		float pinchDistance = 400.0f;
 	};
 
 	//All the flip handling
@@ -81,12 +84,6 @@ public:
 
 		//Distance to ball min to be considered "on the ball" (outer ball)
 		float maxDistance = 100;
-
-		//Reward for flipping on the ball
-		float hasFlipRewardWhenBall = 20.0f;
-
-		//Punishment for keeping the flip on the ball
-		float hasFlipPunishmentWhenBall = -20.0f;
 	};
 
 	struct PinchWallSetupArgs {
@@ -102,7 +99,7 @@ public:
 
 	PinchWallSetupReward(
 		PinchWallSetupArgs args
-	) : config(args), pinchReward(PinchReward(args.pinchRewardConfig)) {};
+	) : config(args), pinchReward(PinchReward(args.pinchRewardConfig)), lastIntercept(Vec()) {};
 
 	virtual void Reset(const RLGSC::GameState& initialState);
 	virtual float GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction);
@@ -112,6 +109,8 @@ public:
 private:
 	PinchWallSetupArgs config;
 	PinchReward pinchReward;
+
+	Vec lastIntercept;
 
 	float Corner(float x, short xOrientation, short yOrientation);
 	Vec GetCornerIntersection(short xFwd, short yFwd, float xPos, float yPos);

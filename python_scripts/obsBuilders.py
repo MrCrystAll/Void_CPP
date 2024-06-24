@@ -67,6 +67,7 @@ class SwappedDefaultObsCpp(ObsBuilder):
 
         obs.extend(allies)
         obs.extend(enemies)
+        print(np.concatenate(obs))
         return np.concatenate(obs)
 
     def _add_player_to_obs(self, obs: List, player: PlayerData, inverted: bool):

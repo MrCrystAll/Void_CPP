@@ -14,6 +14,8 @@ float PinchWallSetupReward::GetReward(const RLGSC::PlayerData& player, const RLG
 	auto agentDir = player.carState.vel.Normalized();
 	short targetDir = ballDir.x < 0 ? -1 : 1;
 
+	bool corner = false;
+
 	float wallInterceptionY = (ballDir.y / ballDir.x) * (RLGSC::CommonValues::SIDE_WALL_X * targetDir - state.ball.pos.x) + state.ball.pos.y;
 	Vec interceptPoint = Vec(RLGSC::CommonValues::SIDE_WALL_X * targetDir, wallInterceptionY, 0);
 	Vec intersectionPoint = GetCornerIntersection(ballDir.x, ballDir.y, state.ball.pos.x, state.ball.pos.y);
@@ -21,15 +23,20 @@ float PinchWallSetupReward::GetReward(const RLGSC::PlayerData& player, const RLG
 	//First things first, is the intersect point valid
 	if (std::abs(intersectionPoint.x) <= RLGSC::CommonValues::SIDE_WALL_X or std::abs(intersectionPoint.x) >= RLGSC::CommonValues::SIDE_WALL_X - 1152) {
 		interceptPoint = intersectionPoint;
+		corner = true;
 	};
 
+	float distToIntercept = interceptPoint.Dist2D(state.ball.pos);
+	if (distToIntercept < config.distancesWallSetup.pinchDistance or state.ball.pos.z > 200) { interceptPoint = lastIntercept; }
+	distToIntercept = interceptPoint.Dist2D(state.ball.pos);
 
 	Vec agentToBall = state.ball.pos - player.carState.pos;
 	float agentToBallDist = agentToBall.Length();
 
 
+
 	//First thing, detect if we trigger based on ball dist to wall intercept
-	if (state.ball.pos.Dist2D(interceptPoint) < config.distancesWallSetup.maxDistToTrigger) {
+	if (state.ball.pos.Dist2D(interceptPoint) < config.distancesWallSetup.maxDistToTrigger and player.carState.pos.Dist(state.ball.pos) < config.distancesWallSetup.maxDistToTrigger) {
 		//Testing if before creeping
 		if (state.ball.pos.Dist2D(interceptPoint) > config.distancesWallSetup.creepingDistance) {
 			//Match direction and speed
@@ -73,14 +80,14 @@ float PinchWallSetupReward::GetReward(const RLGSC::PlayerData& player, const RLG
 
 				//Accel reward on ball hit
 				else if (player.ballTouchedStep and state.ball.pos.z >= config.wallHandling.wallMinHeightToPinch) {
-					//You still got your flip when hitting the ball ? punished, else good
-					float flipBallChange = !player.hasFlip ? config.flipHandlingWallSetup.hasFlipPunishmentWhenBall : config.flipHandlingWallSetup.hasFlipRewardWhenBall;
-					AddLog(reward, "Ball flip", flipBallChange);
 					AddLog(reward, "Pinch reward", this->pinchReward.GetReward(player, state, prevAction));
 				}
 			}
 		}
 	}
+
+	lastIntercept = interceptPoint;
+
 
 	return reward;
 }
@@ -95,8 +102,8 @@ void PinchWallSetupReward::ClearChanges()
 	AddLog(temp, "Creeping distance reward", 0, true);
 	AddLog(temp, "Creeping grounded", 0, true);
 	AddLog(temp, "Creeping flip", 0, true);
-	AddLog(temp, "Ball flip", 0, true);
 	AddLog(temp, "Pinch reward", 0, true);
+	AddLog(temp, "Behind the ball", 0, true);
 	this->pinchReward.ClearChanges();
 }
 
@@ -147,5 +154,5 @@ Vec PinchWallSetupReward::GetCornerIntersection(short xFwd, short yFwd, float xP
 void PinchWallSetupReward::Log(RLGPC::Report& report, std::string name, float weight)
 {
 	LoggableReward::Log(report, name, weight);
-	this->pinchReward.Log(report, name, weight);
+	this->pinchReward.Log(report, name + "/Pinch", weight);
 }

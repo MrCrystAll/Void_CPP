@@ -19,7 +19,7 @@ float PinchGroundSetupReward::GetReward(const RLGSC::PlayerData& player, const R
 void PinchGroundSetupReward::Log(RLGPC::Report& report, std::string name, float weight)
 {
 	LoggableReward::Log(report, name, weight);
-	this->pinchReward.Log(report, name, weight);
+	this->pinchReward.Log(report, name + "/Pinch", weight);
 }
 
 void PinchGroundSetupReward::ClearChanges()

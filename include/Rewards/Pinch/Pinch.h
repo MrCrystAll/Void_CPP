@@ -22,6 +22,15 @@ public:
 
 		//Reward for going towards the net
 		float goalDirectionW = 3.0f;
+
+		//Reward for flipping on the ball
+		float isFlippingW = 3.0f;
+
+		//Divide the exponential input to avoid big values
+		float ballAccelExpReducer = 2.0f;
+
+		//Divide the exponential input to avoid big values
+		float ballDirectionExpReducer = 2.0f;
 	};
 
 	struct PinchArgs {

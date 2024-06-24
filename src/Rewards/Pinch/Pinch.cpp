@@ -21,11 +21,12 @@ float PinchReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameS
 	float reward = 0.f;
 	float ballAccel = (state.ball.vel.Length2D() - lastBallSpeed) / RLConst::BALL_MAX_SPEED;
 	AddLog(reward, "Ball touch", config.ballHandling.touchW);
-	AddLog(reward, "Ball accel", ballAccel * config.ballHandling.ballVelW);
+	AddLog(reward, "Ball accel", std::exp(ballAccel / config.ballHandling.ballAccelExpReducer) * config.ballHandling.ballVelW);
+	AddLog(reward, "Is flipping", player.carState.isFlipping * config.ballHandling.isFlippingW);
 
 	float ballGoalSimilarity = ((player.team == Team::ORANGE ? RLGSC::CommonValues::BLUE_GOAL_CENTER : RLGSC::CommonValues::ORANGE_GOAL_CENTER) - state.ball.pos).Normalized().Dot(state.ball.vel.Normalized());
-	if (ballGoalSimilarity < config.ballHandling.goalDirectionSimilarity) {
-		AddLog(reward, "Towards net", config.ballHandling.goalDirectionW);
+	if (ballGoalSimilarity > config.ballHandling.goalDirectionSimilarity) {
+		AddLog(reward, "Towards net", std::exp(ballGoalSimilarity * 50 / config.ballHandling.ballDirectionExpReducer) * config.ballHandling.goalDirectionW);
 	}
 
 	lastBallSpeed = state.ball.vel.Length2D();
@@ -39,6 +40,7 @@ void PinchReward::ClearChanges()
 	AddLog(temp, "Ball touch", 0, true);
 	AddLog(temp, "Ball accel", 0, true);
 	AddLog(temp, "Towards net", 0, true);
+	AddLog(temp, "Is flipping", 0, true);
 
 
 }

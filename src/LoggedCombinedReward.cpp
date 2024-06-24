@@ -30,7 +30,6 @@ void LoggableReward::Log(RLGPC::Report& report, std::string name, float weight)
 {
 	for (std::pair change : changes) {
 		float value = change.second.size() > 0 ? std::accumulate(change.second.begin(), change.second.end(), 0.0f) / change.second.size() * weight : 0.0f;
-		//std::cout << change.first << ": " << value << std::endl;
 		report.AccumAvg(REWARD_HEADER + name + "/" + change.first, value);
 	}
 }

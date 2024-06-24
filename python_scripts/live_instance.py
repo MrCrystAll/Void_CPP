@@ -10,8 +10,8 @@ from rlgym_ppo.ppo import PPOLearner
 from rlgym_sim.utils.reward_functions.common_rewards.misc_rewards import ConstantReward
 from rlgym_sim.utils.terminal_conditions.common_conditions import TimeoutCondition, GoalScoredCondition
 from rlgym_sim.utils.state_setters.default_state import DefaultState
-from parsers import NectoAction
-from obsBuilders import DefaultObsCpp, OnesObs
+from parsers import NectoAction, SwappedNectoAction
+from obsBuilders import DefaultObsCpp, OnesObs, SwappedDefaultObsCpp
 from rlgym_tools.extra_action_parsers.lookup_act import LookupAction
 
 from setters import OverfitCeilingPinchSetter, RandomPinchSetter, TeamSizeSetter, PinchSetter
@@ -67,7 +67,7 @@ agent = PPOLearner(
 # region ========================= Live instance Settings =============================
 deterministic = True
 
-model_to_load = "checkpoints/pinchv9"
+model_to_load = "checkpoints/pinch_mdx"
 
 minutes_before_update = 15
 seconds_before_update = 0
@@ -139,14 +139,14 @@ def print_live_state():
 if __name__ == "__main__":
 
     agent.load_from(model_to_load)
-
-    env = create_env(sim=False)
+    sim = False
+    env = create_env(sim=sim)
     current_time = time.time()
     refresh_time = current_time
     rewards = []
 
     while True:
-        # playstyle_switch()
+        playstyle_switch()
         obs, info = env.reset(return_info=True)
         if len(rewards) > 0:
             last_ep_reward = sum(rewards) / len(rewards)
@@ -165,5 +165,8 @@ if __name__ == "__main__":
             rewards.append(reward)
             if time.time() - current_time >= time_before_update:
                 model_reload()
+                
+            if sim:
+                time.sleep(STEP_TIME)
 
 # endregion
