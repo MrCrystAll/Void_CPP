@@ -17,6 +17,11 @@
 #include "Rewards/Pinch/CeilingPinch.h"
 #include "Rewards/Pinch/WallPinch.h"
 
+
+//Double tap
+#include "Rewards/DoubleTap/DoubleTapReward.h"
+#include "States/DoubleTap/DoubleTapState.h"
+
 #include <States.h>
 #include <TerminalConditions.h>
 #include <Loggers.h>
@@ -24,7 +29,11 @@
 
 using namespace RLGPC; // RLGymPPO
 using namespace RLGSC; // RLGymSim
-using namespace PINCH_NS;
+
+//Custom NS
+USE_PINCH_NS
+USE_DT_NS
+
 
 std::vector<Logger*> loggers = {
 	//Ball Loggers
@@ -227,9 +236,21 @@ EnvCreateResult EnvCreateFunc() {
 		}
 	};
 
+	DoubleTapReward::DoubleTapArgs dtArgs = {
+		.ballHandling = {
+			.distBallReduction = 5000.0f
+		},
+		.goalHandling = {
+			.similarityGoalBallW = 100.0f,
+			.goalW = 10000.0f,
+			
+		}
+	};
+
 	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc(), weight, name }
 		{
-			{new PinchWallSetupReward(args), 1.0f, "WallPinchReward"},
+			{new DoubleTapReward(dtArgs), 1.0f, "DoubleTapReward"}
+			//{new PinchWallSetupReward(args), 1.0f, "WallPinchReward"},
 			//{new PinchCeilingSetupReward(pinchCeilingArgs), 1.0f, "CeilingPinchReward"},
 			//{new PinchCornerSetupReward({}), 1.0f, "CornerPinchReward"},
 			//{new PinchTeamSetupReward({}), 1.0f, "TeamPinchReward"},
@@ -244,7 +265,20 @@ EnvCreateResult EnvCreateFunc() {
 
 	auto obs = new DefaultOBS();
 	auto actionParser = new DiscreteAction();
-	auto stateSetter = new WallPinchSetter();
+
+
+	DoubleTapState::DoubleTapStateArgs stateArgs = {
+		.bothSides = true,
+		.carVariance = {
+			.posVariance = Vec(2400.0f, 300.0f, 100.0f)
+		},
+		.ballVariance = {
+			.velVariance = Vec(1200.0f, 2000.0f, 100.0f)
+		},
+		
+	};
+
+	auto stateSetter = new DoubleTapState(stateArgs);
 
 	Match* match = new Match(
 		rewards,
@@ -254,7 +288,7 @@ EnvCreateResult EnvCreateFunc() {
 		stateSetter,
 
 		1, // Team size
-		false // Spawn opponents
+		true // Spawn opponents
 	);
 
 	Gym* gym = new Gym(match, TICK_SKIP);
