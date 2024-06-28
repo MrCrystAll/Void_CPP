@@ -11,3 +11,13 @@ private:
 	int totalSteps;
 	int currentSteps;
 };
+
+class BounceTimeoutCondition : public RLGSC::TerminalCondition {
+public:
+	BounceTimeoutCondition(int steps_after_bounce);
+	virtual void Reset(const RLGSC::GameState& initialState);
+	virtual bool IsTerminal(const RLGSC::GameState& currentState);
+private:
+	int totalSteps;
+	int currentSteps = 0;
+};

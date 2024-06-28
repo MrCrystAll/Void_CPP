@@ -32,15 +32,20 @@ float DoubleTapReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::G
 	//So uuuuuh, first, agent dist to ball until the bot gets relatively close
 	if (agentToBallDist > config.ballHandling.minDistToBall) {
 		//Punish that boy for being far away from the ball
-		AddLog(reward, "Going towards the ball", -agentToBallDist / config.ballHandling.distBallReduction);
+		AddLog(reward, "Distance to ball", -agentToBallDist / config.ballHandling.distBallReduction);
+		AddLog(reward, "Going towards the ball", (similarityAgentBall > config.ballHandling.minSimilarityAgentBall) * config.ballHandling.similarityAgentBallW * similarityAgentBall);
 	}
 	//Close to ball ? I assume you can reward for ball touch and similarity (similarityGoalBall)
 	else {
-		//Touching the ball is a yes
-		AddLog(reward, "Ball touch", player.ballTouchedStep * config.ballHandling.touchW);
+		//In the zone to trigger
+		if (std::abs(state.ball.pos.y) > RLGSC::CommonValues::BACK_WALL_Y - config.ballHandling.maxDistFromBB and state.ball.pos.z > config.ballHandling.minHeightToTrigger) {
+			//Touching the ball is a yes
+			AddLog(reward, "Ball touch", player.ballTouchedStep * config.ballHandling.touchW);
 
-		//Going towards the net is also a yes, make sure to be above the required threshold
-		AddLog(reward, "Ball towards goal", (similarityGoalBall > config.goalHandling.minSimilarityGoalBall) * config.goalHandling.similarityGoalBallW);
+			//Going towards the net is also a yes, make sure to be above the required threshold
+			AddLog(reward, "Ball towards goal", (similarityGoalBall > config.goalHandling.minSimilarityGoalBall) * config.goalHandling.similarityGoalBallW);
+		}
+		
 	}
 
 	//Goal ? Count that in, add a lil' bonus for the speed

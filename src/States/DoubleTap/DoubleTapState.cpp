@@ -66,11 +66,11 @@ RLGSC::GameState DoubleTapState::ResetState(Arena* arena)
         yDir = -1;
     }
 
-    Vec ballInitialPos = Vec(0, 1000 * yDir, 1300);
-    Vec agentInitialPos = Vec(0, 600 * yDir, 1100);
+    Vec ballInitialPos = Vec(0, 3000, 1200);
+    Vec agentInitialPos = Vec(0, 600, 1100);
 
-    Vec ballInitialVel = Vec(0, 2500 * yDir, 500);
-    Vec agentInitialVel = Vec(0, 2000 * yDir, 900);
+    Vec ballInitialVel = Vec(0, 2000, 300);
+    Vec agentInitialVel = Vec(0, 1750, 550);
     Vec agentInitialAngVel = Vec(0, 0, 0);
 
     Angle agentInitialOrientation = Angle(M_PI_2);
@@ -78,20 +78,24 @@ RLGSC::GameState DoubleTapState::ResetState(Arena* arena)
 
     ballInitialPos += randomVec(config.ballVariance.posVariance);
     ballInitialPos.x -= config.ballVariance.posVariance.x / 2.0f;
+    ballInitialPos.y *= yDir;
 
     ballInitialVel += randomVec(config.ballVariance.velVariance);
     ballInitialVel.x -= config.ballVariance.velVariance.x / 2.0f;
+    ballInitialVel.y *= yDir;
 
     agentInitialPos += randomVec(config.carVariance.posVariance);
     agentInitialPos.x -= config.carVariance.posVariance.x / 2.0f;
+    agentInitialPos.y *= yDir;
 
     agentInitialVel += randomVec(config.carVariance.velVariance);
     agentInitialVel.x -= config.carVariance.velVariance.x / 2.0f;
+    agentInitialVel.y *= yDir;
 
     agentInitialAngVel += randomVec(config.carVariance.angVelVariance);
-    ballInitialVel.x -= config.carVariance.angVelVariance.x / 2.0f;
-    ballInitialVel.y -= config.carVariance.angVelVariance.y / 2.0f;
-    ballInitialVel.z -= config.carVariance.angVelVariance.z / 2.0f;
+    agentInitialAngVel.x -= config.carVariance.angVelVariance.x / 2.0f;
+    agentInitialAngVel.y -= config.carVariance.angVelVariance.y / 2.0f;
+    agentInitialAngVel.z -= config.carVariance.angVelVariance.z / 2.0f;
 
 
     agentInitialOrientation = agentInitialOrientation + randomAngle(config.carVariance.orientVariance);
@@ -112,6 +116,8 @@ RLGSC::GameState DoubleTapState::ResetState(Arena* arena)
             cs.angVel = agentInitialAngVel;
             cs.hasFlipped = true;
             cs.hasJumped = true;
+            cs.hasDoubleJumped = true;
+            cs.airTimeSinceJump = 3.0;
         }
         else {
             cs.pos = Vec(0, RLGSC::CommonValues::BACK_WALL_Y * yDir, 17);
