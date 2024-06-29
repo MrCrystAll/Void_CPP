@@ -81,3 +81,13 @@ RLGSC::FList PlayerLoggers::PlayerHeightLogger::GetMetrics(RLGSC::GameState stat
 
 	return { sum / state.players.size() };
 }
+
+RLGSC::FList PlayerLoggers::DemoLogger::GetMetrics(RLGSC::GameState state)
+{
+	float nDemos = 0;
+	for (const RLGSC::PlayerData& p : state.players) {
+		if (p.carState.isDemoed) nDemos++;
+	}
+
+	return { nDemos };
+}

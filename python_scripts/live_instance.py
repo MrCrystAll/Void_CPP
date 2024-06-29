@@ -14,7 +14,7 @@ from parsers import NectoAction, SwappedNectoAction
 from obsBuilders import DefaultObsCpp, OnesObs, SwappedDefaultObsCpp
 from rlgym_tools.extra_action_parsers.lookup_act import LookupAction
 
-from setters import OverfitCeilingPinchSetter, RandomPinchSetter, TeamSizeSetter, PinchSetter
+from setters import OverfitCeilingPinchSetter, RandomPinchSetter, TeamSizeSetter, PinchSetter, DoubleTapSetter
 from utils import get_latest_model_path, live_log
 
 # endregion
@@ -22,13 +22,24 @@ from utils import get_latest_model_path, live_log
 tick_skip = 8
 STEP_TIME = tick_skip / 120.
 
-spawn_opponents = False
+spawn_opponents = True
 blue_count = 1
 orange_count = 1 if spawn_opponents else 0
 
+double_tap_args = DoubleTapSetter.DoubleTapSetterArgs(
+    both_sides=True,
+    ball_variance=DoubleTapSetter.PhysObjVariance(
+        vel_variance=np.array([600.0, 1000.0, 100.0])
+    ),
+    agent_variance=DoubleTapSetter.PhysObjVariance(
+        pos_variance=np.array([1000.0, 300.0, 100.0]),
+        vel_variance=np.array([100.0, 300.0, 100.0])
+    )
+)
+
 state_mutator = TeamSizeSetter(
     setters=(
-        RandomPinchSetter(400, 200, 0.5),
+        DoubleTapSetter(double_tap_args),
         # dynamic_replay
     ),
     weights=(1,),
@@ -48,7 +59,7 @@ action_parser = NectoAction()
 obs_builder = DefaultObsCpp()
 
 agent = PPOLearner(
-    obs_space_size=70,
+    obs_space_size=89,
     act_space_size=action_parser.get_action_space().n,
     device="cuda",
     batch_size=10_000,
@@ -67,7 +78,7 @@ agent = PPOLearner(
 # region ========================= Live instance Settings =============================
 deterministic = True
 
-model_to_load = "checkpoints/pinch_mdx"
+model_to_load = "checkpoints/double_tap/dt_v1"
 
 minutes_before_update = 15
 seconds_before_update = 0
@@ -143,26 +154,21 @@ if __name__ == "__main__":
     env = create_env(sim=sim)
     current_time = time.time()
     refresh_time = current_time
-    rewards = []
 
     while True:
         playstyle_switch()
         obs, info = env.reset(return_info=True)
-        if len(rewards) > 0:
-            last_ep_reward = sum(rewards) / len(rewards)
-        rewards = []
         terminated = False
         while not terminated:
             if time.time() - refresh_time >= 1:
                 refresh_time = time.time()
-                print_live_state()
+                # print_live_state()
 
             with torch.no_grad():
-                actions = np.array([agent.policy.get_action(obs, deterministic=deterministic)[0]])
+                actions = np.array([agent.policy.get_action(obs[i], deterministic=deterministic)[0] for i in range(blue_count + orange_count)])
                 actions = actions.reshape((*actions.shape, 1))
 
             obs, reward, terminated, info = env.step(actions)
-            rewards.append(reward)
             if time.time() - current_time >= time_before_update:
                 model_reload()
                 

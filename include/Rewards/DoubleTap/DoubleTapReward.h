@@ -14,8 +14,20 @@ public:
 		//Reduction for ball dist to agent
 		float distBallReduction = 50.0f;
 
+		//Maximum distance to trigger touch from bb
+		float maxDistFromBB = 500.0f;
+
+		//Minimum height to trigger touch
+		float minHeightToTrigger = RLGSC::CommonValues::GOAL_HEIGHT + RLGSC::CommonValues::BALL_RADIUS;
+
 		//Touch weight
 		float touchW = 10.0f;
+
+		//Minimum similarity required to ball to trigger a reward
+		float minSimilarityAgentBall = 0.7f;
+
+		//Similarity agent ball weight
+		float similarityAgentBallW = 10.0f;
 	};
 
 	struct GoalHandling {

@@ -44,7 +44,8 @@ std::vector<Logger*> loggers = {
 	new PlayerLoggers::PlayerBallTouchLogger(),
 	new PlayerLoggers::PlayerInAirLogger(),
 	new PlayerLoggers::PlayerSpeedLogger(),
-	new PlayerLoggers::PlayerHeightLogger()
+	new PlayerLoggers::PlayerHeightLogger(),
+	new PlayerLoggers::DemoLogger()
 };
 
 float maxBallVel = 0.;
@@ -149,6 +150,7 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 EnvCreateResult EnvCreateFunc() {
 	constexpr int TICK_SKIP = 8;
 	constexpr float NO_TOUCH_TIMEOUT_SECS = 7.f;
+	constexpr float BOUNCE_TIMEOUT_SECS = 1.f;
 
 	PinchWallSetupReward::PinchWallSetupArgs args(
 		{
@@ -238,12 +240,15 @@ EnvCreateResult EnvCreateFunc() {
 
 	DoubleTapReward::DoubleTapArgs dtArgs = {
 		.ballHandling = {
-			.distBallReduction = 5000.0f
+			.distBallReduction = 5000.0f,
+			.touchW = 1000.0f,
+			.similarityAgentBallW = 2.0f,
+			
 		},
 		.goalHandling = {
-			.similarityGoalBallW = 100.0f,
-			.goalW = 10000.0f,
-			
+			.similarityGoalBallW = 10000.0f,
+			.goalW = 1000.0f,
+			.goalSpeedW = 1000.0f
 		}
 	};
 
@@ -260,6 +265,7 @@ EnvCreateResult EnvCreateFunc() {
 
 	std::vector<TerminalCondition*> terminalConditions = {
 		new TimeoutCondition(NO_TOUCH_TIMEOUT_SECS * 120 / TICK_SKIP),
+		new BounceTimeoutCondition(BOUNCE_TIMEOUT_SECS * 120 / TICK_SKIP),
 		new GoalScoreCondition()
 	};
 
@@ -270,10 +276,11 @@ EnvCreateResult EnvCreateFunc() {
 	DoubleTapState::DoubleTapStateArgs stateArgs = {
 		.bothSides = true,
 		.carVariance = {
-			.posVariance = Vec(2400.0f, 300.0f, 100.0f)
+			.posVariance = Vec(1000.0f, 300.0f, 100.0f),
+			.velVariance = Vec(100.0f, 300.0f, 100.0f),
 		},
 		.ballVariance = {
-			.velVariance = Vec(1200.0f, 2000.0f, 100.0f)
+			.velVariance = Vec(600.0f, 1000.0f, 100.0f)
 		},
 		
 	};
