@@ -44,7 +44,8 @@ std::vector<Logger*> loggers = {
 	new PlayerLoggers::PlayerBallTouchLogger(),
 	new PlayerLoggers::PlayerInAirLogger(),
 	new PlayerLoggers::PlayerSpeedLogger(),
-	new PlayerLoggers::PlayerHeightLogger()
+	new PlayerLoggers::PlayerHeightLogger(),
+	new PlayerLoggers::DemoLogger()
 };
 
 float maxBallVel = 0.;

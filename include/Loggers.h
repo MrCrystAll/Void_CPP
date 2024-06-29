@@ -99,4 +99,11 @@ namespace PlayerLoggers {
 	protected:
 		virtual RLGSC::FList GetMetrics(RLGSC::GameState state) override;
 	};
+
+	class DemoLogger : public Logger {
+	public:
+		DemoLogger() : Logger({ {.name = "demoes", .isAvg = false} }) {};
+	protected:
+		virtual RLGSC::FList GetMetrics(RLGSC::GameState state) override;
+	};
 }
