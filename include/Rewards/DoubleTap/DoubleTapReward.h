@@ -3,6 +3,8 @@
 #include "LoggedCombinedReward.h"
 #include "Utils/DoubleTapUtils.h"
 
+using namespace RLGSC;
+
 START_DT_NS
 class DoubleTapReward : public LoggableReward {
 public:
@@ -42,6 +44,9 @@ public:
 
 		//Goal speed weight
 		float goalSpeedW = 10.0f;
+
+		//Concede weight
+		float concedeW = 1.0f;
 	};
 
 	struct DoubleTapArgs {
@@ -49,12 +54,43 @@ public:
 		GoalHandling goalHandling;
 	};
 
+	struct PhysObjLastHit {
+		PlayerData physObj;
+		int lastStepHit = 0;
+	};
+
+	struct PhysObjHandling {
+		std::map<int, PhysObjLastHit> allCurrentHits;
+
+		void Clear();
+		void Reset(const GameState& initialState);
+		void Update(const GameState& initialState, const PlayerData& player, const int nbSteps);
+		const PlayerData* GetLatestHit(const Team team);
+	};
+
 	DoubleTapReward(DoubleTapArgs args) : config(args), scoreLine(RLGSC::ScoreLine()) {};
 	virtual void ClearChanges();
+	virtual void Reset(const GameState& initialState);
+	virtual RLGSC::FList GetAllRewards(const RLGSC::GameState& state, const RLGSC::ActionSet& prevActions, bool final) override;
 	virtual float GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction);
 
 private:
-	RLGSC::ScoreLine scoreLine;
+	ScoreLine scoreLine;
 	DoubleTapArgs config;
+	PhysObjHandling physHandling;
+	int nbSteps = 0;
 };
+
+
+class UseDTReward : public LoggableReward{
+public:
+	UseDTReward(DoubleTapReward::DoubleTapArgs dtConfig) : dtConfig(dtConfig), dtReward(DoubleTapReward(dtConfig)) {};
+	virtual void ClearChanges() override;
+	virtual void Reset(const GameState& initialState) override;
+	virtual void Log(RLGPC::Report& report, std::string name, float weight = 1.0f) override;
+protected:
+	DoubleTapReward::DoubleTapArgs dtConfig;
+	DoubleTapReward dtReward;
+};
+
 END_DT_NS

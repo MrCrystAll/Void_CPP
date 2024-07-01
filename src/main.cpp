@@ -20,7 +20,9 @@
 
 //Double tap
 #include "Rewards/DoubleTap/DoubleTapReward.h"
+#include "Rewards/DoubleTap/GroundDoubleTapReward.h"
 #include "States/DoubleTap/DoubleTapState.h"
+#include "States/DoubleTap/GroundDoubleTapState.h"
 
 #include <States.h>
 #include <TerminalConditions.h>
@@ -241,7 +243,7 @@ EnvCreateResult EnvCreateFunc() {
 	DoubleTapReward::DoubleTapArgs dtArgs = {
 		.ballHandling = {
 			.distBallReduction = 5000.0f,
-			.touchW = 1000.0f,
+			.touchW = 10.0f,
 			.similarityAgentBallW = 2.0f,
 			
 		},
@@ -252,9 +254,19 @@ EnvCreateResult EnvCreateFunc() {
 		}
 	};
 
+	GroundDoubleTapReward::GroundDTArgs gdtArgs = {
+		.ballZoning = {
+			.distFromBackboard = 500.0f,
+		},
+		.ballHandling = {
+			.distToZoneReduction = 10000.0f
+}
+	};
+
 	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc(), weight, name }
 		{
-			{new DoubleTapReward(dtArgs), 1.0f, "DoubleTapReward"}
+			{new GroundDoubleTapReward(gdtArgs, dtArgs), 1.0f, "Ground double tap"}
+			//{new DoubleTapReward(dtArgs), 1.0f, "DoubleTapReward"}
 			//{new PinchWallSetupReward(args), 1.0f, "WallPinchReward"},
 			//{new PinchCeilingSetupReward(pinchCeilingArgs), 1.0f, "CeilingPinchReward"},
 			//{new PinchCornerSetupReward({}), 1.0f, "CornerPinchReward"},
@@ -265,7 +277,7 @@ EnvCreateResult EnvCreateFunc() {
 
 	std::vector<TerminalCondition*> terminalConditions = {
 		new TimeoutCondition(NO_TOUCH_TIMEOUT_SECS * 120 / TICK_SKIP),
-		new BounceTimeoutCondition(BOUNCE_TIMEOUT_SECS * 120 / TICK_SKIP),
+		//new BounceTimeoutCondition(BOUNCE_TIMEOUT_SECS * 120 / TICK_SKIP),
 		new GoalScoreCondition()
 	};
 
@@ -285,7 +297,7 @@ EnvCreateResult EnvCreateFunc() {
 		
 	};
 
-	auto stateSetter = new DoubleTapState(stateArgs);
+	auto stateSetter = new GroundDoubleTapState();
 
 	Match* match = new Match(
 		rewards,
