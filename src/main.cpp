@@ -59,14 +59,13 @@ float maxBallVel = 0.;
 void OnStep(GameInst* gameInst, const RLGSC::Gym::StepResult& stepResult, Report& gameMetrics) {
 
 	auto& gameState = stepResult.state;
-	try
-	{
-		((LoggedCombinedReward*)(gameInst->match->rewardFn))->LogRewards(gameMetrics);
-		//std::cout <<"Rw: " <<  std::get<1>(((LoggedCombinedReward*)(gameInst->match->rewardFn))->lastRewards[0]) << std::endl;
+	LoggedCombinedReward* lrw = dynamic_cast<LoggedCombinedReward*>(gameInst->match->rewardFn);
+	if (lrw == nullptr) {
+		VOID_WARN("Couldn't log rewards");
 	}
-	catch (const std::exception& e)
-	{
-		std::cout << "Couldn't log rewards: " << e.what() << std::endl;
+	else {
+		lrw->LogRewards(gameMetrics);
+		//VOID_LOG("Rw: " << std::get<1>(lrw->lastRewards[0]));
 	}
 
 	float ballVel = gameState.ball.vel.Length();
