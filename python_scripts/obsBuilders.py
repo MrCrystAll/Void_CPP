@@ -1,7 +1,9 @@
 import math
+from math import pi
 import numpy as np
 from typing import Any, List
 from rlgym_sim.utils import common_values
+from rlgym_sim.utils.common_values import CAR_MAX_ANG_VEL, CAR_MAX_SPEED
 from rlgym_sim.utils.gamestates import PlayerData, GameState
 from rlgym_sim.utils.obs_builders import ObsBuilder
 
@@ -160,3 +162,48 @@ class DefaultObsCpp(ObsBuilder):
              int(player.is_demoed)]])
 
         return player_car
+    
+    
+class DefaultObsCppPadded(DefaultObsCpp):
+    PLAYER_SIZE: int = 19
+    
+    def __init__(self, ang_coef=1 / math.pi, lin_vel_coef=1 / float(common_values.CAR_MAX_SPEED), ang_vel_coef=1 / float(common_values.CAR_MAX_ANG_VEL), team_size: int = 3, spawn_oppoonents: bool = True):
+        super().__init__(ang_coef, lin_vel_coef, ang_vel_coef)
+        self.team_size = team_size
+        self.spawn_opponents = spawn_oppoonents
+
+        
+    def build_obs(self, player: PlayerData, state: GameState, previous_action: np.ndarray) -> Any:
+        obs = super().build_obs(player, state, previous_action)
+        
+        n_to_pad = self.team_size * (self.spawn_opponents + 1) - len(state.players)
+        
+        for _ in range(n_to_pad):
+            obs = self._add_empty_player(obs)
+            
+        return obs 
+        
+    def _add_empty_player(self, obs: np.ndarray) -> np.ndarray:
+        return np.concatenate((obs, np.zeros(shape=(self.PLAYER_SIZE, ), dtype=np.float32)))
+
+class SwappedDefaultObsCppPadded(SwappedDefaultObsCpp):
+    PLAYER_SIZE: int = 19
+    
+    def __init__(self, ang_coef=1 / math.pi, lin_vel_coef=1 / float(common_values.CAR_MAX_SPEED), ang_vel_coef=1 / float(common_values.CAR_MAX_ANG_VEL), team_size: int = 3, spawn_oppoonents: bool = True):
+        super().__init__(ang_coef, lin_vel_coef, ang_vel_coef)
+        self.team_size = team_size
+        self.spawn_opponents = spawn_oppoonents
+
+        
+    def build_obs(self, player: PlayerData, state: GameState, previous_action: np.ndarray) -> Any:
+        obs = super().build_obs(player, state, previous_action)
+        
+        n_to_pad = self.team_size * (self.spawn_opponents + 1) - len(state.players)
+        
+        for _ in range(n_to_pad):
+            obs = self._add_empty_player(obs)
+            
+        return obs 
+        
+    def _add_empty_player(self, obs: np.ndarray) -> np.ndarray:
+        return np.concatenate((obs, np.zeros(shape=(self.PLAYER_SIZE, ), dtype=np.float32)))
