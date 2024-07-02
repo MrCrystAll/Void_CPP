@@ -2,6 +2,7 @@
 import os
 import random
 import time
+from typing import Dict
 
 import numpy as np
 import torch
@@ -10,8 +11,10 @@ from rlgym_ppo.ppo import PPOLearner
 from rlgym_sim.utils.reward_functions.common_rewards.misc_rewards import ConstantReward
 from rlgym_sim.utils.terminal_conditions.common_conditions import TimeoutCondition, GoalScoredCondition
 from rlgym_sim.utils.state_setters.default_state import DefaultState
+from rlgym_sim.utils.common_values import BLUE_TEAM, ORANGE_TEAM
+from rlgym_sim.utils.gamestates.game_state import GameState
 from parsers import NectoAction, SwappedNectoAction
-from obsBuilders import DefaultObsCpp, OnesObs, SwappedDefaultObsCpp
+from obsBuilders import DefaultObsCpp, DefaultObsCppPadded, OnesObs, SwappedDefaultObsCpp
 from rlgym_tools.extra_action_parsers.lookup_act import LookupAction
 
 from setters import OverfitCeilingPinchSetter, RandomPinchSetter, TeamSizeSetter, PinchSetter, DoubleTapSetter
@@ -43,7 +46,7 @@ state_mutator = TeamSizeSetter(
         # dynamic_replay
     ),
     weights=(1,),
-    gm_probs=(1, 0, 0)
+    gm_probs=(1, 1, 1)
 )
 reward_fn = ConstantReward()
 
@@ -56,11 +59,26 @@ termination_conditions = [
 # region ========================= Model Settings =============================
 
 action_parser = NectoAction()
+action_size = action_parser.get_action_space().n
+
 obs_builder = DefaultObsCpp()
+obs_size = obs_builder.get_obs_space()
+
+if isinstance(obs_size, type(None)):
+    raise ValueError("Obs size couldn't be determined, implement \"get_obs_space\" in your observation builder")
+else:
+    obs_size = obs_size.shape[0]
+    
+print("=========== Model ============")
+print("Observation size:", obs_size)
+print("Action size:", action_size)
+print("==============================")
+
+
 
 agent = PPOLearner(
-    obs_space_size=89,
-    act_space_size=action_parser.get_action_space().n,
+    obs_space_size=obs_size,
+    act_space_size=action_size,
     device="cuda",
     batch_size=10_000,
     mini_batch_size=1_000,
@@ -149,8 +167,8 @@ def print_live_state():
 
 if __name__ == "__main__":
 
-    agent.load_from(model_to_load)
-    sim = False
+    # agent.load_from(model_to_load)
+    sim = True
     env = create_env(sim=sim)
     current_time = time.time()
     refresh_time = current_time
@@ -159,13 +177,24 @@ if __name__ == "__main__":
         playstyle_switch()
         obs, info = env.reset(return_info=True)
         terminated = False
+        
+        cnt_blue_count = len([0 for p in info["state"].players if p.team_num == BLUE_TEAM ])
+        cnt_orange_count = cnt_blue_count if spawn_opponents else 0
+        
+        print("Number of blue agents: ", cnt_blue_count)
+        print("Number of orange agents: ", cnt_orange_count)
+        print("Total number of agents: ", cnt_blue_count + cnt_orange_count)
+        
         while not terminated:
             if time.time() - refresh_time >= 1:
                 refresh_time = time.time()
-                # print_live_state()
+                # print_live_state()            
+            
+            if cnt_blue_count + cnt_orange_count == 1:
+                obs = [obs]
 
             with torch.no_grad():
-                actions = np.array([agent.policy.get_action(obs[i], deterministic=deterministic)[0] for i in range(blue_count + orange_count)])
+                actions = np.array([agent.policy.get_action(obs[i], deterministic=deterministic)[0] for i in range(cnt_blue_count + cnt_orange_count)])
                 actions = actions.reshape((*actions.shape, 1))
 
             obs, reward, terminated, info = env.step(actions)

@@ -1,5 +1,7 @@
 import math
 from math import pi
+import gym
+import gym.spaces
 import numpy as np
 from typing import Any, List
 from rlgym_sim.utils import common_values
@@ -69,7 +71,6 @@ class SwappedDefaultObsCpp(ObsBuilder):
 
         obs.extend(allies)
         obs.extend(enemies)
-        print(np.concatenate(obs))
         return np.concatenate(obs)
 
     def _add_player_to_obs(self, obs: List, player: PlayerData, inverted: bool):
@@ -182,6 +183,9 @@ class DefaultObsCppPadded(DefaultObsCpp):
             obs = self._add_empty_player(obs)
             
         return obs 
+    
+    def get_obs_space(self) -> gym.spaces.Space:
+        return gym.spaces.Box(-np.inf, np.inf, ((70 - self.PLAYER_SIZE) + self.team_size * (self.spawn_opponents + 1) * self.PLAYER_SIZE, ))
         
     def _add_empty_player(self, obs: np.ndarray) -> np.ndarray:
         return np.concatenate((obs, np.zeros(shape=(self.PLAYER_SIZE, ), dtype=np.float32)))
@@ -204,6 +208,9 @@ class SwappedDefaultObsCppPadded(SwappedDefaultObsCpp):
             obs = self._add_empty_player(obs)
             
         return obs 
+    
+    def get_obs_space(self) -> gym.spaces.Space:
+        return gym.spaces.Box(-np.inf, np.inf, (70 + self.team_size * (self.spawn_opponents + 1) * self.PLAYER_SIZE, ))
         
     def _add_empty_player(self, obs: np.ndarray) -> np.ndarray:
         return np.concatenate((obs, np.zeros(shape=(self.PLAYER_SIZE, ), dtype=np.float32)))

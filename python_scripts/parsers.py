@@ -47,7 +47,6 @@ class SwappedNectoAction(ActionParser):
         # strip out fillers, pass through 8sets, get look up table values, recombine
         parsed_actions = []
         for action in actions:
-            print(action)
             # support reconstruction
             if action.size != 8:
                 if action.shape == 0:

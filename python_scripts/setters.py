@@ -148,10 +148,7 @@ class DoubleTapSetter(StateSetter):
         agentInitialAngVel[1] -= self.config.agent_variance.ang_vel_variance[1] / 2.0
         agentInitialAngVel[2] -= self.config.agent_variance.ang_vel_variance[2] / 2.0
 
-        agentInitialOrientation = agentInitialOrientation + randomVec(self.config.agent_variance.orient_variance)
-        
-        print(ballInitialVel, agentInitialVel)
-        
+        agentInitialOrientation = agentInitialOrientation + randomVec(self.config.agent_variance.orient_variance)        
         state_wrapper.ball.set_pos(*ballInitialPos)
         state_wrapper.ball.set_lin_vel(*ballInitialVel)
 
