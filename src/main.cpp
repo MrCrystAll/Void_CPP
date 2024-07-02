@@ -1,4 +1,5 @@
 #include <RLGymPPO_CPP/Learner.h>
+#include <RLGymPPO_CPP/Util/SkillTrackerConfig.h>
 
 #include <RLGymSim_CPP/Utils/RewardFunctions/CommonRewards.h>
 #include <RLGymSim_CPP/Utils/RewardFunctions/CombinedReward.h>
@@ -51,6 +52,10 @@ std::vector<Logger*> loggers = {
 };
 
 float maxBallVel = 0.;
+
+void OnStepSkillTracker(GameInst* gameInst, const RLGSC::Gym::StepResult& stepResult, Report& gameMetrics) {
+	//Idk if we are doing something special during the skill tracker step, for now, i assume we don't, the combined logged reward appears to be broken when in there
+}
 
 // This is our step callback, it's called every step from every RocketSim game
 // WARNING: This is called from multiple threads, often simultaneously, 
@@ -320,7 +325,13 @@ int main() {
 	// Make configuration for the learner
 	LearnerConfig cfg = {};
 
-	CONFIG(cfg)
+	CONFIG(cfg);
+
+	SkillTrackerConfig stc = {};
+	stc.enabled = true;
+	stc.stepCallback = OnStepSkillTracker;
+
+	cfg.skillTrackerConfig = stc;
 
 	// Make the learner with the environment creation function and the config we just made
 	Learner learner = Learner(EnvCreateFunc, cfg);
