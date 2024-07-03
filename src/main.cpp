@@ -325,7 +325,7 @@ int main() {
 	// Make configuration for the learner
 	LearnerConfig cfg = {};
 
-	CONFIG(cfg);
+	SetupConfig(cfg);
 
 	SkillTrackerConfig stc = {};
 	stc.enabled = true;
