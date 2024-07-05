@@ -1,7 +1,5 @@
 #pragma once
-#include "../../LoggedCombinedReward.h"
 #include "Pinch.h"
-#include "Utils/PinchUtils.h"
 
 START_PINCH_NS
 
@@ -11,11 +9,11 @@ public:
 		PinchReward::PinchArgs pinchRewardConfig = {};
 	};
 
-	PinchTeamSetupReward(PinchTeamSetupArgs args) : config(args), pinchReward(PinchReward(args.pinchRewardConfig)) {};
+	PinchTeamSetupReward(std::string name, PinchTeamSetupArgs args) : config(args), LoggableReward(name), pinchReward(PinchReward("Pinch", args.pinchRewardConfig)) {};
 	virtual void Reset(const RLGSC::GameState& initialState);
 	virtual float GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction);
-	virtual void ClearChanges() override;
-	virtual void Log(RLGPC::Report& report, std::string name, float weight = 1.0f) override;
+	virtual void LogAll(Report& report, bool final, std::string name = "", float weight = 1.f);
+
 
 private:
 	PinchTeamSetupArgs config;

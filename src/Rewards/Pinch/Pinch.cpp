@@ -2,13 +2,13 @@
 
 USE_PINCH_NS
 
-PinchReward::PinchReward(
-	PinchArgs args
-) :
-	config(args)
+PinchReward::PinchReward(std::string name, PinchArgs args) :
+	config(args),
+	LoggableReward(name)
 {
 	this->lastBallSpeed = 0;
 }
+
 
 void PinchReward::Reset(const RLGSC::GameState& initialState)
 {
@@ -17,30 +17,17 @@ void PinchReward::Reset(const RLGSC::GameState& initialState)
 
 float PinchReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction)
 {
-	//REWARD
-	float reward = 0.f;
 	float ballAccel = (state.ball.vel.Length2D() - lastBallSpeed) / RLConst::BALL_MAX_SPEED;
-	AddLog(reward, "Ball touch", config.ballHandling.touchW);
-	AddLog(reward, "Ball accel", std::exp(ballAccel / config.ballHandling.ballAccelExpReducer) * config.ballHandling.ballVelW);
-	AddLog(reward, "Is flipping", player.carState.isFlipping * config.ballHandling.isFlippingW);
+
+	reward += {config.ballHandling.touchW, "Ball touch"};
+	reward += {std::exp(ballAccel / config.ballHandling.ballAccelExpReducer)* config.ballHandling.ballVelW, "Ball accel"};
+	reward += {player.carState.isFlipping* config.ballHandling.isFlippingW, "Is flipping"};
 
 	float ballGoalSimilarity = ((player.team == Team::ORANGE ? RLGSC::CommonValues::BLUE_GOAL_CENTER : RLGSC::CommonValues::ORANGE_GOAL_CENTER) - state.ball.pos).Normalized().Dot(state.ball.vel.Normalized());
 	if (ballGoalSimilarity > config.ballHandling.goalDirectionSimilarity) {
-		AddLog(reward, "Towards net", std::exp(ballGoalSimilarity * 50 / config.ballHandling.ballDirectionExpReducer) * config.ballHandling.goalDirectionW);
+		reward += {std::exp(ballGoalSimilarity * 50 / config.ballHandling.ballDirectionExpReducer)* config.ballHandling.goalDirectionW, "Towards net"};
 	}
 
 	lastBallSpeed = state.ball.vel.Length2D();
-	return reward;
-}
-
-void PinchReward::ClearChanges()
-{
-	float temp = 0;
-	LoggableReward::ClearChanges();
-	AddLog(temp, "Ball touch", 0, true);
-	AddLog(temp, "Ball accel", 0, true);
-	AddLog(temp, "Towards net", 0, true);
-	AddLog(temp, "Is flipping", 0, true);
-
-
+	return reward.value;
 }

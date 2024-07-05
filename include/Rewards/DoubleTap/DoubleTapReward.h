@@ -1,9 +1,7 @@
 #pragma once
 
-#include "LoggedCombinedReward.h"
+#include <Logging/LoggableReward.h>
 #include "Utils/DoubleTapUtils.h"
-
-using namespace RLGSC;
 
 START_DT_NS
 class DoubleTapReward : public LoggableReward {
@@ -63,14 +61,13 @@ public:
 		std::map<int, PhysObjLastHit> allCurrentHits;
 
 		void Clear();
-		void Reset(const GameState& initialState);
-		void Update(const GameState& initialState, const PlayerData& player, const int nbSteps);
+		void Reset(const RLGSC::GameState& initialState);
+		void Update(const RLGSC::GameState& initialState, const RLGSC::PlayerData& player, const int nbSteps);
 		const PlayerData* GetLatestHit(const Team team);
 	};
 
-	DoubleTapReward(DoubleTapArgs args) : config(args), scoreLine(RLGSC::ScoreLine()) {};
-	virtual void ClearChanges();
-	virtual void Reset(const GameState& initialState);
+	DoubleTapReward(std::string name, DoubleTapArgs args) : config(args), LoggableReward(name), scoreLine(RLGSC::ScoreLine()) {};
+	virtual void Reset(const RLGSC::GameState& initialState);
 	virtual RLGSC::FList GetAllRewards(const RLGSC::GameState& state, const RLGSC::ActionSet& prevActions, bool final) override;
 	virtual float GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction);
 
@@ -84,10 +81,11 @@ private:
 
 class UseDTReward : public LoggableReward{
 public:
-	UseDTReward(DoubleTapReward::DoubleTapArgs dtConfig) : dtConfig(dtConfig), dtReward(DoubleTapReward(dtConfig)) {};
-	virtual void ClearChanges() override;
-	virtual void Reset(const GameState& initialState) override;
-	virtual void Log(RLGPC::Report& report, std::string name, float weight = 1.0f) override;
+	UseDTReward(std::string name, DoubleTapReward::DoubleTapArgs dtConfig) : dtConfig(dtConfig), LoggableReward(name), dtReward(DoubleTapReward("DT", dtConfig)) {};
+	virtual void Reset(const RLGSC::GameState& initialState) override;
+	virtual void LogAll(Report& report, bool final, std::string name = "", float weight = 1.f);
+	virtual void PreStep(const GameState& state);
+	virtual std::vector<float> GetAllRewards(const GameState& state, const ActionSet& prevActions, bool final);
 protected:
 	DoubleTapReward::DoubleTapArgs dtConfig;
 	DoubleTapReward dtReward;

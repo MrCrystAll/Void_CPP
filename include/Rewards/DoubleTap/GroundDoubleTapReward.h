@@ -1,8 +1,6 @@
 #pragma once
 
-#include <Utils/DoubleTapUtils.h>
 #include "Rewards/DoubleTap/DoubleTapReward.h"
-#include "LoggedCombinedReward.h"
 
 START_DT_NS
 
@@ -35,10 +33,9 @@ public:
 		BallHandling ballHandling;
 	};
 
-	GroundDoubleTapReward(GroundDTArgs config, DoubleTapReward::DoubleTapArgs dtConfig) : config(config), UseDTReward(dtConfig) {};
+	GroundDoubleTapReward(std::string name, GroundDTArgs config, DoubleTapReward::DoubleTapArgs dtConfig) : config(config), UseDTReward(name, dtConfig) {};
 
 	virtual float GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction);
-	virtual void ClearChanges() override;
 private:
 	GroundDTArgs config;
 };

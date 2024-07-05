@@ -9,10 +9,14 @@
 #include <RLGymSim_CPP/Utils/ActionParsers/DiscreteAction.h>
 
 #include "RLBotClient.h"
-#include "LoggedCombinedReward.h"
-#include "LoggerUtils.h"
+#include "Utils/LoggerUtils.h"
 #include "WandbConfig.h"
 #include "ObsBuilder.h"
+
+//Reward logging
+#include <Logging/LoggedCombinedReward.h>
+#include <Logging/TestReward.h>
+
 
 //Pinch
 #include "Rewards/Pinch/CeilingPinch.h"
@@ -53,24 +57,18 @@ std::vector<Logger*> loggers = {
 
 float maxBallVel = 0.;
 
-void OnStepSkillTracker(GameInst* gameInst, const RLGSC::Gym::StepResult& stepResult, Report& gameMetrics) {
-	//Idk if we are doing something special during the skill tracker step, for now, i assume we don't, the combined logged reward appears to be broken when in there
-}
-
 // This is our step callback, it's called every step from every RocketSim game
 // WARNING: This is called from multiple threads, often simultaneously, 
 //	so don't access things apart from these arguments unless you know what you're doing.
 // gameMetrics: The metrics for this specific game
 void OnStep(GameInst* gameInst, const RLGSC::Gym::StepResult& stepResult, Report& gameMetrics) {
-
 	auto& gameState = stepResult.state;
 	LoggedCombinedReward* lrw = dynamic_cast<LoggedCombinedReward*>(gameInst->match->rewardFn);
 	if (lrw == nullptr) {
 		VOID_WARN("Couldn't log rewards");
 	}
 	else {
-		lrw->LogRewards(gameMetrics);
-		//VOID_LOG("Rw: " << std::get<1>(lrw->lastRewards[0]));
+		lrw->LogAll(gameMetrics, stepResult.done);
 	}
 
 	float ballVel = gameState.ball.vel.Length();
@@ -267,16 +265,16 @@ EnvCreateResult EnvCreateFunc() {
 }
 	};
 
-	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc(), weight, name }
+	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc(name), weight }
 		{
-			{new GroundDoubleTapReward(gdtArgs, dtArgs), 1.0f, "Ground double tap"}
+			{new DummyReward("Dummy reward"), 1.0f},
+			{new GroundDoubleTapReward("Ground double tap", gdtArgs, dtArgs), 1.0f}
 			//{new DoubleTapReward(dtArgs), 1.0f, "DoubleTapReward"}
 			//{new PinchWallSetupReward(args), 1.0f, "WallPinchReward"},
 			//{new PinchCeilingSetupReward(pinchCeilingArgs), 1.0f, "CeilingPinchReward"},
 			//{new PinchCornerSetupReward({}), 1.0f, "CornerPinchReward"},
 			//{new PinchTeamSetupReward({}), 1.0f, "TeamPinchReward"},
-		},
-		false
+		}
 	);
 
 	std::vector<TerminalCondition*> terminalConditions = {
@@ -289,7 +287,7 @@ EnvCreateResult EnvCreateFunc() {
 	auto actionParser = new DiscreteAction();
 
 
-	DoubleTapState::DoubleTapStateArgs stateArgs = {
+	/*DoubleTapState::DoubleTapStateArgs stateArgs = {
 		.bothSides = true,
 		.carVariance = {
 			.posVariance = Vec(1000.0f, 300.0f, 100.0f),
@@ -299,9 +297,9 @@ EnvCreateResult EnvCreateFunc() {
 			.velVariance = Vec(600.0f, 1000.0f, 100.0f)
 		},
 		
-	};
+	};*/
 
-	auto stateSetter = new GroundDoubleTapState();
+	auto stateSetter = new RandomState(100, 100, 100);
 
 	Match* match = new Match(
 		rewards,
@@ -326,12 +324,6 @@ int main() {
 	LearnerConfig cfg = {};
 
 	SetupConfig(cfg);
-
-	SkillTrackerConfig stc = {};
-	stc.enabled = true;
-	stc.stepCallback = OnStepSkillTracker;
-
-	cfg.skillTrackerConfig = stc;
 
 	// Make the learner with the environment creation function and the config we just made
 	Learner learner = Learner(EnvCreateFunc, cfg);

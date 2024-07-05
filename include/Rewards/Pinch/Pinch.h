@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../LoggedCombinedReward.h"
+#include <Logging/LoggableReward.h>
 #include "Utils/PinchUtils.h"
 
 START_PINCH_NS
@@ -38,12 +38,12 @@ public:
 	};
 
 	PinchReward(
+		std::string name,
 		PinchArgs args
 	);
 
 	virtual void Reset(const RLGSC::GameState& initialState);
 	virtual float GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction);
-	virtual void ClearChanges() override;
 private:
 	PinchArgs config;
 

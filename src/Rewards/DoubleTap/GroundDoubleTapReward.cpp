@@ -4,7 +4,6 @@ USE_DT_NS
 
 float GroundDoubleTapReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction)
 {
-	float reward = 0.0f;
 	float yDir = player.team == Team::BLUE ? 1 : -1;
 
 	//I think i can do something like "outside of the bb zone, reward for hitting the ball towards the zone"
@@ -12,24 +11,14 @@ float GroundDoubleTapReward::GetReward(const RLGSC::PlayerData& player, const RL
 
 		Vec ballZoneDiff = Vec(state.ball.pos.x, (RLGSC::CommonValues::BACK_WALL_Y - (config.ballZoning.distFromBackboard / 2)) * yDir, (config.ballZoning.minHeight + RLGSC::CommonValues::CEILING_Z) / 2) - state.ball.pos;
 
-		AddLog(reward, "Ball towards zone", state.ball.vel.Normalized().Dot(ballZoneDiff.Normalized()) * config.ballHandling.ballTowardsZoneW);
-		AddLog(reward, "Ball dist to zone", -ballZoneDiff.Length() / config.ballHandling.distToZoneReduction);
-		AddLog(reward, "Ball touch (outside of bb zone)", player.ballTouchedStep * config.ballHandling.touchW);
-		AddLog(reward, "Ball height", state.ball.pos.z / RLGSC::CommonValues::CEILING_Z * config.ballHandling.ballHeightW);
+		reward += {state.ball.vel.Normalized().Dot(ballZoneDiff.Normalized())* config.ballHandling.ballTowardsZoneW, "Ball towards zone"};
+		reward += { -ballZoneDiff.Length() / config.ballHandling.distToZoneReduction, "Ball dist to zone"};
+		reward += {player.ballTouchedStep* config.ballHandling.touchW, "Ball touch (outside of bb zone)"};
+		reward += {state.ball.pos.z / RLGSC::CommonValues::CEILING_Z * config.ballHandling.ballHeightW, "Ball height"};
 	}
 
-	AddLog(reward, "Double tap total", this->dtReward.GetReward(player, state, prevAction));
+	reward += {this->dtReward.GetReward(player, state, prevAction), "Double tap total"};
 
-	return reward;
-}
 
-void GroundDoubleTapReward::ClearChanges()
-{
-	float temp;
-	AddLog(temp, "Ball towards zone", 0, true);
-	AddLog(temp, "Ball dist to zone", 0, true);
-	AddLog(temp, "Ball touch (outside of bb zone)", 0, true);
-	AddLog(temp, "Ball height", 0, true);
-	AddLog(temp, "Double tap total", 0, true);
-	UseDTReward::ClearChanges();
+	return reward.value;
 }

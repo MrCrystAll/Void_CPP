@@ -1,5 +1,5 @@
 #include "Loggers.h"
-#include <LoggerUtils.h>
+#include <Utils/LoggerUtils.h>
 
 void Logger::Log(RLGPC::Report& report, RLGSC::GameState state)
 {
