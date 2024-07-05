@@ -8,9 +8,16 @@
 
 typedef std::pair<float, std::string> Log;
 
+/**
+ * @brief Stat
+ * Holds all the statistics calculations
+ */
 struct Stat
 {
-
+	/**
+	 * @brief StatResult
+	 * Holds the statistics results from the calculations
+	 */
 	struct StatResult {
 		float mean;
 		float median;
@@ -24,20 +31,61 @@ struct Stat
 
 	std::vector<float> allValues = std::vector<float>(count, 0.0f);
 
+	/**
+	 * @brief Computes the average
+	 * 
+	 * \return The average of the stored values
+	 */
 	float ComputeAvg() const;
+
+	/**
+	 * @brief Computes the median.
+	 * 
+	 * \return The median of the stored values
+	 */
 	float ComputeMedian();
+
+	/**
+	 * @brief Computes the standard deviation
+	 * 
+	 * \return The standard deviation of the stored values
+	 */
 	float ComputeStd();
+
+	/**
+	 * @brief Computes the min
+	 * 
+	 * \return The minimum of the stored values
+	 */
 	float ComputeMin();
+
+	/**
+	 * @brief Computes the max
+	 * 
+	 * \return The maximum of the stored values
+	 */
 	float ComputeMax();
 
+	/**
+	 * @brief Compute everything
+	 * 
+	 * \return All the computations
+	 */
 	StatResult ComputeAll();
 
+	/**
+	 * @brief Resets the stat
+	 * 
+	 */
 	void Reset();
 
 	Stat operator+(float value);
 	Stat operator+=(float value);
 };
 
+/**
+ * @brief A float you can keep the changes of
+ */
 struct LoggedFloat
 {
 	float value = 0;
@@ -51,9 +99,28 @@ struct LoggedFloat
 	LoggedFloat(std::vector<std::string> metrics = {}) : metrics(metrics) { InitMetrics(); };
 
 	void InitMetrics();
+
+	/**
+	 * @brief Clears the logs
+	 * 
+	 */
 	void Clear();
 
+	/**
+	 * @brief Steps the float to keep track of the number of updates.
+	 * 
+	 */
 	void Step();
+
+	/**
+	 * @brief Resets the value
+	 * 
+	 */
 	void Reset();
+
+	/**
+	 * @brief Resets the value, clears the logs and reinitialize the metrics.
+	 * 
+	 */
 	void ResetAll();
 };
