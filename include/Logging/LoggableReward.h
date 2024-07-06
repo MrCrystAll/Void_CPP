@@ -87,3 +87,28 @@ public:
 	 */
 	virtual std::vector<float> GetAllRewards(const GameState& state, const ActionSet& prevActions, bool final);
 };
+
+class LoggableWrapper : public LoggableReward {
+public:
+	/**
+	 * @brief Resets the reward.
+	 *
+	 * \param initialState The state usable to setup your reward for the current episode
+	 */
+	virtual void Reset(const GameState& initialState);
+
+	/**
+	 * @brief Computes stuff before stepping
+	 *
+	 * \param state The state you'll calculate the reward on
+	 */
+	virtual void PreStep(const GameState& state);
+
+	LoggableWrapper(RewardFunction* rfn, std::string name) : LoggableReward(name), rfn(rfn) {};
+
+	virtual float GetReward(const PlayerData& player, const GameState& state, const Action& prevAction);
+
+	virtual float GetFinalReward(const PlayerData& player, const GameState& state, const Action& prevAction);
+private:
+	RewardFunction* rfn;
+};

@@ -18,7 +18,26 @@ using namespace RLGSC;
 class LoggedCombinedReward: public RLGSC::RewardFunction
 {
 public:
-	LoggedCombinedReward(std::vector<std::pair<RLGSC::RewardFunction*, float>> rewardsAndWeights) : rewardsAndWeights(rewardsAndWeights) {};
+
+	struct RewardArg {
+		RLGSC::RewardFunction* rf;
+		float w = 1.0f;
+		std::string name = "";
+	};
+	
+	LoggedCombinedReward(std::vector<RewardArg> rewardsAndWeights) : rewardsAndWeights(rewardsAndWeights) {
+		for (size_t i = 0; i < this->rewardsAndWeights.size(); i++)
+		{
+			LoggableReward* temp = dynamic_cast<LoggableReward*>(this->rewardsAndWeights[i].rf);
+			if (temp == nullptr) {
+				if (this->rewardsAndWeights[i].name.empty()) {
+					VOID_ERR("Cannot log reward number " << i + 1 << ". No name provided");
+					std::exit(EXIT_FAILURE);
+				}
+				this->rewardsAndWeights[i].rf = new LoggableWrapper(this->rewardsAndWeights[i].rf, this->rewardsAndWeights[i].name);
+			}
+		}
+	};
 	virtual void Reset(const GameState& initialState);
 	virtual void PreStep(const GameState& state);
 
@@ -29,7 +48,7 @@ public:
 	virtual void LogAll(RLGPC::Report& report, bool final, std::string name = "", float weight = 1);
 	virtual void PrintRewards(bool showMedian = false, bool showStd = false, bool showMin = false, bool showMax = false);
 
-	std::vector<std::pair<RLGSC::RewardFunction*, float>> rewardsAndWeights;
+	std::vector<RewardArg> rewardsAndWeights;
 private:
 
 };

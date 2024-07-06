@@ -16,7 +16,9 @@
 /**
  * @brief Start flag
  */
-#define START_PINCH_NS namespace PINCH_NS {
+#define START_PINCH_NS /**\
+ * @brief Pinch namespace \
+  */ namespace PINCH_NS {
 
 /**
  * @brief End flag

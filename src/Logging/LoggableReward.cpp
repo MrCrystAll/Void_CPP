@@ -38,11 +38,22 @@ void LoggableReward::LogFinal(RLGPC::Report& report, std::string name, float wei
 {
 	//Compute average throughout episode
 	for (auto& [key, val] : this->reward.logs) {
-		if (name.empty()) {
-			report.AccumAvg(REWARD_HEADER + this->name + "/" + key, val.ComputeAvg() * weight);
+		std::string keyCopy;
+		if (key == "_total") {
+			keyCopy = "";
 		}
 		else {
-			report.AccumAvg(REWARD_HEADER + name + "/" + this->name + "/" + key, val.ComputeAvg() * weight);
+			keyCopy = key;
+		}
+
+		//Sub reward logging doesn't log the subreward total
+		if ((not name.empty() and keyCopy.empty()) or keyCopy == "__temp") continue;
+
+		if (name.empty()) {
+			report.AccumAvg(REWARD_HEADER + this->name + (keyCopy.empty() ? "" : "/" + keyCopy), val.ComputeAvg() * weight);
+		}
+		else {
+			report.AccumAvg(REWARD_HEADER + name + "/" + this->name + (keyCopy.empty() ? "" : "/" + keyCopy), val.ComputeAvg() * weight);
 		}
 	}
 }
@@ -65,4 +76,28 @@ std::vector<float> LoggableReward::GetAllRewards(const GameState& state, const A
 		this->reward.Step();
 	}
 	return rewards;
+}
+
+void LoggableWrapper::Reset(const GameState& initialState)
+{
+	LoggableReward::Reset(initialState);
+	this->rfn->Reset(initialState);
+}
+
+void LoggableWrapper::PreStep(const GameState& state)
+{
+	LoggableReward::PreStep(state);
+	this->rfn->PreStep(state);
+}
+
+float LoggableWrapper::GetReward(const PlayerData& player, const GameState& state, const Action& prevAction)
+{
+	this->reward += {this->rfn->GetReward(player, state, prevAction), "__temp"};
+	return this->reward.value;
+}
+
+float LoggableWrapper::GetFinalReward(const PlayerData& player, const GameState& state, const Action& prevAction)
+{
+	this->reward += {this->rfn->GetFinalReward(player, state, prevAction), "__temp"};
+	return this->reward.value;
 }

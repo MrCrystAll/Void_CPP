@@ -103,7 +103,7 @@ std::vector<float> UseDTReward::GetAllRewards(const GameState& state, const Acti
 void UseDTReward::LogAll(RLGPC::Report& report, bool final, std::string name, float weight)
 {
 	LoggableReward::LogAll(report, final, name, weight);
-	this->dtReward.LogAll(report, final, "DT", weight);
+	this->dtReward.LogAll(report, final, this->name, weight);
 }
 
 void DoubleTapReward::PhysObjHandling::Clear()

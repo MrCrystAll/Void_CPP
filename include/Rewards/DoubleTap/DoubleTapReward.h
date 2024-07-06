@@ -11,29 +11,50 @@
 #include "Utils/DoubleTapUtils.h"
 
 START_DT_NS
+
+/**
+ * @brief Basic double tap reward
+ */
 class DoubleTapReward : public LoggableReward {
 public:
 
+	/**
+	 * @brief Ball handling
+	 */
 	struct BallHandling {
-		//Minimum distance to start going for aim
+		/**
+		 * @brief Minimum distance to start going for aim
+		 */
 		float minDistToBall = 350.0f;
 
-		//Reduction for ball dist to agent
+		/**
+		 * @brief Reduction for ball dist to agent
+		 */
 		float distBallReduction = 50.0f;
 
-		//Maximum distance to trigger touch from bb
+		/**
+		 * @brief Maximum distance to trigger touch from bb
+		 */
 		float maxDistFromBB = 500.0f;
 
-		//Minimum height to trigger touch
+		/**
+		 * @brief Minimum height to trigger touch
+		 */
 		float minHeightToTrigger = RLGSC::CommonValues::GOAL_HEIGHT + RLGSC::CommonValues::BALL_RADIUS;
 
-		//Touch weight
+		/**
+		 * @brief Touch weight
+		 */
 		float touchW = 10.0f;
 
-		//Minimum similarity required to ball to trigger a reward
+		/**
+		 * @brief Minimum similarity required to ball to trigger a reward
+		 */
 		float minSimilarityAgentBall = 0.7f;
 
-		//Similarity agent ball weight
+		/**
+		 * @brief Similarity agent ball weight
+		 */
 		float similarityAgentBallW = 10.0f;
 	};
 
@@ -85,7 +106,9 @@ private:
 	int nbSteps = 0;
 };
 
-
+/**
+ * @brief A reward that uses double tap reward
+ */
 class UseDTReward : public LoggableReward{
 public:
 	UseDTReward(std::string name, DoubleTapReward::DoubleTapArgs dtConfig) : dtConfig(dtConfig), LoggableReward(name), dtReward(DoubleTapReward("DT", dtConfig)) {};

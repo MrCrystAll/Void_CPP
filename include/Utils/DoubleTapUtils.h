@@ -16,7 +16,9 @@
 /**
  * @brief Start flag
  */
-#define START_DT_NS namespace DT_NS {
+#define START_DT_NS /**\
+ * @brief Double tap namespace\
+ */namespace DT_NS {
 
 /** @brief End flag */
 #define END_DT_NS };
