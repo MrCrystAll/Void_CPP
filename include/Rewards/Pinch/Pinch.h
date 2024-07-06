@@ -5,6 +5,9 @@
 
 START_PINCH_NS
 
+/**
+ * @brief Base pinch reward
+ */
 class PinchReward : public LoggableReward {
 public:
 
@@ -38,8 +41,8 @@ public:
 	};
 
 	PinchReward(
-		std::string name,
-		PinchArgs args
+		PinchArgs args,
+		std::string name = "Pinch reward"
 	);
 
 	virtual void Reset(const RLGSC::GameState& initialState);

@@ -267,8 +267,8 @@ EnvCreateResult EnvCreateFunc() {
 
 	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc(name), weight }
 		{
-			{new DummyReward("Dummy reward"), 1.0f},
-			{new GroundDoubleTapReward("Ground double tap", gdtArgs, dtArgs), 1.0f}
+			{new DummyReward(), 1.0f},
+			{new GroundDoubleTapReward(gdtArgs, dtArgs), 1.0f}
 			//{new DoubleTapReward(dtArgs), 1.0f, "DoubleTapReward"}
 			//{new PinchWallSetupReward(args), 1.0f, "WallPinchReward"},
 			//{new PinchCeilingSetupReward(pinchCeilingArgs), 1.0f, "CeilingPinchReward"},

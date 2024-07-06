@@ -4,6 +4,9 @@
 
 using namespace RLGSC;
 
+/**
+ * @brief A reward used for testing purposes
+ */
 class DummyReward : public LoggableReward {
 public:
 	DummyReward(std::string name = "Dummy") : LoggableReward(name) {};

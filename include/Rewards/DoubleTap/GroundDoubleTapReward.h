@@ -4,6 +4,9 @@
 
 START_DT_NS
 
+/**
+ * A reward for ground double taps
+ */
 class GroundDoubleTapReward : public UseDTReward {
 public:
 	struct BallZoning {
@@ -33,7 +36,7 @@ public:
 		BallHandling ballHandling;
 	};
 
-	GroundDoubleTapReward(std::string name, GroundDTArgs config, DoubleTapReward::DoubleTapArgs dtConfig) : config(config), UseDTReward(name, dtConfig) {};
+	GroundDoubleTapReward(GroundDTArgs config, DoubleTapReward::DoubleTapArgs dtConfig, std::string name = "Ground double tap reward") : config(config), UseDTReward(name, dtConfig) {};
 
 	virtual float GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction);
 private:

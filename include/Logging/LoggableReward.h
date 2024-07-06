@@ -58,7 +58,7 @@ public:
 	virtual void PreStep(const GameState& state);
 
 	/**
-	 * Print reward and metrics.
+	 * {brief Print reward and metrics.
 	 * 
 	 * \param weight The weight of the reward
 	 * \param showMedian Whether to print median

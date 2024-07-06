@@ -2,7 +2,7 @@
 
 USE_PINCH_NS
 
-PinchReward::PinchReward(std::string name, PinchArgs args) :
+PinchReward::PinchReward(PinchArgs args, std::string name) :
 	config(args),
 	LoggableReward(name)
 {

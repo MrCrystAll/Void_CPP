@@ -4,6 +4,9 @@
 
 START_PINCH_NS
 
+/**
+ * @brief A reward for wall pinches
+ */
 class PinchWallSetupReward : public LoggableReward {
 public:
 	//All the wall handling
@@ -96,9 +99,9 @@ public:
 	};
 
 	PinchWallSetupReward(
-		std::string name,
-		PinchWallSetupArgs args
-	) : config(args), LoggableReward(name), pinchReward(PinchReward("Pinch", args.pinchRewardConfig)), lastIntercept(Vec()) {};
+		PinchWallSetupArgs args,
+		std::string name = "Wall pinch reward"
+	) : config(args), LoggableReward(name), pinchReward(PinchReward(args.pinchRewardConfig)), lastIntercept(Vec()) {};
 
 	virtual void Reset(const RLGSC::GameState& initialState);
 	virtual float GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction);
