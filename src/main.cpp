@@ -53,10 +53,6 @@ std::vector<Logger*> loggers = {
 
 float maxBallVel = 0.;
 
-void OnStepSkillTracker(GameInst* gameInst, const RLGSC::Gym::StepResult& stepResult, Report& gameMetrics) {
-	//Idk if we are doing something special during the skill tracker step, for now, i assume we don't, the combined logged reward appears to be broken when in there
-}
-
 // This is our step callback, it's called every step from every RocketSim game
 // WARNING: This is called from multiple threads, often simultaneously, 
 //	so don't access things apart from these arguments unless you know what you're doing.
