@@ -1,3 +1,11 @@
+/*****************************************************************//**
+ * \file   TestReward.h
+ * \brief  A test reward
+ * 
+ * \author Mathieu Suchet
+ * \date   July 2024
+ *********************************************************************/
+
 #pragma once
 #include "Logging/LoggableReward.h"
 #include <RLGymSim_CPP/Utils/CommonValues.h>

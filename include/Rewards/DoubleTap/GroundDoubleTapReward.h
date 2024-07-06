@@ -1,3 +1,10 @@
+/*****************************************************************//**
+ * \file   GroundDoubleTapReward.h
+ * \brief  Contains the ground double tap reward
+ * 
+ * \author Mathieu Suchet
+ * \date   July 2024
+ *********************************************************************/
 #pragma once
 
 #include "Rewards/DoubleTap/DoubleTapReward.h"
@@ -5,7 +12,7 @@
 START_DT_NS
 
 /**
- * A reward for ground double taps
+ * @brief A reward for ground double taps
  */
 class GroundDoubleTapReward : public UseDTReward {
 public:

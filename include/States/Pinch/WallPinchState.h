@@ -1,3 +1,11 @@
+/*****************************************************************//**
+ * \file   WallPinchState.h
+ * \brief  Little random wall pinch state setter
+ * 
+ * \author Mathieu Suchet
+ * \date   July 2024
+ *********************************************************************/
+
 #pragma once
 
 #include "RLGymSim_CPP/Utils/StateSetters/StateSetter.h"

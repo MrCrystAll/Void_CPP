@@ -1,8 +1,31 @@
+/*****************************************************************//**
+ * \file   DoubleTapUtils.h
+ * \brief  All utilities for double taps
+ * 
+ * \author Mathieu Suchet
+ * \date   July 2024
+ *********************************************************************/
+
 #pragma once
 
+/**
+ * @brief Namespace name
+ */
 #define DT_NS DoubleTap
-#define START_DT_NS namespace DT_NS {
+
+/**
+ * @brief Start flag
+ */
+#define START_DT_NS /**\
+ * @brief Double tap namespace\
+ */namespace DT_NS {
+
+/** @brief End flag */
 #define END_DT_NS };
+
+/**
+ * @brief Use flag
+ */
 #define USE_DT_NS using namespace DT_NS;
 
 #include "RLGymSim_CPP/Utils/Gamestates/PhysObj.h"

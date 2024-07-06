@@ -1,3 +1,11 @@
+/*****************************************************************//**
+ * \file   DoubleTapState.h
+ * \brief  Overfitting and random double tap state setters
+ * 
+ * \author Mathieu Suchet
+ * \date   July 2024
+ *********************************************************************/
+
 #pragma once
 
 #include "Utils/DoubleTapUtils.h"

@@ -1,7 +1,18 @@
+/*****************************************************************//**
+ * \file   ObsBuilder.h
+ * \brief  Custom obs builders
+ * 
+ * \author Mathieu Suchet
+ * \date   July 2024
+ *********************************************************************/
+
 #pragma once
 #include <RLGymSim_CPP/Utils/OBSBuilders/OBSBuilder.h>
 #include "../RLGymPPO_CPP/RLGymSim_CPP/RocketSim/src/Sim/BallPredTracker/BallPredTracker.h"
 
+/**
+ * @brief An observation build that fills the obs with 1s
+ */
 class OnesObs : public RLGSC::OBSBuilder {
 public:
 	// Inherited via OBSBuilder
@@ -31,6 +42,9 @@ namespace RLGSC {
 	};
 }
 
+/**
+ * @brief Obs with ball prediction
+ */
 class BallPredObs : public RLGSC::DefaultOBS {
 public:
 	BallPredObs(
@@ -50,6 +64,9 @@ private:
 	float predTime;
 };
 
+/**
+ * @brief Padded obs for multi gamemode support
+ */
 class DefaultPaddedObs : public RLGSC::DefaultOBS {
 public:
 	DefaultPaddedObs(

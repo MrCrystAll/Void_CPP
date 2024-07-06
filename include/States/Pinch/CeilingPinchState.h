@@ -1,3 +1,11 @@
+/*****************************************************************//**
+ * \file   CeilingPinchState.h
+ * \brief  Overfitting and little random ceiling pinch state setters
+ * 
+ * \author Mathieu Suchet
+ * \date   July 2024
+ *********************************************************************/
+
 #pragma once
 
 #include "RLGymSim_CPP/Utils/StateSetters/StateSetter.h"

@@ -1,3 +1,11 @@
+/*****************************************************************//**
+ * \file   TerminalConditions.h
+ * \brief  Custom terminal conditions
+ * 
+ * \author Mathieu Suchet
+ * \date   July 2024
+ *********************************************************************/
+
 #pragma once
 #include <RLGymSim_CPP/Utils/TerminalConditions/TerminalCondition.h>
 

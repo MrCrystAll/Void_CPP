@@ -265,15 +265,10 @@ EnvCreateResult EnvCreateFunc() {
 }
 	};
 
-	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc(name), weight }
+	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc, weight (optional, default = 1), name (optional for loggable rewards, mandatory for non loggable) }
 		{
-			{new DummyReward(), 1.0f},
-			{new GroundDoubleTapReward(gdtArgs, dtArgs), 1.0f}
-			//{new DoubleTapReward(dtArgs), 1.0f, "DoubleTapReward"}
-			//{new PinchWallSetupReward(args), 1.0f, "WallPinchReward"},
-			//{new PinchCeilingSetupReward(pinchCeilingArgs), 1.0f, "CeilingPinchReward"},
-			//{new PinchCornerSetupReward({}), 1.0f, "CornerPinchReward"},
-			//{new PinchTeamSetupReward({}), 1.0f, "TeamPinchReward"},
+			{.rf = new DummyReward(), .w = 1.0f},
+			{.rf = new VelocityReward(), .w = 1.0f, .name = "Velocity reward"}
 		}
 	);
 

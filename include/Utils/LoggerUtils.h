@@ -1,3 +1,11 @@
+/*****************************************************************//**
+ * \file   LoggerUtils.h
+ * \brief  All the utils for the logger (console log, metrics and reward headers)
+ * 
+ * \author Mathieu Suchet
+ * \date   July 2024
+ *********************************************************************/
+
 #include <string>
 #pragma once
 

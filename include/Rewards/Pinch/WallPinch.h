@@ -1,3 +1,11 @@
+/*****************************************************************//**
+ * \file   WallPinch.h
+ * \brief  A wall pinch reward
+ * 
+ * \author Mathieu Suchet
+ * \date   July 2024
+ *********************************************************************/
+
 #pragma once
 
 #include "Pinch.h"
