@@ -1,8 +1,20 @@
+/*****************************************************************//**
+ * \file   States.h
+ * \brief  Weighted sample setter
+ * 
+ * \author Mathieu Suchet
+ * \date   July 2024
+ *********************************************************************/
+
 #pragma once
 
 #include <RLGymSim_CPP/Utils/StateSetters/StateSetter.h>
 #include <RLGymPPO_CPP/Lists.h>
 
+
+/**
+ * @brief Setter that allows to pick a random state in a list of weighted states
+ */
 class WeightedSampleSetter : public RLGSC::StateSetter {
 private:
 	std::vector<std::pair<StateSetter*, float>> setters;

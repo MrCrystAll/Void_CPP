@@ -1,3 +1,10 @@
+/*****************************************************************//**
+ * \file   DoubleTapReward.h
+ * \brief  Contains double tap reward and a reward that uses it
+ * 
+ * \author Mathieu Suchet
+ * \date   July 2024
+ *********************************************************************/
 #pragma once
 
 #include <Logging/LoggableReward.h>

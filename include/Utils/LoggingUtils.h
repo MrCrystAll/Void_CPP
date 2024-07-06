@@ -1,3 +1,11 @@
+/*****************************************************************//**
+ * \file   LoggingUtils.h
+ * \brief  All the utilities for the reward logging
+ * 
+ * \author Mathieu Suchet
+ * \date   July 2024
+ *********************************************************************/
+
 #pragma once
 
 #include "LoggerUtils.h"

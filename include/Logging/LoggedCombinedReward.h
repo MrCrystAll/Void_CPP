@@ -1,3 +1,10 @@
+/*****************************************************************//**
+ * \file   LoggedCombinedReward.h
+ * \brief  Contains the combined reward used to work with multiple loggable rewards
+ * 
+ * \author Mathieu Suchet
+ * \date   July 2024
+ *********************************************************************/
 #pragma once
 #include <vector>
 #include <RLGymSim_CPP/Utils/RewardFunctions/RewardFunction.h>

@@ -1,3 +1,10 @@
+/*****************************************************************//**
+ * \file   GroundPinch.h
+ * \brief  A ground pinch reward
+ * 
+ * \author Mathieu Suchet
+ * \date   July 2024
+ *********************************************************************/
 #pragma once
 
 #include <Logging/LoggableReward.h>

@@ -1,3 +1,10 @@
+/*****************************************************************//**
+ * \file   GroundDoubleTapReward.h
+ * \brief  Contains the ground double tap reward
+ * 
+ * \author Mathieu Suchet
+ * \date   July 2024
+ *********************************************************************/
 #pragma once
 
 #include "Rewards/DoubleTap/DoubleTapReward.h"

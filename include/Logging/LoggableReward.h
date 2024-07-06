@@ -1,3 +1,10 @@
+/*****************************************************************//**
+ * \file   LoggableReward.h
+ * \brief  Contains the loggable reward, use it to create a new reward with loggable metrics
+ * 
+ * \author Mathieu Suchet
+ * \date   July 2024
+ *********************************************************************/
 #pragma once
 
 #include <RLGymSim_CPP/Utils/RewardFunctions/RewardFunction.h>
