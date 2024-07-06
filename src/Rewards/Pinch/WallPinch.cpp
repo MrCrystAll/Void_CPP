@@ -9,7 +9,6 @@ void PinchWallSetupReward::Reset(const RLGSC::GameState& initialState)
 
 float PinchWallSetupReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction)
 {
-	float reward = 0.f;
 	auto ballDir = state.ball.vel.Normalized();
 	auto agentDir = player.carState.vel.Normalized();
 	short targetDir = ballDir.x < 0 ? -1 : 1;
@@ -45,7 +44,7 @@ float PinchWallSetupReward::GetReward(const RLGSC::PlayerData& player, const RLG
 
 			if (agentToBallDist < config.ballWallHandling.agentDistToBallThresh) {
 				if (abs(agentToBall.x) < config.ballWallHandling.ballOffsetX and abs(agentToBall.y) < config.ballWallHandling.ballOffsetY) {
-					AddLog(reward, "Behind the ball", config.ballWallHandling.behindTheBallReward);
+					reward += {config.ballWallHandling.behindTheBallReward, "Behind the ball"};
 				}
 			}
 
@@ -53,15 +52,16 @@ float PinchWallSetupReward::GetReward(const RLGSC::PlayerData& player, const RLG
 			float ballDistPunish = state.ball.pos.Dist(player.carState.pos) / config.ballWallHandling.ballDistReduction;
 			float directionMatchBonus = directionSimilarity >= config.similarityWallSetup.similarityBallAgentThresh ? config.similarityWallSetup.similarityBallAgentReward : 0;
 
-			AddLog(reward, "Speed matching", speedMatchingBonus);
-			AddLog(reward, "Player distance to ball", -ballDistPunish);
-			AddLog(reward, "Direction matching", directionMatchBonus);
+			reward += {speedMatchingBonus, "Speed matching"};
+			reward += {-ballDistPunish, "Player distance to ball"};
+			reward += {directionMatchBonus, "Direction matching"};
 		}
 
 		//Creeping distance
 		else {
 			//Being in this zone is good already, get some snacks
-			AddLog(reward, "Creeping distance reward", config.groundWallSetupHandling.creepingDistanceReward);
+			reward += {config.groundWallSetupHandling.creepingDistanceReward, "Creeping distance reward"};
+
 
 			float agentDistToIntercept = Vec(RLGSC::CommonValues::SIDE_WALL_X * targetDir, player.carState.pos.y, 0).Dist2D(player.carState.pos);
 
@@ -69,18 +69,21 @@ float PinchWallSetupReward::GetReward(const RLGSC::PlayerData& player, const RLG
 			if (agentDistToIntercept <= config.distancesWallSetup.groundBanDistance) {
 				//If grounded, get spanked, else, you're doing great
 				float groundChange = player.carState.isOnGround ? config.groundWallSetupHandling.groundBanPunishment : config.groundWallSetupHandling.groundBanReward;
-				AddLog(reward, "Creeping grounded", groundChange);
+				reward += {groundChange, "Creeping grounded"};
+
 
 				//If still relatively far
 				if (state.ball.pos.Dist(player.carState.pos) > config.flipHandlingWallSetup.maxDistance + RLGSC::CommonValues::BALL_RADIUS) {
 					//Don't use your flip or punished
 					float flipChange = player.hasFlip ? config.flipHandlingWallSetup.hasFlipReward : config.flipHandlingWallSetup.hasFlipPunishment;
-					AddLog(reward, "Creeping flip", flipChange);
+					reward += {flipChange, "Creeping flip"};
+
 				}
 
 				//Accel reward on ball hit
 				else if (player.ballTouchedStep and state.ball.pos.z >= config.wallHandling.wallMinHeightToPinch) {
-					AddLog(reward, "Pinch reward", this->pinchReward.GetReward(player, state, prevAction));
+					reward += {this->pinchReward.GetReward(player, state, prevAction), "Pinch reward"};
+
 				}
 			}
 		}
@@ -89,22 +92,7 @@ float PinchWallSetupReward::GetReward(const RLGSC::PlayerData& player, const RLG
 	lastIntercept = interceptPoint;
 
 
-	return reward;
-}
-
-void PinchWallSetupReward::ClearChanges()
-{
-	float temp = 0;
-	LoggableReward::ClearChanges();
-	AddLog(temp, "Speed matching", 0, true);
-	AddLog(temp, "Player distance to ball", 0, true);
-	AddLog(temp, "Direction matching", 0, true);
-	AddLog(temp, "Creeping distance reward", 0, true);
-	AddLog(temp, "Creeping grounded", 0, true);
-	AddLog(temp, "Creeping flip", 0, true);
-	AddLog(temp, "Pinch reward", 0, true);
-	AddLog(temp, "Behind the ball", 0, true);
-	this->pinchReward.ClearChanges();
+	return reward.value;
 }
 
 float PinchWallSetupReward::Corner(float x, short xOrientation, short yOrientation)
@@ -151,8 +139,8 @@ Vec PinchWallSetupReward::GetCornerIntersection(short xFwd, short yFwd, float xP
 	return Vec(xResult, yResult, 0.0f);
 }
 
-void PinchWallSetupReward::Log(RLGPC::Report& report, std::string name, float weight)
+void PinchWallSetupReward::LogAll(Report& report, bool final, std::string name, float weight)
 {
-	LoggableReward::Log(report, name, weight);
-	this->pinchReward.Log(report, name + "/Pinch", weight);
+	LoggableReward::LogAll(report, final, name, weight);
+	this->pinchReward.LogAll(report, final, "Pinch", weight);
 }

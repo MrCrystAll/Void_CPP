@@ -1,7 +1,7 @@
 #pragma once
 #include <RLGymSim_CPP/Utils/BasicTypes/Lists.h>
 #include <RLGymPPO_CPP/Util/Report.h>
-#include <LoggerUtils.h>
+#include <Utils/LoggerUtils.h>
 
 struct Metric {
 	std::string name;

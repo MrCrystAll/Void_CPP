@@ -9,7 +9,6 @@ void PinchCeilingSetupReward::Reset(const RLGSC::GameState& initialState)
 
 float PinchCeilingSetupReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction)
 {
-	float reward = 0.0f;
 	auto ballDir = state.ball.vel.Normalized();
 	auto agentDir = player.carState.vel.Normalized();
 	short targetDir = ballDir.x < 0 ? -1 : 1;
@@ -28,8 +27,8 @@ float PinchCeilingSetupReward::GetReward(const RLGSC::PlayerData& player, const 
 
 		if (agentToBallDist < config.groundHandling.ballGroundHandling.agentDistToBallThresh) {
 			if (abs(agentToBall.x) < config.groundHandling.ballGroundHandling.ballOffsetX and abs(agentToBall.y) < config.groundHandling.ballGroundHandling.ballOffsetY) {
-				AddLog(reward, "Ground/Behind the ball", config.groundHandling.ballGroundHandling.behindTheBallReward);
-			}
+				reward += {config.groundHandling.ballGroundHandling.behindTheBallReward, "Ground/Behind the ball"};
+;			}
 		}
 
 		float speedDiff = std::max(0.01f, std::abs(state.ball.vel.Dist(player.carState.vel)) / RLGSC::CommonValues::SUPERSONIC_THRESHOLD);
@@ -47,13 +46,14 @@ float PinchCeilingSetupReward::GetReward(const RLGSC::PlayerData& player, const 
 		//You're matching the ball's direction ? Here, a snack
 		float directionMatchBonus = directionSimilarity >= config.groundHandling.agentSimilarity.similarityBallAgentThresh ? config.groundHandling.agentSimilarity.similarityBallAgentReward : 0;
 
-		AddLog(reward, "Ground/Speed matching", speedMatchingBonus);
-		AddLog(reward, "Ground/Wall alignment punishment", wallComparisonPunish);
-		AddLog(reward, "Ground/Player distance to ball", -ballDistPunish);
-		AddLog(reward, "Ground/Direction matching", directionMatchBonus);
+		reward += {speedMatchingBonus, "Ground/Behind the ball"};
+		reward += {wallComparisonPunish, "Ground/Wall alignment punishment"};
+		reward += {-ballDistPunish, "Ground/Player distance to ball"};
+		reward += {directionMatchBonus, "Ground/Direction matching"};
 
 		if (player.ballTouchedStep) {
-			AddLog(reward, "Ground/Ball touch", config.groundHandling.touchReward);
+			reward += {config.groundHandling.touchReward, "Ground/Ball touch"};
+
 		}
 	}
 
@@ -63,57 +63,42 @@ float PinchCeilingSetupReward::GetReward(const RLGSC::PlayerData& player, const 
 		) {
 
 		if (agentState.pos.z < ball.pos.z and std::abs(agentState.pos.y) > std::abs(ball.pos.y - config.wallHandling.underBallOffsetY) and std::abs(agentState.pos.y) < std::abs(ball.pos.y + config.wallHandling.underBallOffsetY)) {
-			AddLog(reward, "Wall/Under the ball", config.wallHandling.underTheBallReward);
+			reward += {config.wallHandling.underTheBallReward, "Wall/Under the ball"};
 		}
 
 		float ballDistPunish = state.ball.pos.Dist(player.carState.pos) / config.wallHandling.ballDistReduction;
-		AddLog(reward, "Wall/Agent dist to ball", -ballDistPunish);
+		reward += {-ballDistPunish, "Wall/Agent dist to ball"};
 
 		//Reward for ball height ?
-		AddLog(reward, "Wall/Ball height", ball.pos.z / RLGSC::CommonValues::CEILING_Z * config.wallHandling.ballHeightW);
+		reward += {ball.pos.z / RLGSC::CommonValues::CEILING_Z * config.wallHandling.ballHeightW, "Wall/Ball height"};
 	}
 
 	if (player.carState.pos.z > config.ceilingHandling.banZoneHeight and ball.pos.z > config.ceilingHandling.banZoneHeight) {
-		if (player.carState.isOnGround) AddLog(reward, "Ceiling/Ground ban", config.ceilingHandling.groundedBan);
-		else AddLog(reward, "Ceiling/Off Ground Reward", config.ceilingHandling.ungroundedReward);
+		if (player.carState.isOnGround) {
+			reward += {config.ceilingHandling.groundedBan, "Ceiling/Ground ban"};
+		}
+		
+		else{
+			reward += {config.ceilingHandling.ungroundedReward, "Ceiling/Off Ground Reward"};
+		}
 	}
 
 	//If within ceiling range
 	if (ball.pos.z > RLGSC::CommonValues::CEILING_Z - config.ceilingHandling.distToCeilThresh) {
 		//Already good being there, get some snack
-		AddLog(reward, "Ceiling/Ceiling zone", config.ceilingHandling.onCeilingReward);
+		reward += {config.ceilingHandling.onCeilingReward, "Ceiling/Ceiling zone"};
 
 		//Touching the ball and ceiling range ? Sure thing buddy
 		if (player.ballTouchedStep) {
-			AddLog(reward, "Ceiling/Ceiling pinch", this->pinchReward.GetReward(player, state, prevAction));
+			reward += {this->pinchReward.GetReward(player, state, prevAction), "Ceiling/Ceiling pinch"};
 		}
 	}
 
-	return reward;
+	return reward.value;
 }
 
-void PinchCeilingSetupReward::ClearChanges()
+void PinchCeilingSetupReward::LogAll(Report& report, bool final, std::string name, float weight)
 {
-	float temp;
-	AddLog(temp, "Ground/Behind the ball", 0, true);
-	AddLog(temp, "Ground/Speed matching", 0, true);
-	AddLog(temp, "Ground/Wall alignment punishment", 0, true);
-	AddLog(temp, "Ground/Player distance to ball", 0, true);
-	AddLog(temp, "Ground/Direction matching", 0, true);
-	AddLog(temp, "Ground/Ball touch", 0, true);
-	AddLog(temp, "Wall/Under the ball", 0, true);
-	AddLog(temp, "Wall/Agent dist to ball", 0, true);
-	AddLog(temp, "Wall/Ball height", 0, true);
-	AddLog(temp, "Ceiling/Ground ban", 0, true);
-	AddLog(temp, "Ceiling/Off Ground Reward", 0, true);
-	AddLog(temp, "Ceiling/Off Ground Reward", 0, true);
-	AddLog(temp, "Ceiling/Ceiling zone", 0, true);
-	AddLog(temp, "Ceiling/Ceiling pinch", 0, true);
-	this->pinchReward.ClearChanges();
-}
-
-void PinchCeilingSetupReward::Log(RLGPC::Report& report, std::string name, float weight)
-{
-	LoggableReward::Log(report, name, weight);
-	this->pinchReward.Log(report, name + "/Pinch", weight);
+	LoggableReward::LogAll(report, final, name, weight);
+	this->pinchReward.LogAll(report, final, "Pinch", weight);
 }

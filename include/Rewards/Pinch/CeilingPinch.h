@@ -1,10 +1,14 @@
 #pragma once
 
-#include "../../LoggedCombinedReward.h"
+#include "Logging/LoggableReward.h"
 #include "Pinch.h"
 
 
 START_PINCH_NS
+
+/**
+ * @brief A reward for ceiling pinches.
+ */
 class PinchCeilingSetupReward : public LoggableReward {
 public:
 
@@ -100,11 +104,10 @@ public:
 		PinchReward::PinchArgs pinchRewardConfig = {};
 	};
 
-	PinchCeilingSetupReward(PinchCeilingSetupArgs args) : config(args), pinchReward(PinchReward(args.pinchRewardConfig)) {};
+	PinchCeilingSetupReward(PinchCeilingSetupArgs args, std::string name = "Ceiling pinch reward") : config(args), LoggableReward(name), pinchReward(PinchReward(args.pinchRewardConfig)) {};
 	virtual void Reset(const RLGSC::GameState& initialState);
 	virtual float GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction);
-	virtual void ClearChanges() override;
-	virtual void Log(RLGPC::Report& report, std::string name, float weight = 1.0f) override;
+	virtual void LogAll(Report& report, bool final, std::string name = "", float weight = 1.f);
 private:
 	PinchCeilingSetupArgs config;
 	PinchReward pinchReward;

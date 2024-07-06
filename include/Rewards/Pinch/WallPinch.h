@@ -1,10 +1,12 @@
 #pragma once
 
-#include "../../LoggedCombinedReward.h"
 #include "Pinch.h"
 
 START_PINCH_NS
 
+/**
+ * @brief A reward for wall pinches
+ */
 class PinchWallSetupReward : public LoggableReward {
 public:
 	//All the wall handling
@@ -97,13 +99,14 @@ public:
 	};
 
 	PinchWallSetupReward(
-		PinchWallSetupArgs args
-	) : config(args), pinchReward(PinchReward(args.pinchRewardConfig)), lastIntercept(Vec()) {};
+		PinchWallSetupArgs args,
+		std::string name = "Wall pinch reward"
+	) : config(args), LoggableReward(name), pinchReward(PinchReward(args.pinchRewardConfig)), lastIntercept(Vec()) {};
 
 	virtual void Reset(const RLGSC::GameState& initialState);
 	virtual float GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction);
-	virtual void ClearChanges() override;
-	virtual void Log(RLGPC::Report& report, std::string name, float weight = 1.0f) override;
+	virtual void LogAll(Report& report, bool final, std::string name = "", float weight = 1.f);
+
 
 private:
 	PinchWallSetupArgs config;

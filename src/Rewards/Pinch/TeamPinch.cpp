@@ -9,16 +9,11 @@ void PinchTeamSetupReward::Reset(const RLGSC::GameState& initialState)
 
 float PinchTeamSetupReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction)
 {
-	return 0.0f;
+	return reward.value;
 }
 
-void PinchTeamSetupReward::ClearChanges()
+void PinchTeamSetupReward::LogAll(Report& report, bool final, std::string name, float weight)
 {
-	this->pinchReward.ClearChanges();
-}
-
-void PinchTeamSetupReward::Log(RLGPC::Report& report, std::string name, float weight)
-{
-	LoggableReward::Log(report, name, weight);
-	this->pinchReward.Log(report, name + "/Pinch", weight);
+	LoggableReward::LogAll(report, final, name, weight);
+	this->pinchReward.LogAll(report, final, "Pinch", weight);
 }

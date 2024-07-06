@@ -7,4 +7,15 @@
 
 #include "RLGymSim_CPP/Utils/Gamestates/PhysObj.h"
 
+/**
+ * @brief Checks if the physics object is within the backboard zone
+ * 
+ * @param physObj The object to check the position of
+ * @param distFromBackboard The maximum distance from the back wall
+ * @param minHeight The minimum height from the ground
+ */
 bool IsOutsideBackboardZone(const RLGSC::PhysObj physObj, int distFromBackboard, int minHeight);
+
+
+
+
