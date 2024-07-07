@@ -10,7 +10,7 @@ float PinchGroundSetupReward::GetReward(const RLGSC::PlayerData& player, const R
 {
 	/* Pseudo algorithm idea */
 
-	return reward.value;
+	return this->ComputeReward();
 }
 
 void PinchGroundSetupReward::LogAll(Report& report, bool final, std::string name, float weight)

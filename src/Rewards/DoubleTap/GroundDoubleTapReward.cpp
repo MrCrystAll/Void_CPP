@@ -20,5 +20,5 @@ float GroundDoubleTapReward::GetReward(const RLGSC::PlayerData& player, const RL
 	reward += {this->dtReward.GetReward(player, state, prevAction), "Double tap total"};
 
 
-	return reward.value;
+	return this->ComputeReward();
 }

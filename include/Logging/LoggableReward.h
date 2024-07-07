@@ -64,6 +64,8 @@ public:
 	 */
 	virtual void PreStep(const GameState& state);
 
+	virtual float ComputeReward();
+
 	/**
 	 * {brief Print reward and metrics.
 	 * 
@@ -76,16 +78,6 @@ public:
 	virtual void PrintReward(float weight = 1.0f, bool showMedian = false, bool showStd = false, bool showMin = false, bool showMax = false);
 
 	LoggableReward(std::string name) : name(name) {};
-
-	/**
-	 * @brief Get all rewards for all players
-	 * 
-	 * \param state The state to get rewards
-	 * \param prevActions Previous actions
-	 * \param final Whether the state is final
-	 * \return A list of all the rewards
-	 */
-	virtual std::vector<float> GetAllRewards(const GameState& state, const ActionSet& prevActions, bool final);
 };
 
 class LoggableWrapper : public LoggableReward {

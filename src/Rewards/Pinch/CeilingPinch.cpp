@@ -94,7 +94,7 @@ float PinchCeilingSetupReward::GetReward(const RLGSC::PlayerData& player, const 
 		}
 	}
 
-	return reward.value;
+	return this->ComputeReward();
 }
 
 void PinchCeilingSetupReward::LogAll(Report& report, bool final, std::string name, float weight)

@@ -73,7 +73,7 @@ float DoubleTapReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::G
 	}
 	
 	scoreLine = state.scoreLine;
-	return reward.value;
+	return this->ComputeReward();
 }
 
 void UseDTReward::Reset(const RLGSC::GameState& initialState)

@@ -9,7 +9,7 @@ void PinchTeamSetupReward::Reset(const RLGSC::GameState& initialState)
 
 float PinchTeamSetupReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction)
 {
-	return reward.value;
+	return this->ComputeReward();
 }
 
 void PinchTeamSetupReward::LogAll(Report& report, bool final, std::string name, float weight)

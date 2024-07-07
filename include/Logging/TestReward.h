@@ -25,6 +25,6 @@ public:
 		}*/
 		reward += {player.carState.vel.Length() / RLGSC::CommonValues::CAR_MAX_SPEED, "Ball speed"};
 
-		return reward.value;
+		return this->ComputeReward();
 	}
 };

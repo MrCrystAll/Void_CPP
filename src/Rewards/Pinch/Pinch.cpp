@@ -29,5 +29,5 @@ float PinchReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameS
 	}
 
 	lastBallSpeed = state.ball.vel.Length2D();
-	return reward.value;
+	return this->ComputeReward();
 }

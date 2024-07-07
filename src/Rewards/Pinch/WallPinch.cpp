@@ -92,7 +92,7 @@ float PinchWallSetupReward::GetReward(const RLGSC::PlayerData& player, const RLG
 	lastIntercept = interceptPoint;
 
 
-	return reward.value;
+	return this->ComputeReward();
 }
 
 float PinchWallSetupReward::Corner(float x, short xOrientation, short yOrientation)

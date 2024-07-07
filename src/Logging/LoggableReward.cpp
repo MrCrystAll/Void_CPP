@@ -18,6 +18,14 @@ void LoggableReward::PreStep(const GameState& state)
 	this->reward.Reset();
 }
 
+float LoggableReward::ComputeReward()
+{
+	float re = this->reward.value;
+	this->reward.Reset();
+	this->reward.Step();
+	return re;
+}
+
 void LoggableReward::PrintReward(float weight, bool showMedian, bool showStd, bool showMin, bool showMax)
 {
 	VOID_LOG(" - " << this->name << ": " << this->reward.logs["_total"].ComputeAvg() * weight);
@@ -46,7 +54,7 @@ void LoggableReward::LogFinal(RLGPC::Report& report, std::string name, float wei
 			keyCopy = key;
 		}
 
-		//Sub reward logging doesn't log the subreward total
+		//Sub reward logging doesn't log the sub reward total
 		if ((not name.empty() and keyCopy.empty()) or keyCopy == "__temp") continue;
 
 		if (name.empty()) {
@@ -61,21 +69,6 @@ void LoggableReward::LogFinal(RLGPC::Report& report, std::string name, float wei
 void LoggableReward::Log(Report& report, std::string name, float weight)
 {
 	//Do we log each step ? Don't think that's necessary, i'll leave it here in case
-}
-std::vector<float> LoggableReward::GetAllRewards(const GameState& state, const ActionSet& prevActions, bool final)
-{
-	std::vector<float> rewards = std::vector<float>(state.players.size());
-	for (int i = 0; i < state.players.size(); i++) {
-		if (final) {
-			rewards[i] = GetFinalReward(state.players[i], state, prevActions[i]);
-		}
-		else {
-			rewards[i] = GetReward(state.players[i], state, prevActions[i]);
-		}
-		this->reward.Reset();
-		this->reward.Step();
-	}
-	return rewards;
 }
 
 void LoggableWrapper::Reset(const GameState& initialState)
@@ -93,11 +86,11 @@ void LoggableWrapper::PreStep(const GameState& state)
 float LoggableWrapper::GetReward(const PlayerData& player, const GameState& state, const Action& prevAction)
 {
 	this->reward += {this->rfn->GetReward(player, state, prevAction), "__temp"};
-	return this->reward.value;
+	return this->ComputeReward();
 }
 
 float LoggableWrapper::GetFinalReward(const PlayerData& player, const GameState& state, const Action& prevAction)
 {
 	this->reward += {this->rfn->GetFinalReward(player, state, prevAction), "__temp"};
-	return this->reward.value;
+	return this->ComputeReward();
 }
