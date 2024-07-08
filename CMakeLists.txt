@@ -53,3 +53,10 @@ target_link_libraries(Void RLGymPPO_CPP)
 # Include RLBot
 add_subdirectory(RLBotCPP)
 target_link_libraries(Void RLBotCPP)
+
+# Add libtorch (https://pytorch.org/cppdocs/installing.html#minimal-example)
+find_package(Torch REQUIRED)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+
+# Include libtorch
+target_link_libraries(Void "${TORCH_LIBRARIES}")
