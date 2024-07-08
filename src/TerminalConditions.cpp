@@ -33,3 +33,11 @@ bool BounceTimeoutCondition::IsTerminal(const RLGSC::GameState& currentState)
 
 	return this->currentSteps >= this->totalSteps;
 }
+
+bool TouchTimeoutCondition::IsTerminal(const RLGSC::GameState& currentState)
+{
+	for (RLGSC::PlayerData p : currentState.players) {
+		if (p.ballTouchedStep) return true;
+	}
+	return false;
+}

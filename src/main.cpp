@@ -6,12 +6,14 @@
 #include <RLGymSim_CPP/Utils/TerminalConditions/NoTouchCondition.h>
 #include <RLGymSim_CPP/Utils/TerminalConditions/GoalScoreCondition.h>
 #include <RLGymSim_CPP/Utils/StateSetters/RandomState.h>
+#include <RLGymSim_CPP/Utils/StateSetters/KickoffState.h>
 #include <RLGymSim_CPP/Utils/ActionParsers/DiscreteAction.h>
 
 #include "RLBotClient.h"
 #include "Utils/LoggerUtils.h"
 #include "WandbConfig.h"
 #include "ObsBuilder.h"
+#include "ActionParser.h"
 
 //Reward logging
 #include <Logging/LoggedCombinedReward.h>
@@ -28,6 +30,13 @@
 #include "Rewards/DoubleTap/GroundDoubleTapReward.h"
 #include "States/DoubleTap/DoubleTapState.h"
 #include "States/DoubleTap/GroundDoubleTapState.h"
+
+//Dashes
+#include "Rewards/Dashes/IsFlippingReward.h"
+#include "Rewards/Dashes/TimeBetweenFlipsPunishment.h"
+
+//Recovery
+#include "States/Recovery/AboveGroundState.h"
 
 #include <States.h>
 #include <TerminalConditions.h>
@@ -52,7 +61,7 @@ std::vector<Logger*> loggers = {
 	new PlayerLoggers::PlayerInAirLogger(),
 	new PlayerLoggers::PlayerSpeedLogger(),
 	new PlayerLoggers::PlayerHeightLogger(),
-	new PlayerLoggers::DemoLogger()
+	new PlayerLoggers::FlipTimeLogger()
 };
 
 float maxBallVel = 0.;
@@ -64,10 +73,7 @@ float maxBallVel = 0.;
 void OnStep(GameInst* gameInst, const RLGSC::Gym::StepResult& stepResult, Report& gameMetrics) {
 	auto& gameState = stepResult.state;
 	LoggedCombinedReward* lrw = dynamic_cast<LoggedCombinedReward*>(gameInst->match->rewardFn);
-	if (lrw == nullptr) {
-		VOID_WARN("Couldn't log rewards");
-	}
-	else {
+	if (lrw != nullptr) {
 		lrw->LogAll(gameMetrics, stepResult.done);
 	}
 
@@ -267,19 +273,21 @@ EnvCreateResult EnvCreateFunc() {
 
 	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc, weight (optional, default = 1), name (optional for loggable rewards, mandatory for non loggable) }
 		{
-			{.rf = new DummyReward(), .w = 1.0f},
-			{.rf = new VelocityReward(), .w = 1.0f, .name = "Velocity reward"}
+			{new VelocityPlayerToBallReward(), 2.0f, "Velocity player to ball"},
+			{new EventReward({.touch = 3.0}), 3.0f, "Event reward"},
+			{new FaceBallReward(), 1.0f, "Face ball"}
 		}
 	);
 
 	std::vector<TerminalCondition*> terminalConditions = {
 		new TimeoutCondition(NO_TOUCH_TIMEOUT_SECS * 120 / TICK_SKIP),
 		//new BounceTimeoutCondition(BOUNCE_TIMEOUT_SECS * 120 / TICK_SKIP),
+		new TouchTimeoutCondition(),
 		new GoalScoreCondition()
 	};
 
 	auto obs = new DefaultOBS();
-	auto actionParser = new DiscreteAction();
+	auto actionParser = new DashParser();
 
 
 	/*DoubleTapState::DoubleTapStateArgs stateArgs = {
@@ -294,7 +302,7 @@ EnvCreateResult EnvCreateFunc() {
 		
 	};*/
 
-	auto stateSetter = new RandomState(100, 100, 100);
+	auto stateSetter = new RandomRecoveryState();
 
 	Match* match = new Match(
 		rewards,
@@ -303,7 +311,7 @@ EnvCreateResult EnvCreateFunc() {
 		actionParser,
 		stateSetter,
 
-		1, // Team size
+		3, // Team size
 		true // Spawn opponents
 	);
 

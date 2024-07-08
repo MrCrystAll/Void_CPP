@@ -85,3 +85,16 @@ void WeightedSampleSetter::BuildArenaConfig(Arena* arena)
         }
     }
 }
+
+RLGSC::GameState EmptyBoostKickoffSetter::ResetState(Arena* arena)
+{
+    arena->ResetToRandomKickoff();
+    for (Car* c : arena->GetCars()) {
+        CarState cs = c->GetState();
+        cs.boost = 0;
+
+        c->SetState(cs);
+    }
+
+    return RLGSC::GameState(arena);
+}

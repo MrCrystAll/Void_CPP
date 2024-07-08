@@ -91,3 +91,16 @@ RLGSC::FList PlayerLoggers::DemoLogger::GetMetrics(RLGSC::GameState state)
 
 	return { nDemos };
 }
+
+RLGSC::FList PlayerLoggers::FlipTimeLogger::GetMetrics(RLGSC::GameState state)
+{
+	float timer = 0;
+	for (const RLGSC::PlayerData& p : state.players) {
+		timer += p.carState.flipTime;
+	}
+
+	timer /= state.players.size();
+
+	return { timer };
+}
+
