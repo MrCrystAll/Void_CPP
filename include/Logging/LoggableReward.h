@@ -78,6 +78,8 @@ public:
 	virtual void PrintReward(float weight = 1.0f, bool showMedian = false, bool showStd = false, bool showMin = false, bool showMax = false);
 
 	LoggableReward(std::string name) : name(name) {};
+
+	virtual float GetReward(const PlayerData& player, const GameState& state, const Action& prevAction) = 0;
 };
 
 class LoggableWrapper : public LoggableReward {

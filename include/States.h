@@ -27,3 +27,8 @@ public:
 	WeightedSampleSetter(std::vector<std::pair<StateSetter*, float>> setters, RLGPC::FList gmProbs) : setters(setters), gmProbs(gmProbs) {};
 	virtual RLGSC::GameState ResetState(Arena* arena) override;
 };
+
+class EmptyBoostKickoffSetter : public RLGSC::StateSetter {
+public:
+	virtual RLGSC::GameState ResetState(Arena* arena) override;
+};

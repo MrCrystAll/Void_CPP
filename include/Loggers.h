@@ -170,4 +170,16 @@ namespace PlayerLoggers {
 	protected:
 		virtual RLGSC::FList GetMetrics(RLGSC::GameState state) override;
 	};
+
+	/**
+	 * @brief Logger that tracks number of demos
+	 */
+	class FlipTimeLogger : public Logger {
+	public:
+		FlipTimeLogger() : Logger({ {.name = "flip_time", .isAvg = true} }) {};
+	protected:
+		virtual RLGSC::FList GetMetrics(RLGSC::GameState state) override;
+	};
+
+
 }

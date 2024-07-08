@@ -29,3 +29,8 @@ private:
 	int totalSteps;
 	int currentSteps = 0;
 };
+
+class TouchTimeoutCondition : public RLGSC::TerminalCondition {
+	// Inherited via TerminalCondition
+	bool IsTerminal(const RLGSC::GameState& currentState) override;
+};
