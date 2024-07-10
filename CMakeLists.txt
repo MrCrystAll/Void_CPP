@@ -46,6 +46,8 @@ GroupSourcesByFolder(Void)
 set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
 
+file(COPY "submodels" DESTINATION "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
+
 # Include RLGymSim_PPO
 add_subdirectory(RLGymPPO_CPP)
 target_link_libraries(Void RLGymPPO_CPP)
@@ -53,10 +55,3 @@ target_link_libraries(Void RLGymPPO_CPP)
 # Include RLBot
 add_subdirectory(RLBotCPP)
 target_link_libraries(Void RLBotCPP)
-
-# Add libtorch (https://pytorch.org/cppdocs/installing.html#minimal-example)
-find_package(Torch REQUIRED)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
-
-# Include libtorch
-target_link_libraries(Void "${TORCH_LIBRARIES}")

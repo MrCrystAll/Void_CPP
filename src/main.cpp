@@ -38,6 +38,12 @@
 //Recovery
 #include "States/Recovery/AboveGroundState.h"
 
+//Selector
+#include "ActionParsers/Selector/SelectorParser.h"
+#include "Utils/Selector/Submodel.h"
+#include "Rewards/Selector/SelectorReward.h"
+#include "ObsBuilders/Selector/SelectorObs.h"
+
 #include <States.h>
 #include <TerminalConditions.h>
 #include <Loggers.h>
@@ -62,6 +68,11 @@ std::vector<Logger*> loggers = {
 	new PlayerLoggers::PlayerSpeedLogger(),
 	new PlayerLoggers::PlayerHeightLogger(),
 	new PlayerLoggers::FlipTimeLogger()
+};
+
+std::vector<Submodel> submodels = {
+	Submodel({.path = "submodels/gp/PPO_POLICY.lt", .name = "Global purpose", .obsSize = 70 + 19 * (2 * (1 + 1))}),
+	Submodel({.path = "submodels/pinch/PPO_POLICY.lt", .name = "Pinch", .obsSize = 70, .weight = 4.0f, .obsBuilder = new LockedDefaultObs(1, false)})
 };
 
 float maxBallVel = 0.;
@@ -94,6 +105,7 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 	std::map<std::string, AvgTracker> mTrackersAvg = {};
 	std::map<std::string, float> mTrackers = {};
 	std::map<std::string, AvgTracker> rTrackers = {};
+	std::map<std::string, int> selectorTrackers = {};
 	
 	// Get metrics for every gameInst
 	auto allGameMetrics = learner->GetAllGameMetrics();
@@ -106,6 +118,15 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 			}
 			else if (!metric.first.ends_with("_avg_count")) {
 				rTrackers[metric.first] += 0;
+			}
+		}
+
+		if (metric.first.starts_with(SELECTOR_HEADER)) {
+			if (metric.first.ends_with("_avg_total")) {
+				selectorTrackers[metric.first.substr(0, metric.first.size() - 10)] += 0;
+			}
+			else if (!metric.first.ends_with("_avg_count")) {
+				selectorTrackers[metric.first] += 0;
 			}
 		}
 	}
@@ -137,6 +158,10 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 				tracker.second += gameReport.GetAvg(tracker.first);
 			}
 		}
+
+		for (auto& tracker : selectorTrackers) {
+			tracker.second += gameReport[tracker.first];
+		}
 	}
 
 	for (const auto& tracker : rTrackers) {
@@ -150,6 +175,10 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 	for (const auto& tracker : mTrackersAvg) {
 		allMetrics[tracker.first] = tracker.second.Get();
 	}
+
+	for (const auto& tracker : selectorTrackers) {
+		allMetrics[tracker.first] = tracker.second;
+	}
 	
 	allMetrics[METRICS_HEADER + std::string("max_ball_speed")] = maxBallVel / CommonValues::BALL_MAX_SPEED * 216;
 	maxBallVel = 0;
@@ -161,6 +190,9 @@ EnvCreateResult EnvCreateFunc() {
 	constexpr int TICK_SKIP = 8;
 	constexpr float NO_TOUCH_TIMEOUT_SECS = 7.f;
 	constexpr float BOUNCE_TIMEOUT_SECS = 1.f;
+
+	const int teamSize = 2;
+	const bool spawnOpponents = true;
 
 	PinchWallSetupReward::PinchWallSetupArgs args(
 		{
@@ -271,13 +303,15 @@ EnvCreateResult EnvCreateFunc() {
 }
 	};
 
-	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc, weight (optional, default = 1), name (optional for loggable rewards, mandatory for non loggable) }
+	SelectorChoice* logging = new SelectorChoice(submodels);
+
+	auto rewards = new SelectorReward(new LoggedCombinedReward( // Format is { RewardFunc, weight (optional, default = 1), name (optional for loggable rewards, mandatory for non loggable) }
 		{
 			{new VelocityPlayerToBallReward(), 2.0f, "Velocity player to ball"},
 			{new EventReward({.touch = 3.0}), 3.0f, "Event reward"},
 			{new FaceBallReward(), 1.0f, "Face ball"}
 		}
-	);
+	), logging);
 
 	std::vector<TerminalCondition*> terminalConditions = {
 		new TimeoutCondition(NO_TOUCH_TIMEOUT_SECS * 120 / TICK_SKIP),
@@ -286,8 +320,8 @@ EnvCreateResult EnvCreateFunc() {
 		new GoalScoreCondition()
 	};
 
-	auto obs = new DefaultOBS();
-	auto actionParser = new DashParser();
+	auto obs = new SelectorObs(new RLGSC::DefaultOBS(), logging);
+	auto actionParser = new SelectorParser(logging);
 
 
 	/*DoubleTapState::DoubleTapStateArgs stateArgs = {
@@ -311,8 +345,8 @@ EnvCreateResult EnvCreateFunc() {
 		actionParser,
 		stateSetter,
 
-		3, // Team size
-		true // Spawn opponents
+		teamSize, // Team size
+		spawnOpponents // Spawn opponents
 	);
 
 	Gym* gym = new Gym(match, TICK_SKIP);
