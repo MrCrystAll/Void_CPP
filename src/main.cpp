@@ -34,6 +34,7 @@
 //Dashes
 #include "Rewards/Dashes/IsFlippingReward.h"
 #include "Rewards/Dashes/TimeBetweenFlipsPunishment.h"
+#include "ObsBuilders/Dashes/DashObsBuilder.h"
 
 //Recovery
 #include "States/Recovery/AboveGroundState.h"
@@ -158,7 +159,7 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 
 // Create the RLGymSim environment for each of our games
 EnvCreateResult EnvCreateFunc() {
-	constexpr int TICK_SKIP = 8;
+	constexpr int TICK_SKIP = 4;
 	constexpr float NO_TOUCH_TIMEOUT_SECS = 7.f;
 	constexpr float BOUNCE_TIMEOUT_SECS = 1.f;
 
@@ -286,7 +287,7 @@ EnvCreateResult EnvCreateFunc() {
 		new GoalScoreCondition()
 	};
 
-	auto obs = new DefaultOBS();
+	auto obs = new DashObsBuilder(3);
 	auto actionParser = new DashParser();
 
 
