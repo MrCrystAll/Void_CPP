@@ -275,8 +275,9 @@ EnvCreateResult EnvCreateFunc() {
 	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc, weight (optional, default = 1), name (optional for loggable rewards, mandatory for non loggable) }
 		{
 			{new VelocityPlayerToBallReward(), 2.0f, "Velocity player to ball"},
-			{new EventReward({.touch = 3.0}), 3.0f, "Event reward"},
-			{new FaceBallReward(), 1.0f, "Face ball"}
+			{new EventReward({.touch = 3.0}), 30.0f, "Event reward"},
+			{new FaceBallReward(), 1.0f, "Face ball"},
+			{new TimeBetweenFlipsPunishment({}), 5.0f}
 		}
 	);
 

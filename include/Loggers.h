@@ -172,7 +172,7 @@ namespace PlayerLoggers {
 	};
 
 	/**
-	 * @brief Logger that tracks number of demos
+	 * @brief Logger that tracks the average flip time
 	 */
 	class FlipTimeLogger : public Logger {
 	public:
