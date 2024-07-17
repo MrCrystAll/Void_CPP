@@ -11,7 +11,7 @@
 #include <Logging/LoggableReward.h>
 #include "Utils/PinchUtils.h"
 
-START_PINCH_NS
+START_REWARDS_PINCH_NS
 
 /**
  * @brief Base pinch reward

@@ -1,6 +1,8 @@
 #include "ActionParser.h"
 #include <Utils/LoggerUtils.h>
 
+USE_ACTION_PARSER_NS;
+
 DashParser::DashParser()
 {
 	Action a = {};

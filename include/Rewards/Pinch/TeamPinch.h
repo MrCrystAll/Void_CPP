@@ -9,7 +9,7 @@
 #pragma once
 #include "Pinch.h"
 
-START_PINCH_NS
+START_REWARDS_PINCH_NS
 
 /**
  * @brief A reward for team pinches

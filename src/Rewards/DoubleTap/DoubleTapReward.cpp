@@ -1,6 +1,6 @@
 #include "Rewards/DoubleTap/DoubleTapReward.h"
 
-USE_DT_NS
+USE_REWARDS_DT_NS;
 
 void DoubleTapReward::Reset(const RLGSC::GameState& initialState)
 {

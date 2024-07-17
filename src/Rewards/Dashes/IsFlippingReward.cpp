@@ -1,4 +1,7 @@
 #include <Rewards/Dashes/IsFlippingReward.h>
+#include <Utils/DashesUtils.h>
+
+USE_REWARDS_DASHES_NS;
 
 float IsFlippingReward::GetReward(const PlayerData& player, const GameState& state, const Action& prevAction)
 {

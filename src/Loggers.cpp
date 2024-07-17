@@ -1,6 +1,8 @@
 #include "Loggers.h"
 #include <Utils/LoggerUtils.h>
 
+USE_LOGGERS_NS;
+
 void Logger::Log(RLGPC::Report& report, RLGSC::GameState state)
 {
 	RLGSC::FList data = GetMetrics(state);

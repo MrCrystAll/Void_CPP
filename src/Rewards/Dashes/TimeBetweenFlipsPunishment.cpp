@@ -1,4 +1,7 @@
 #include "Rewards/Dashes/TimeBetweenFlipsPunishment.h"
+#include <Utils/DashesUtils.h>
+
+USE_REWARDS_DASHES_NS;
 
 float TimeBetweenFlipsPunishment::GetReward(const PlayerData& player, const GameState& state, const Action& prevAction)
 {

@@ -1,6 +1,6 @@
 #include "States/Pinch/WallPinchState.h"
 
-USE_PINCH_NS
+USE_STATES_PINCH_NS;
 
 WallPinchSetter::WallPinchSetter(float posVariance, float velVariance, float orientVariance) : posVariance(posVariance), velVariance(velVariance), orientVariance(orientVariance) {
 
