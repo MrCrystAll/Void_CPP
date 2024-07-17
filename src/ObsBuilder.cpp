@@ -1,6 +1,8 @@
 #include "ObsBuilder.h"
 #include "../RLGymPPO_CPP/RLGymSim_CPP/RocketSim/src/Sim/BallPredTracker/BallPredTracker.h"
 
+USE_OBS_BUILDER_NS;
+
 using namespace RLGSC;
 
 RLGSC::FList OnesObs::BuildOBS(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction)

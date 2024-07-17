@@ -9,6 +9,9 @@
 #pragma once
 
 #include <RLGymSim_CPP/Utils/ActionParsers/DiscreteAction.h>
+#include <Utils/VoidUtils.h>
+
+START_ACTION_PARSER_NS
 
 using namespace RLGSC;
 
@@ -29,3 +32,5 @@ public:
 		return actions.size();
 	}
 };
+
+END_ACTION_PARSER_NS

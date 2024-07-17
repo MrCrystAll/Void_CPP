@@ -10,6 +10,9 @@
 #include <RLGymSim_CPP/Utils/OBSBuilders/OBSBuilder.h>
 #include <RLGymSim_CPP/Utils/OBSBuilders/DefaultOBS.h>
 #include "../RLGymPPO_CPP/RLGymSim_CPP/RocketSim/src/Sim/BallPredTracker/BallPredTracker.h"
+#include <Utils/VoidUtils.h>
+
+START_OBS_BUILDER_NS
 
 /**
  * @brief An observation build that fills the obs with 1s
@@ -67,3 +70,5 @@ private:
 
 	int PLAYER_SIZE = 19;
 };
+
+END_OBS_BUILDER_NS

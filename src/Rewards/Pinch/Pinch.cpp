@@ -1,6 +1,6 @@
 #include "Rewards/Pinch/Pinch.h"
 
-USE_PINCH_NS
+USE_REWARDS_PINCH_NS;
 
 PinchReward::PinchReward(PinchArgs args, std::string name) :
 	config(args),

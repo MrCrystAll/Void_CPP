@@ -44,13 +44,23 @@
 #include <Loggers.h>
 #include <LearnerConfigUtils.h>
 
+
+#include <Utils/VoidUtils.h>
 using namespace RLGPC; // RLGymPPO
 using namespace RLGSC; // RLGymSim
 
-//Custom NS
-USE_PINCH_NS
-USE_DT_NS
 
+USE_REWARDS_PINCH_NS;
+USE_REWARDS_DT_NS;
+USE_REWARDS_DASHES_NS;
+
+USE_STATES_DASHES_NS;
+
+USE_OBS_BUILDER_NS;
+USE_ACTION_PARSER_NS;
+USE_LOGGERS_NS;
+
+USE_VOID_NS;
 
 std::vector<Logger*> loggers = {
 	//Ball Loggers

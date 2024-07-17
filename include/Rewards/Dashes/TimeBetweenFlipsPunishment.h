@@ -1,5 +1,8 @@
 #pragma once
 #include <Logging/LoggableReward.h>
+#include <Utils/DashesUtils.h>
+
+START_REWARDS_DASHES_NS
 
 class TimeBetweenFlipsPunishment : public LoggableReward{
 public:
@@ -16,3 +19,5 @@ public:
 private:
 	TBFPArgs config;
 };
+
+END_REWARDS_NS

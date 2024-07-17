@@ -1,6 +1,6 @@
 #include "States/DoubleTap/DoubleTapState.h"
 
-USE_DT_NS
+USE_STATES_DT_NS;
 
 static float random(float min, float max) {
     std::random_device rd;  // a seed source for the random number engine

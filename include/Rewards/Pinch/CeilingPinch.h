@@ -11,7 +11,7 @@
 #include "Pinch.h"
 
 
-START_PINCH_NS
+START_REWARDS_PINCH_NS
 
 /**
  * @brief A reward for ceiling pinches.

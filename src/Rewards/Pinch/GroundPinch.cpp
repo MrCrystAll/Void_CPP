@@ -1,6 +1,6 @@
 #include "Rewards/Pinch/GroundPinch.h"
 
-USE_PINCH_NS
+USE_REWARDS_PINCH_NS;
 
 void PinchGroundSetupReward::Reset(const RLGSC::GameState& initialState)
 {
