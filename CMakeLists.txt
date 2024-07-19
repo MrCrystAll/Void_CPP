@@ -29,16 +29,21 @@ project("Void")
 
 file(GLOB_RECURSE FILES_SRC_E "src/*.cpp")
 file(GLOB_RECURSE FILES_H_E "include/*.h")
+file(GLOB MAIN_GLOBAL_SRC "mains/main.cpp")
 
-add_executable(Void ${FILES_SRC_E} ${FILES_H_E})
 
-target_include_directories(Void PUBLIC "include")
 
-# Set C++ version to 20
+add_library(Void ${FILES_SRC_E} ${FILES_H_E})
+add_executable(Void_Main ${MAIN_GLOBAL_SRC})
+
 set_target_properties(Void PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(Void PROPERTIES CXX_STANDARD 20)
-
 GroupSourcesByFolder(Void)
+
+list(APPEND TARGETS Void_Main)
+
+target_include_directories(Void PUBLIC "include")
+target_link_libraries(Void_Main Void)
 
 
 # Make sure RLGymPPO_CPP is going to build in the same directory as us
@@ -53,3 +58,20 @@ target_link_libraries(Void RLGymPPO_CPP)
 # Include RLBot
 add_subdirectory(RLBotCPP)
 target_link_libraries(Void RLBotCPP)
+
+file(GLOB MAIN_RECOVERY_SRC "mains/RecoveryMain.cpp")
+add_executable(Void_Recovery ${MAIN_RECOVERY_SRC})
+list(APPEND TARGETS Void_Recovery)
+
+file(GLOB MAIN_SHOTS_SRC "mains/ShotsMain.cpp")
+add_executable(Void_Shots ${MAIN_SHOTS_SRC})
+list(APPEND TARGETS Void_Shots)
+
+# Replace here
+
+foreach(tgt ${TARGETS})
+    set_target_properties(${tgt} PROPERTIES LINKER_LANGUAGE CXX)
+    set_target_properties(${tgt} PROPERTIES CXX_STANDARD 20)
+    GroupSourcesByFolder(${tgt})
+    target_link_libraries(${tgt} Void)
+endforeach()
