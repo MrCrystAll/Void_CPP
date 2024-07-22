@@ -10,39 +10,74 @@ ReplaySetter::ReplaySetter(std::string replaysToLoad)
 		VOID_WARN("The path " << replaysToLoad << " doesn't exist, no replays loaded");
 		return;
 	}
+
 	std::ifstream ifs = std::ifstream(replaysToLoad);
 	json j;
+
+	VOID_LOG("Loading replays...");
 	ifs >> j;
 
-	Replay replay;
-	replay.from_json(j, replay);
+	std::vector<Replay> replays = j.at("replays");
 
-	this->replays.push_back(replay);
+	VOID_LOG(replays.size() << " replay(s) loaded!");
+
+	this->replays = replays;
+
+	for (const Replay r: this->replays) {
+		std::pair<int, int> pair = {};
+		pair.first = r.metadata.nBlue;
+		pair.second = r.metadata.nOrange;
+
+		if (not this->sortedReplays.contains(pair)) {
+			this->sortedReplays[pair] = { r };
+		}
+		else {
+			this->sortedReplays[pair].push_back(r);
+		}
+	}
+
+	VOID_LOG("Number of replays per mode: ");
+	for (auto [key, val] : this->sortedReplays) {
+		VOID_LOG(" - " << key.first << "v" << key.second << ": " << val.size());
+	}
 }
 
 GameState ReplaySetter::ResetState(Arena* arena)
 {
-	if (this->replays.size() == 0) return GameState(arena);
-	//TODO: An actually good way to pick a replay
-	int chosenReplayInd = RocketSim::Math::RandInt(0, this->replays.size());
-	Replay chosenReplay = this->replays[chosenReplayInd];
+
+	std::pair<int, int> currentArenaConfig;
+
+	int nBlue = 0, nOrange = 0;
+	
+	for (Car* c : arena->GetCars()) {
+		c->team == Team::BLUE ? nBlue++ : nOrange++;
+	}
+
+	currentArenaConfig.first = nBlue;
+	currentArenaConfig.second = nOrange;
+
+	if (not this->sortedReplays.contains(currentArenaConfig)) return GameState(arena);
+
+	int chosenReplayInd = RocketSim::Math::RandInt(0, this->sortedReplays[currentArenaConfig].size());
+	Replay chosenReplay = this->sortedReplays[currentArenaConfig][chosenReplayInd];
 
 	//TODO: An actually good way to pick the frame
 	int chosenFrame = RocketSim::Math::RandInt(0, chosenReplay.metadata.numberOfPlayableFrames);
 	
-	this->ReplayFrameToState(chosenReplay.frames[chosenFrame], arena);
-	return GameState(arena);
-}
+	GameState gs = chosenReplay.states[chosenFrame];
 
-void ReplaySetter::ReplayFrameToState(ReplayFrame frame, Arena* arena)
-{
-	BallState bs = BallFrame::ToBallState(frame.ball);
-	arena->ball->SetState(bs);
+	VOID_LOG(gs.ball.pos.y);
 
-	int i = 0;
-	for (Car* c: arena->GetCars()) {
-		PlayerData pd = PlayerFrame::ToPlayerData(frame.players[i]);
-		c->SetState(pd.carState);
-		i++;
+	arena->ball->SetState(gs.ballState);
+	auto cars = arena->GetCars();
+	for (Car* c : cars) {
+		for (const PlayerData p : gs.players) {
+			if (p.carId == c->id) {
+				c->SetState(p.carState);
+				break;
+			}
+		}
 	}
+	
+	return GameState(arena);
 }

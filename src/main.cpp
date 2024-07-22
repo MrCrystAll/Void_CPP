@@ -330,7 +330,7 @@ EnvCreateResult EnvCreateFunc() {
 		actionParser,
 		stateSetter,
 
-		1, // Team size
+		2, // Team size
 		true // Spawn opponents
 	);
 
@@ -353,16 +353,18 @@ int main() {
 	// Set up our callbacks
 	learner.stepCallback = OnStep;
 	learner.iterationCallback = OnIteration;
-	/*Replay replay = loader.LoadReplay("./replays/7BB4614B4C23E44EB9178AB22CC380AD.replay", 100);
+	/*std::vector<Replay> replay = loader.LoadReplays("./replays", 100);
 
-	VOID_LOG("Conversion done");
+	VOID_LOG("Conversion done, writing to file...");
 
 	json j;
-	replay.to_json(j, replay);
+	j["replays"] = replay;
 
 	std::ofstream ofs = std::ofstream("test.json");
 	ofs << j;
-	ofs.close();*/
+	ofs.close();
+
+	VOID_LOG("Finished!");*/
 
 	// Start learning!
 	learner.Learn();

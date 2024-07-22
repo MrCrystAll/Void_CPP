@@ -10,6 +10,7 @@ START_REPLAY_NS
 class ReplaySetter: public StateSetter {
 public:
 	std::vector<Replay> replays;
+	std::map<std::pair<int, int>, std::vector<Replay>> sortedReplays = {};
 	ReplaySetter(std::string replaysToLoad);
 
 	virtual GameState ResetState(Arena* arena);

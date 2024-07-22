@@ -9,10 +9,18 @@ using json = nlohmann::json;
 
 namespace RocketSim {
 	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Vec, x, y, z, _w)
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(RotMat, forward, right, up)
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(PhysState, pos, vel, angVel, rotMat)
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(CarControls, throttle, steer, pitch, yaw, roll, boost, jump, handbrake)
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(BallState, BALLSTATE_SERIALIZATION_FIELDS)
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(CarState, CARSTATE_SERIALIZATION_FIELDS)
 };
 
 namespace RLGSC {
 	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ScoreLine, teamGoals)
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(PhysObj, pos, vel, angVel, rotMat)
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(PlayerData, carId, team, phys, physInv, carState, matchGoals, matchSaves, matchAssists, matchShots, matchShotPasses, matchBumps, matchDemos, boostPickups, hasJump, hasFlip, boostFraction, ballTouchedStep, ballTouchedTick)
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(GameState, deltaTime, scoreLine, lastTouchCarID, ballState, ball, ballInv, boostPads, boostPadsInv, boostPadTimers, boostPadTimersInv, lastTickCount)
 }
 
 START_REPLAY_NS
@@ -70,11 +78,12 @@ struct GoalFrame {
 
 struct ReplayMetadata {
 	int numberOfFrames, numberOfPlayableFrames;
+	int nBlue = 0, nOrange = 0;
 	RLGSC::ScoreLine scoreLine;
 
 	std::vector<GoalFrame> goalFrames;
 
-	NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReplayMetadata, numberOfFrames, numberOfPlayableFrames, scoreLine, goalFrames)
+	NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReplayMetadata, numberOfFrames, numberOfPlayableFrames, scoreLine, goalFrames, nBlue, nOrange)
 };
 
 class GameplayPeriod {
@@ -102,7 +111,7 @@ public:
 	NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReplayAnalysis, gameplayPeriods)
 };
 
-class Replay {
+class ConvertedReplay {
 public:
 
 	ReplayMetadata metadata;
@@ -111,7 +120,16 @@ public:
 
 	void AddFrame(ReplayFrame frame) { this->frames.push_back(frame); }
 
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Replay, metadata, analysis, frames)
+	NLOHMANN_DEFINE_TYPE_INTRUSIVE(ConvertedReplay, metadata, analysis, frames)
+};
+
+class Replay {
+public:
+	ReplayMetadata metadata;
+	ReplayAnalysis analysis;
+	std::vector<RLGSC::GameState> states = {};
+
+	NLOHMANN_DEFINE_TYPE_INTRUSIVE(Replay, metadata, analysis, states)
 };
 
 END_REPLAY_NS

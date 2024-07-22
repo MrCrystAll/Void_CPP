@@ -20,12 +20,15 @@ public:
 	/// <returns></returns>
 	Replay LoadReplay(std::string path, int endDelay);
 
+	std::vector<Replay> LoadReplays(std::string path, int delay);
+
 private:
 	std::vector<GameFrame> LoadGameFrames(std::string path, ReplayAnalysis analysis);
 	std::vector<BallFrame> LoadBallFrames(std::string path, ReplayAnalysis analysis);
 	std::vector<std::vector<PlayerFrame>> LoadPlayersFrames(std::string path, ReplayAnalysis analysis);
 	ReplayMetadata LoadMetadata(std::string path, ReplayAnalysis analysis);
 	ReplayAnalysis LoadAnalysis(std::string path, int endDelay);
+	std::vector<RLGSC::GameState> InterpolateReplays(ConvertedReplay replay);
 
 };
 END_REPLAY_NS

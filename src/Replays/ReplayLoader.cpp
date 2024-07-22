@@ -1,4 +1,9 @@
 #include <Replays/ReplayLoader.h>
+#include <RLGymSim_CPP/Gym.h>
+
+#include <RLGymSim_CPP/Utils/RewardFunctions/CommonRewards.h>
+#include <RLGymSim_CPP/Utils/OBSBuilders/DefaultOBS.h>
+#include <RLGymSim_CPP/Utils/ActionParsers/DiscreteAction.h>
 
 USE_REPLAY_NS;
 
@@ -6,9 +11,9 @@ Replay ReplayLoader::LoadReplay(std::string path, int endDelay)
 {
 	int retCode = CallCarball(path);
 
-	Replay replay = Replay();
+	ConvertedReplay replay = ConvertedReplay();
 
-	if (retCode != 0) return replay;
+	if (retCode != 0) return Replay();
 
 	
 	ReplayAnalysis analysis = this->LoadAnalysis("carball_output", endDelay);
@@ -36,7 +41,28 @@ Replay ReplayLoader::LoadReplay(std::string path, int endDelay)
 	replay.metadata = metadata;
 	replay.analysis = analysis;
 
-	return replay;
+	Replay finalReplay = {};
+	finalReplay.analysis = replay.analysis;
+	finalReplay.metadata = replay.metadata;
+
+	finalReplay.states = this->InterpolateReplays(replay);
+	return finalReplay;
+}
+
+std::vector<Replay> ReplayLoader::LoadReplays(std::string path, int delay)
+{
+	std::vector<Replay> replays = {};
+	for (const auto& entry : std::filesystem::directory_iterator(path)) {
+		const auto filenameStr = entry.path().filename().string();
+
+		if (filenameStr.ends_with(".replay")) {
+			Replay r = LoadReplay(path + "/" + filenameStr, delay);
+			if (r.states.size() == 0) continue;
+			replays.push_back(r);
+		}
+	}
+
+	return replays;
 }
 
 std::vector<GameFrame> ReplayLoader::LoadGameFrames(std::string path, ReplayAnalysis analysis)
@@ -244,6 +270,11 @@ ReplayMetadata ReplayLoader::LoadMetadata(std::string path, ReplayAnalysis analy
 		metadataGoalFrames.push_back(gf);
 	}
 
+	for (auto const& player : metadata.at("players")) {
+		bool isOrange = player.at("is_orange");
+		isOrange ? replayMetadata.nOrange++ : replayMetadata.nBlue++;
+	}
+
 	replayMetadata.goalFrames = metadataGoalFrames;
 	return replayMetadata;
 }
@@ -272,4 +303,48 @@ ReplayAnalysis ReplayLoader::LoadAnalysis(std::string path, int endDelay)
 	}
 
 	return analysis;
+}
+
+void ReplayFrameToState(ReplayFrame frame, Arena* arena)
+{
+	BallState bs = BallFrame::ToBallState(frame.ball);
+	arena->ball->SetState(bs);
+
+	int i = 0;
+	for (Car* c : arena->GetCars()) {
+		RLGSC::PlayerData pd = PlayerFrame::ToPlayerData(frame.players[i]);
+		c->SetState(pd.carState);
+		i++;
+	}
+}
+
+std::vector<RLGSC::GameState> ReplayLoader::InterpolateReplays(ConvertedReplay replay)
+{
+	//Fuck that already
+	int nbBlue, nbOrange;
+
+	nbBlue = replay.metadata.nBlue;
+	nbOrange = replay.metadata.nOrange;
+
+	RocketSim::Arena* arena = RocketSim::Arena::Create(GameMode::SOCCAR);
+	for (int i = 0; i < nbBlue; i++) {
+		arena->AddCar(Team::BLUE);
+	}
+	for (int i = 0; i < nbOrange; i++) {
+		arena->AddCar(Team::ORANGE);
+	}
+	
+	std::vector<RLGSC::GameState> states = std::vector<RLGSC::GameState>(replay.metadata.numberOfPlayableFrames);
+	int i = 0;
+
+	VOID_LOG("Interpolating...");
+	for (const ReplayFrame rf : replay.frames) {
+		ReplayFrameToState(rf, arena);
+		arena->Step();
+		states[i] = RLGSC::GameState(arena);
+		i++;
+	}
+	VOID_LOG("Interpolation complete");
+
+	return states;
 }
