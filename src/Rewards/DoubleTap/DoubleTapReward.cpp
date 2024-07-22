@@ -6,6 +6,7 @@ void DoubleTapReward::Reset(const RLGSC::GameState& initialState)
 {
 	this->physHandling.Reset(initialState);
 	this->nbSteps = 0;
+	this->scoreLine = initialState.scoreLine;
 	LoggableReward::Reset(initialState);
 }
 RLGSC::FList DoubleTapReward::GetAllRewards(const RLGSC::GameState& state, const RLGSC::ActionSet& prevActions, bool final)

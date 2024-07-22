@@ -8,6 +8,7 @@
 #include <RLGymSim_CPP/Utils/StateSetters/RandomState.h>
 #include <RLGymSim_CPP/Utils/StateSetters/KickoffState.h>
 #include <RLGymSim_CPP/Utils/ActionParsers/DiscreteAction.h>
+#include <RLGymSim_CPP/Utils/OBSBuilders/DefaultOBSPadded.h>
 
 #include "RLBotClient.h"
 #include "Utils/LoggerUtils.h"
@@ -44,6 +45,9 @@
 #include <Loggers.h>
 #include <LearnerConfigUtils.h>
 
+#include <Replays/ReplayLoader.h>
+#include <Replays/ReplaySetter.h>
+#include <Replays/ReplayUtils.h>
 
 #include <Utils/VoidUtils.h>
 using namespace RLGPC; // RLGymPPO
@@ -61,6 +65,7 @@ USE_ACTION_PARSER_NS;
 USE_LOGGERS_NS;
 
 USE_VOID_NS;
+USE_REPLAY_NS;
 
 std::vector<Logger*> loggers = {
 	//Ball Loggers
@@ -76,6 +81,10 @@ std::vector<Logger*> loggers = {
 };
 
 float maxBallVel = 0.;
+
+ReplayLoader loader = ReplayLoader();
+
+auto stateSetter = new ReplaySetter("test.json");
 
 // This is our step callback, it's called every step from every RocketSim game
 // WARNING: This is called from multiple threads, often simultaneously, 
@@ -287,7 +296,7 @@ EnvCreateResult EnvCreateFunc() {
 			{new VelocityPlayerToBallReward(), 2.0f, "Velocity player to ball"},
 			{new EventReward({.touch = 3.0}), 30.0f, "Event reward"},
 			{new FaceBallReward(), 1.0f, "Face ball"},
-			{new TimeBetweenFlipsPunishment({}), 5.0f}
+			//{new TimeBetweenFlipsPunishment({}), 5.0f}
 		}
 	);
 
@@ -298,8 +307,8 @@ EnvCreateResult EnvCreateFunc() {
 		new GoalScoreCondition()
 	};
 
-	auto obs = new DashObsBuilder(3);
-	auto actionParser = new DashParser();
+	auto obs = new DefaultOBSPadded(6);
+	auto actionParser = new DiscreteAction();
 
 
 	/*DoubleTapState::DoubleTapStateArgs stateArgs = {
@@ -314,8 +323,6 @@ EnvCreateResult EnvCreateFunc() {
 		
 	};*/
 
-	auto stateSetter = new RandomRecoveryState();
-
 	Match* match = new Match(
 		rewards,
 		terminalConditions,
@@ -323,7 +330,7 @@ EnvCreateResult EnvCreateFunc() {
 		actionParser,
 		stateSetter,
 
-		3, // Team size
+		1, // Team size
 		true // Spawn opponents
 	);
 
@@ -346,9 +353,20 @@ int main() {
 	// Set up our callbacks
 	learner.stepCallback = OnStep;
 	learner.iterationCallback = OnIteration;
+	/*Replay replay = loader.LoadReplay("./replays/7BB4614B4C23E44EB9178AB22CC380AD.replay", 100);
+
+	VOID_LOG("Conversion done");
+
+	json j;
+	replay.to_json(j, replay);
+
+	std::ofstream ofs = std::ofstream("test.json");
+	ofs << j;
+	ofs.close();*/
 
 	// Start learning!
 	learner.Learn();
+
 
 	//RLBotClient::Run({ .port = 23233, .obsBuilder = new DefaultOBS(), .actionParser = new DiscreteAction(), .policyPath = "checkpoints/42011264", .obsSize = 70,  .policyLayerSizes = {256, 256, 256}, .tickSkip = 8 });
 	std::cout << "Learning done" << std::endl;

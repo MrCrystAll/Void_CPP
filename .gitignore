@@ -73,3 +73,5 @@ checkpoints
 /docs/html
 /cpp.hint
 /submodels
+/include/Replays/outputs
+/replays
