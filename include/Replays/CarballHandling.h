@@ -15,6 +15,6 @@
 
 START_REPLAY_NS
 
-int CallCarball(std::string replayPath, std::string output_path = "carball_output");
+int CallCarball(std::string replayPath, std::string output_path = "replays/tmp");
 
 END_REPLAY_NS

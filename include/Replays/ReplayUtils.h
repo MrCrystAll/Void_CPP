@@ -9,3 +9,11 @@
 
 #define START_REPLAY_SUB_NS(ns) START_VOID_SUB_NS(REPLAY_NS::ns)
 #define USE_REPLAY_SUB_NS(ns) USE_VOID_SUB_NS(REPLAY_NS::ns)
+
+#define DEFAULT_CARBALL_RESULT_PATH "replays/tmp"
+
+START_REPLAY_NS
+
+std::string GetTimePath();
+
+END_REPLAY_NS

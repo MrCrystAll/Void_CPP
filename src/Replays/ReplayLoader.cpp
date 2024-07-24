@@ -1,13 +1,15 @@
 #include <Replays/ReplayLoader.h>
 #include <RLGymSim_CPP/Gym.h>
 
+#include <ctime>
+
 #include <RLGymSim_CPP/Utils/RewardFunctions/CommonRewards.h>
 #include <RLGymSim_CPP/Utils/OBSBuilders/DefaultOBS.h>
 #include <RLGymSim_CPP/Utils/ActionParsers/DiscreteAction.h>
 
 USE_REPLAY_NS;
 
-Replay ReplayLoader::LoadReplay(std::string path, int endDelay)
+Replay ReplayLoader::LoadReplay(std::string path, int endDelay, bool saveReplay)
 {
 	int retCode = CallCarball(path);
 
@@ -16,17 +18,17 @@ Replay ReplayLoader::LoadReplay(std::string path, int endDelay)
 	if (retCode != 0) return Replay();
 
 	
-	ReplayAnalysis analysis = this->LoadAnalysis("carball_output", endDelay);
-	ReplayMetadata metadata = this->LoadMetadata("carball_output", analysis);
+	ReplayAnalysis analysis = this->LoadAnalysis(DEFAULT_CARBALL_RESULT_PATH, endDelay);
+	ReplayMetadata metadata = this->LoadMetadata(DEFAULT_CARBALL_RESULT_PATH, analysis);
 
-	VOID_LOG("Loaded metadata and analysis");
+	REPLAY_LOADER_LOG("Loaded metadata and analysis");
 
-	std::vector<GameFrame> gameFrames = this->LoadGameFrames("carball_output", analysis);
-	VOID_LOG("Found " << gameFrames.size() << " game frames");
-	std::vector<BallFrame> ballFrames = this->LoadBallFrames("carball_output", analysis);
-	VOID_LOG("Found " << ballFrames.size() << " ball frames");
-	std::vector<std::vector<PlayerFrame>> playersFrames = this->LoadPlayersFrames("carball_output", analysis);
-	VOID_LOG("Found " << playersFrames.size() << " group of players frames");
+	std::vector<GameFrame> gameFrames = this->LoadGameFrames(DEFAULT_CARBALL_RESULT_PATH, analysis);
+	REPLAY_LOADER_LOG("Found " << gameFrames.size() << " game frames");
+	std::vector<BallFrame> ballFrames = this->LoadBallFrames(DEFAULT_CARBALL_RESULT_PATH, analysis);
+	REPLAY_LOADER_LOG("Found " << ballFrames.size() << " ball frames");
+	std::vector<std::vector<PlayerFrame>> playersFrames = this->LoadPlayersFrames(DEFAULT_CARBALL_RESULT_PATH, analysis);
+	REPLAY_LOADER_LOG("Found " << playersFrames.size() << " group of players frames");
 
 	for (int i = 0; i < gameFrames.size(); i++) {
 		ReplayFrame rf = {};
@@ -46,10 +48,13 @@ Replay ReplayLoader::LoadReplay(std::string path, int endDelay)
 	finalReplay.metadata = replay.metadata;
 
 	finalReplay.states = this->InterpolateReplays(replay);
+
+	if(saveReplay) replaySaver.SaveReplay(GetTimePath() + ".json", finalReplay);
+
 	return finalReplay;
 }
 
-std::vector<Replay> ReplayLoader::LoadReplays(std::string path, int delay)
+std::vector<Replay> ReplayLoader::LoadReplays(std::string path, int delay, bool saveReplay)
 {
 	std::vector<Replay> replays = {};
 	for (const auto& entry : std::filesystem::directory_iterator(path)) {
@@ -61,6 +66,8 @@ std::vector<Replay> ReplayLoader::LoadReplays(std::string path, int delay)
 			replays.push_back(r);
 		}
 	}
+
+	if(saveReplay and not replays.empty()) replaySaver.SaveReplays(GetTimePath() + ".json", replays);
 
 	return replays;
 }
@@ -254,8 +261,17 @@ ReplayMetadata ReplayLoader::LoadMetadata(std::string path, ReplayAnalysis analy
 
 	RLGSC::ScoreLine scoreLine = RLGSC::ScoreLine();
 
-	scoreLine[(int)Team::BLUE] = metadata.at("game").at("team_0_score");
-	scoreLine[(int)Team::ORANGE] = metadata.at("game").at("team_1_score");
+	auto jBlueScore = metadata.at("game").at("team_0_score");
+	int blueScore = 0;
+
+	auto jOrangeScore = metadata.at("game").at("team_1_score");
+	int orangeScore = 0;
+
+	if (!jBlueScore.is_null()) blueScore = jBlueScore;
+	if (!jOrangeScore.is_null()) orangeScore = jOrangeScore;
+
+	scoreLine[(int)Team::BLUE] = blueScore;
+	scoreLine[(int)Team::ORANGE] = orangeScore;
 
 	replayMetadata.scoreLine = scoreLine;
 
@@ -337,14 +353,14 @@ std::vector<RLGSC::GameState> ReplayLoader::InterpolateReplays(ConvertedReplay r
 	std::vector<RLGSC::GameState> states = std::vector<RLGSC::GameState>(replay.metadata.numberOfPlayableFrames);
 	int i = 0;
 
-	VOID_LOG("Interpolating...");
+	REPLAY_LOADER_LOG("Interpolating...");
 	for (const ReplayFrame rf : replay.frames) {
 		ReplayFrameToState(rf, arena);
 		arena->Step();
 		states[i] = RLGSC::GameState(arena);
 		i++;
 	}
-	VOID_LOG("Interpolation complete");
+	REPLAY_LOADER_LOG("Interpolation complete");
 
 	return states;
 }

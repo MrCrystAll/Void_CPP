@@ -82,9 +82,10 @@ std::vector<Logger*> loggers = {
 
 float maxBallVel = 0.;
 
-ReplayLoader loader = ReplayLoader();
-
-auto stateSetter = new ReplaySetter("test.json");
+auto stateSetter = new ReplaySetter({
+		.loadExistingReplays = {false, {"1v1.json", "2v2.json", "3v3.json"}, 30},
+		.loadNewReplays = {true, {"replays"}, 30}
+	});
 
 // This is our step callback, it's called every step from every RocketSim game
 // WARNING: This is called from multiple threads, often simultaneously, 
@@ -353,18 +354,6 @@ int main() {
 	// Set up our callbacks
 	learner.stepCallback = OnStep;
 	learner.iterationCallback = OnIteration;
-	/*std::vector<Replay> replay = loader.LoadReplays("./replays", 100);
-
-	VOID_LOG("Conversion done, writing to file...");
-
-	json j;
-	j["replays"] = replay;
-
-	std::ofstream ofs = std::ofstream("test.json");
-	ofs << j;
-	ofs.close();
-
-	VOID_LOG("Finished!");*/
 
 	// Start learning!
 	learner.Learn();
