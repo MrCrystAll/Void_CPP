@@ -9,8 +9,9 @@
 
 #include <Logging/LoggableReward.h>
 #include "Utils/DoubleTapUtils.h"
+#include <Utils/VoidUtils.h>
 
-START_DT_NS
+START_REWARDS_DT_NS
 
 /**
  * @brief Basic double tap reward

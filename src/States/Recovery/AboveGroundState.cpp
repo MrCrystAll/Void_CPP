@@ -1,4 +1,7 @@
 #include "States/Recovery/AboveGroundState.h"
+#include <Utils/DashesUtils.h>
+
+USE_STATES_DASHES_NS;
 
 GameState OverfittingGroundRecoveryState::ResetState(Arena* arena)
 {

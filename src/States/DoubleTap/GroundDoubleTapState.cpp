@@ -1,5 +1,6 @@
 #include "States/DoubleTap/GroundDoubleTapState.h"
 
+USE_STATES_DT_NS;
 
 GameState GroundDoubleTapState::ResetState(Arena* arena)
 {

@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <Utils/VoidUtils.h>
+
 /**
  * @brief Namespace name
  */
@@ -16,9 +18,12 @@
 /**
  * @brief Start flag
  */
-#define START_DT_NS /**\
- * @brief Double tap namespace\
- */namespace DT_NS {
+#define START_REWARDS_DT_NS /**\
+ * @brief Double tap reward namespace\
+ */START_REWARDS_SUB_NS(DT_NS)
+#define START_STATES_DT_NS /**\
+ * @brief Double tap state namespace\
+ */START_STATES_SUB_NS(DT_NS)
 
 /** @brief End flag */
 #define END_DT_NS };
@@ -26,7 +31,10 @@
 /**
  * @brief Use flag
  */
-#define USE_DT_NS using namespace DT_NS;
+#define USE_REWARDS_DT_NS USE_REWARDS_SUB_NS(DT_NS);
+#define USE_STATES_DT_NS USE_STATES_SUB_NS(DT_NS);
+#define USE_ACTION_PARSER_DT_NS USE_ACTION_PARSER_SUB_NS(DT_NS);
+#define USE_OBS_BUILDERS_DT_NS USE_OBS_BUILDER_SUB_NS(DT_NS);
 
 #include "RLGymSim_CPP/Utils/Gamestates/PhysObj.h"
 

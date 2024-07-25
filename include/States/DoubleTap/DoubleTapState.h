@@ -11,7 +11,7 @@
 #include "Utils/DoubleTapUtils.h"
 #include "RLGymSim_CPP/Utils/StateSetters/StateSetter.h"
 
-START_DT_NS
+START_STATES_DT_NS
 
 class OverfittingDoubleTapSetter : public RLGSC::StateSetter {
 public:

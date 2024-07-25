@@ -1,5 +1,6 @@
 #include "States.h"
 
+USE_STATES_NS;
 
 RLGSC::GameState WeightedSampleSetter::ResetState(Arena* arena)
 {

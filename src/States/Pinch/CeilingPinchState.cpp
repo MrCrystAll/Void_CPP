@@ -1,6 +1,6 @@
 #include "States/Pinch/CeilingPinchState.h"
 
-USE_PINCH_NS
+USE_STATES_PINCH_NS;
 
 RLGSC::GameState OverfittingCeilingPinchSetter::ResetState(Arena* arena)
 {

@@ -9,7 +9,7 @@
 
 #include "Rewards/DoubleTap/DoubleTapReward.h"
 
-START_DT_NS
+START_REWARDS_DT_NS
 
 /**
  * @brief A reward for ground double taps

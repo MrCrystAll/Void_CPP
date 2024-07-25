@@ -10,7 +10,9 @@
 
 #include <RLGymSim_CPP/Utils/StateSetters/StateSetter.h>
 #include <RLGymPPO_CPP/Lists.h>
+#include <Utils/VoidUtils.h>
 
+START_STATES_NS
 
 /**
  * @brief Setter that allows to pick a random state in a list of weighted states
@@ -32,3 +34,5 @@ class EmptyBoostKickoffSetter : public RLGSC::StateSetter {
 public:
 	virtual RLGSC::GameState ResetState(Arena* arena) override;
 };
+
+END_STATES_NS

@@ -9,7 +9,9 @@
 #pragma once
 #include <RLGymSim_CPP/Utils/BasicTypes/Lists.h>
 #include <RLGymPPO_CPP/Util/Report.h>
-#include <Utils/LoggerUtils.h>
+#include <Utils/VoidUtils.h>
+
+START_LOGGERS_NS
 
 struct Metric {
 	std::string name;
@@ -17,6 +19,8 @@ struct Metric {
 };
 
 //TODO: Optimize this shit to actually not loop every player for each logger and just do them all in one go
+
+
 
 /**
  * @brief Base logger class
@@ -172,7 +176,7 @@ namespace PlayerLoggers {
 	};
 
 	/**
-	 * @brief Logger that tracks number of demos
+	 * @brief Logger that tracks the average flip time
 	 */
 	class FlipTimeLogger : public Logger {
 	public:
@@ -183,3 +187,4 @@ namespace PlayerLoggers {
 
 
 }
+END_LOGGERS_NS

@@ -11,7 +11,7 @@
 #include "RLGymSim_CPP/Utils/StateSetters/StateSetter.h"
 #include "Utils/PinchUtils.h"
 
-START_PINCH_NS
+START_STATES_PINCH_NS
 
 class WallPinchSetter : public RLGSC::StateSetter {
 public:

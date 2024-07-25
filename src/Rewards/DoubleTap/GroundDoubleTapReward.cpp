@@ -1,6 +1,6 @@
 #include "Rewards/DoubleTap/GroundDoubleTapReward.h"
 
-USE_DT_NS
+USE_REWARDS_DT_NS;
 
 float GroundDoubleTapReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction)
 {
