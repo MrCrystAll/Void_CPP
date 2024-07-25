@@ -15,6 +15,12 @@
 
 START_REPLAY_NS
 
-int CallCarball(std::string replayPath, std::string output_path = "replays/tmp");
+/// <summary>
+/// Calls carball and returns the return code, writes the results to a specific path
+/// </summary>
+/// <param name="replayPath">Path to replay file</param>
+/// <param name="output_path">The file to write the result to</param>
+/// <returns>Return code of the carball call</returns>
+int CallCarball(std::string replayPath, std::string output_path = DEFAULT_CARBALL_RESULT_PATH);
 
 END_REPLAY_NS

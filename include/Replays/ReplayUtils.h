@@ -1,3 +1,11 @@
+/*****************************************************************//**
+ * \file   ReplayUtils.h
+ * \brief  Utils for the replays
+ * 
+ * \author Mathieu Suchet
+ * \date   July 2024
+ *********************************************************************/
+
 #pragma once
 
 #include <Utils/VoidUtils.h>
@@ -17,3 +25,5 @@ START_REPLAY_NS
 std::string GetTimePath();
 
 END_REPLAY_NS
+
+

@@ -1,3 +1,11 @@
+/*****************************************************************//**
+ * \file   ReplaySetter.h
+ * \brief  Setter that lets you reset on replay situations
+ * 
+ * \author Mathieu Suchet
+ * \date   July 2024
+ *********************************************************************/
+
 #pragma once
 
 #include <RLGymSim_CPP/Utils/StateSetters/StateSetter.h>
@@ -12,6 +20,10 @@ START_REPLAY_NS
 #define REPLAY_SETTER_WARN(content) VOID_WARN("[REPLAY SETTER] " << content)
 #define REPLAY_SETTER_ERR(content) VOID_ERR("[REPLAY SETTER] " << content)
 
+
+/// <summary>
+/// Setter that lets you reset on replay situations
+/// </summary>
 class ReplaySetter: public StateSetter {
 public:
 	

@@ -1,3 +1,11 @@
+/*****************************************************************//**
+ * \file   ReplayFrame.h
+ * \brief  File containing all the classes definition for replay handling
+ * 
+ * \author Mathieu Suchet
+ * \date   July 2024
+ *********************************************************************/
+
 #pragma once
 
 #include <RLGymSim_CPP/Utils/BasicTypes/Lists.h>
@@ -25,6 +33,9 @@ namespace RLGSC {
 
 START_REPLAY_NS
 
+/// <summary>
+/// Represents the physical part of an object in a frame
+/// </summary>
 struct PhysicsFrame {
 	Vec pos = Vec(), vel = Vec(), rot = Vec(), angVel = Vec();
 	bool isSleeping = true;
@@ -32,6 +43,9 @@ struct PhysicsFrame {
 	static PhysState ToPhysState(const PhysicsFrame& physObj);
 };
 
+/// <summary>
+/// Represents the ball part of the frame
+/// </summary>
 struct BallFrame: PhysicsFrame {
 	int hitTeamNum = -1;
 
@@ -40,6 +54,9 @@ struct BallFrame: PhysicsFrame {
 	static BallState ToBallState(const BallFrame& ballFrame);
 };
 
+/// <summary>
+/// Represents the "game" part of the frame, mainly containing field data
+/// </summary>
 struct GameFrame {
 	float time = 0, delta = 0, secondsRemaining = 0;
 	int replicatedGameStateTimeRemaining = 0;
@@ -48,6 +65,9 @@ struct GameFrame {
 	NLOHMANN_DEFINE_TYPE_INTRUSIVE(GameFrame, time, delta, secondsRemaining, replicatedGameStateTimeRemaining, isOvertime, ballHasBeenHit)
 };
 
+/// <summary>
+/// Represents a single player's data of the frame
+/// </summary>
 struct PlayerFrame: PhysicsFrame {
 	Vec dodgeJumpTorque = Vec(), dodgeTorque = Vec();
 	int throttle = 0, steer = 0, matchScore = 0, matchGoals = 0, matchAssists = 0, matchSaves = 0, matchShots = 0, team = 0, boostPickup = 0;
@@ -59,6 +79,9 @@ struct PlayerFrame: PhysicsFrame {
 	static RLGSC::PlayerData ToPlayerData(const PlayerFrame& playerFrame);
 };
 
+/// <summary>
+/// A frame of a replay
+/// </summary>
 class ReplayFrame {
 public:
 	BallFrame ball;
@@ -69,6 +92,9 @@ public:
 	NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReplayFrame, ball, game, players)
 };
 
+/// <summary>
+/// A frame where a goal occurred
+/// </summary>
 struct GoalFrame {
 	int frame;
 	Team team;
@@ -76,6 +102,9 @@ struct GoalFrame {
 	NLOHMANN_DEFINE_TYPE_INTRUSIVE(GoalFrame, frame, team)
 };
 
+/// <summary>
+/// The replay metadata, containing misc data about the replay
+/// </summary>
 struct ReplayMetadata {
 	int numberOfFrames, numberOfPlayableFrames;
 	int nBlue = 0, nOrange = 0;
@@ -86,8 +115,12 @@ struct ReplayMetadata {
 	NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReplayMetadata, numberOfFrames, numberOfPlayableFrames, scoreLine, goalFrames, nBlue, nOrange)
 };
 
+/// <summary>
+/// Represents an actual gameplay period, used to eliminate goal celebrations
+/// </summary>
 class GameplayPeriod {
 public:
+
 	GameplayPeriod(int startFrame = 0, int endFrame = 0, int firstHitFrame = 0, int goalFrame = 0);
 	int startFrame, endFrame, firstHitFrame, goalFrame;
 
@@ -96,6 +129,9 @@ public:
 	NLOHMANN_DEFINE_TYPE_INTRUSIVE(GameplayPeriod, startFrame, endFrame, firstHitFrame, goalFrame)
 };
 
+/// <summary>
+/// Analysis of the replay, contains gameplay periods
+/// </summary>
 struct ReplayAnalysis {
 public:
 
@@ -111,6 +147,10 @@ public:
 	NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReplayAnalysis, gameplayPeriods)
 };
 
+
+/// <summary>
+/// The replay resulting from the finished parsing of the .replay file
+/// </summary>
 class ConvertedReplay {
 public:
 
@@ -123,6 +163,9 @@ public:
 	NLOHMANN_DEFINE_TYPE_INTRUSIVE(ConvertedReplay, metadata, analysis, frames)
 };
 
+/// <summary>
+/// The replay resulting from the interpolation of a converted replay
+/// </summary>
 class Replay {
 public:
 	ReplayMetadata metadata;
