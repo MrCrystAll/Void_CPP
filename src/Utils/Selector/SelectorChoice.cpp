@@ -1,6 +1,8 @@
 #include "Utils/Selector/SelectorChoice.h"
 #include "Utils/LoggerUtils.h"
 
+USE_SELECTOR_NS;
+
 void SelectorChoice::UpdateCurrentSubmodels(std::vector<Submodel>& actions)
 {
 	this->currentSubmodels = actions;

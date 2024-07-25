@@ -1,5 +1,7 @@
 #include "ObsBuilders/Selector/SelectorObs.h"
 
+USE_SELECTOR_NS;
+
 RLGSC::FList SelectorObs::BuildOBS(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction)
 {
 	return this->obsBuilder->BuildOBS(player, state, prevAction);

@@ -1,7 +1,21 @@
+/*****************************************************************//**
+ * \file   SelectorObs.h
+ * \brief  Observation builder of the selector
+ * 
+ * \author msuch
+ * \date   July 2024
+ *********************************************************************/
+
 #pragma once
 #include <RLGymSim_CPP/Utils/OBSBuilders/OBSBuilder.h>
 #include <Utils/Selector/SelectorChoice.h>
+#include <Utils/Selector/SelectorUtils.h>
 
+START_SELECTOR_NS
+
+/// <summary>
+/// Observation builder of the selector
+/// </summary>
 class SelectorObs: public RLGSC::OBSBuilder {
 public:
 
@@ -16,3 +30,5 @@ private:
 	RLGSC::OBSBuilder* obsBuilder;
 	SelectorChoice* choice;
 };
+
+END_SELECTOR_NS

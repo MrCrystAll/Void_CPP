@@ -1,5 +1,7 @@
 #include "Rewards/Selector/SelectorReward.h"
 
+USE_SELECTOR_NS;
+
 float SelectorReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction)
 {
 	std::vector<Submodel> chosenModels = this->choice->GetCurrentSubmodels();

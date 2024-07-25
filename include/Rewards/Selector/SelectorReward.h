@@ -1,11 +1,25 @@
+/*****************************************************************//**
+ * \file   SelectorReward.h
+ * \brief  Reward of the selector, weighted depending on the selector choice
+ * 
+ * \author Mathieu Suchet
+ * \date   July 2024
+ *********************************************************************/
+
 #pragma once
 #include <Logging/LoggableReward.h>
 #include <Logging/LoggedCombinedReward.h>
 #include <RLGymSim_CPP/Utils/RewardFunctions/RewardFunction.h>
 #include <Utils/Selector/SelectorChoice.h>
+#include <Utils/Selector/SelectorUtils.h>
 #include <map>
 #include <vector>
 
+START_SELECTOR_NS
+
+/// <summary>
+/// Reward of the selector, weighted depending on the selector choice
+/// </summary>
 class SelectorReward : public LoggableReward {
 public:
 	SelectorReward(LoggedCombinedReward* cbr, SelectorChoice* choice, std::string name = "Selector reward") : choice(choice), LoggableReward(name), cbr(cbr) {};
@@ -30,3 +44,5 @@ public:
 private:
 	LoggedCombinedReward* cbr;
 };
+
+END_SELECTOR_NS

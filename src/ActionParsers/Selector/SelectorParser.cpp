@@ -3,6 +3,8 @@
 #include <map>
 #include <algorithm>
 
+USE_SELECTOR_NS;
+
 ActionSet SelectorParser::ParseActions(const Input& actionsData, const GameState& gameState)
 {
     RLGSC::ActionSet resultActions = {};
