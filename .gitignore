@@ -72,6 +72,4 @@ checkpoints
 /python_scripts/__pycache__/metric_receiver.cpython-312.pyc
 /docs/html
 /cpp.hint
-/detect_cuda_compute_capabilities.cu
-/detect_cuda_version.cc
 /submodels
