@@ -24,6 +24,26 @@ public:
 };
 
 using namespace RLGSC;
+
+class LockedDefaultObs : public RLGSC::DefaultOBS {
+public:
+	Vec posCoef;
+	float velCoef, angVelCoef;
+	int teamSize = 3;
+	bool spawnOpponents = true;
+	LockedDefaultObs(
+		int teamSize = 3,
+		bool spawnOpponents = true,
+		Vec posCoef = Vec(1 / CommonValues::SIDE_WALL_X, 1 / CommonValues::BACK_WALL_Y, 1 / CommonValues::CEILING_Z),
+		float velCoef = 1 / CommonValues::CAR_MAX_SPEED,
+		float angVelCoef = 1 / CommonValues::CAR_MAX_ANG_VEL
+	) : DefaultOBS(posCoef, velCoef, angVelCoef), teamSize(teamSize), spawnOpponents(spawnOpponents) {
+
+	}
+
+	virtual FList BuildOBS(const PlayerData& player, const GameState& state, const Action& prevAction);
+};
+
 /**
  * @brief Obs with ball prediction
  */
