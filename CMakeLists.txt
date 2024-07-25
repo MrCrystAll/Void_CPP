@@ -51,6 +51,8 @@ target_link_libraries(Void_Main Void)
 set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
 
+file(COPY "submodels" DESTINATION "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
+
 # Include RLGymSim_PPO
 add_subdirectory(RLGymPPO_CPP)
 target_link_libraries(Void RLGymPPO_CPP)
