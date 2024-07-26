@@ -61,13 +61,9 @@ target_link_libraries(Void RLGymPPO_CPP)
 add_subdirectory(RLBotCPP)
 target_link_libraries(Void RLBotCPP)
 
-file(GLOB MAIN_RECOVERY_SRC "mains/RecoveryMain.cpp")
-add_executable(Void_Recovery ${MAIN_RECOVERY_SRC})
-list(APPEND TARGETS Void_Recovery)
-
-file(GLOB MAIN_SHOTS_SRC "mains/ShotsMain.cpp")
-add_executable(Void_Shots ${MAIN_SHOTS_SRC})
-list(APPEND TARGETS Void_Shots)
+file(GLOB MAIN_SELECTOR_SRC "mains/SelectorMain.cpp")
+add_executable(Void_Selector ${MAIN_SELECTOR_SRC})
+list(APPEND TARGETS Void_Selector)
 
 # Replace here
 

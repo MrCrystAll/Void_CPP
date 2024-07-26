@@ -60,6 +60,13 @@ def create_ap_file(path: str, name: str, header: bool):
             f.write("};\n\n")
             f.write(f"END_{name.upper()}_NS\n")
             
+    else:
+        folder_name = path.split("\\")[-1]
+        
+        with open(os.path.join(path, name + "ActionParser.cpp"), "x") as f:
+            _add_include(f"{name}/{name + 'Utils.h'}", f)
+            _add_include(f"{name}/{folder_name}/{name + 'ActionParser.h'}", f)
+            
 def create_ob_file(path: str, name: str, header: bool):
     capitalized_name = name[0].upper() + name[1:]
     if header:
@@ -76,6 +83,12 @@ def create_ob_file(path: str, name: str, header: bool):
             f.write(f"class {capitalized_name}ObsBuilder: public DefaultOBSPadded" + "{\n")
             f.write("};\n\n")
             f.write(f"END_{name.upper()}_NS\n")
+    else:
+        folder_name = path.split("\\")[-1]
+        
+        with open(os.path.join(path, name + "ObsBuilder.cpp"), "x") as f:
+            _add_include(f"{name}/{name + 'Utils.h'}", f)
+            _add_include(f"{name}/{folder_name}/{name + 'ObsBuilder.h'}", f)
            
 
 def create_state_file(path: str, name: str, header: bool):

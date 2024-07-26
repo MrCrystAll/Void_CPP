@@ -1,9 +1,7 @@
-#include "ActionParsers/Selector/SelectorParser.h"
-#include <Utils/LoggerUtils.h>
-#include <map>
-#include <algorithm>
+#include <Selector/SelectorUtils.h>
+#include <Selector/ActionParsers/SelectorActionParser.h>
 
-USE_SELECTOR_NS;
+USE_SELECTOR_AP_NS;
 
 ActionSet SelectorParser::ParseActions(const Input& actionsData, const GameState& gameState)
 {
