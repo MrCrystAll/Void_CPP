@@ -71,8 +71,6 @@ USE_VOID_NS;
 USE_REPLAY_NS;
 
 USE_RCF_NS;
-AbstractRCF* rcf = new OnWallRCF(100, 100);
-ReplayFilter filter = ReplayFilter(rcf);
 
 std::vector<Logger*> loggers = {
 	//Ball Loggers
@@ -90,8 +88,7 @@ std::vector<Logger*> loggers = {
 float maxBallVel = 0.;
 
 auto stateSetter = new ReplaySetter({
-		//.loadExistingReplays = {false, {"replays/1v1.json", "replays/2v2.json", "replays/3v3.json"}, 30},
-		.loadExistingReplays = {true, {"Wall2v2.json"}, 30},
+		.loadExistingReplays = {false, {"replays/1v1.json", "replays/2v2.json", "replays/3v3.json"}, 30},
 		.loadNewReplays = {false, {"replays"}, 30}
 	});
 
@@ -358,13 +355,6 @@ int main() {
 
 	// Make the learner with the environment creation function and the config we just made
 	Learner learner = Learner(EnvCreateFunc, cfg);
-
-	/*ReplayLoader loader = ReplayLoader();
-	Replay replay = loader.LoadReplay("replays/A7D1710A45D6737BD12906BBED98B970.replay", 50, true);
-
-	Replay filteredGround = filter.FilterReplay(replay);
-	ReplaySaver saver = ReplaySaver();
-	saver.SaveReplay("Wall2v2.json", filteredGround);*/
 
 	// Set up our callbacks
 	learner.stepCallback = OnStep;
