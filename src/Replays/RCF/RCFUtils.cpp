@@ -5,7 +5,7 @@ START_RCF_NS
 
 #define X_AT_ZERO 8064
 
-bool isGoalScored(const GameState state)
+bool IsGoalScored(const GameState state)
 {
 	return GoalScoreCondition().IsTerminal(state);
 }

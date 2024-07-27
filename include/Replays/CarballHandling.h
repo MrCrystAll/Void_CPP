@@ -1,5 +1,5 @@
 /*****************************************************************//**
- * \file   carball_handling.h
+ * \file   CarballHandling.h
  * \brief  Handling of all the carball related stuff
  * 
  * \author Mathieu Suchet
