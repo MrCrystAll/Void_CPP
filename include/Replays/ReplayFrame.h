@@ -27,8 +27,8 @@ namespace RocketSim {
 namespace RLGSC {
 	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ScoreLine, teamGoals)
 	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(PhysObj, pos, vel, angVel, rotMat)
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(PlayerData, carId, team, phys, physInv, carState, matchGoals, matchSaves, matchAssists, matchShots, matchShotPasses, matchBumps, matchDemos, boostPickups, hasJump, hasFlip, boostFraction, ballTouchedStep, ballTouchedTick)
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(GameState, deltaTime, scoreLine, lastTouchCarID, ballState, ball, ballInv, boostPads, boostPadsInv, boostPadTimers, boostPadTimersInv, lastTickCount)
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(PlayerData, carState)
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(GameState, deltaTime, scoreLine, lastTouchCarID, ballState, ball, ballInv, boostPads, boostPadsInv, boostPadTimers, boostPadTimersInv, lastTickCount, players)
 }
 
 START_REPLAY_NS
@@ -77,6 +77,7 @@ struct PlayerFrame: PhysicsFrame {
 	NLOHMANN_DEFINE_TYPE_INTRUSIVE(PlayerFrame, pos, vel, angVel, rot, isSleeping, dodgeJumpTorque, dodgeTorque, throttle, steer, matchScore, matchAssists, matchSaves, matchShots, team, boostPickup, handbrake, isBoostActive, isJumpActive, isDoubleJumpActive, isFlipCarActive, isDodgeActive, boostAmount)
 
 	static RLGSC::PlayerData ToPlayerData(const PlayerFrame& playerFrame);
+	static RocketSim::CarState ToCarState(const PlayerFrame& playerFrame);
 };
 
 /// <summary>

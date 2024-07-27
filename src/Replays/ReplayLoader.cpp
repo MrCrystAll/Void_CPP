@@ -328,8 +328,8 @@ void ReplayFrameToState(ReplayFrame frame, Arena* arena)
 
 	int i = 0;
 	for (Car* c : arena->GetCars()) {
-		RLGSC::PlayerData pd = PlayerFrame::ToPlayerData(frame.players[i]);
-		c->SetState(pd.carState);
+		CarState cs = PlayerFrame::ToCarState(frame.players[i]);
+		c->SetState(cs);
 		i++;
 	}
 }

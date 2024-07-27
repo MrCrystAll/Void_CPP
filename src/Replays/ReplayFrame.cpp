@@ -45,6 +45,21 @@ RLGSC::PlayerData PlayerFrame::ToPlayerData(const PlayerFrame& playerFrame)
 	return playerData;
 }
 
+RocketSim::CarState PlayerFrame::ToCarState(const PlayerFrame& playerFrame)
+{
+	PhysState ps = PlayerFrame::ToPhysState(playerFrame);
+	CarState cs = {};
+	cs.pos = ps.pos;
+	cs.vel = ps.vel;
+	cs.rotMat = ps.rotMat;
+	cs.angVel = ps.angVel;
+
+	cs.boost = playerFrame.boostAmount;
+	cs.isFlipping = playerFrame.isFlipCarActive;
+
+	return cs;
+}
+
 PhysState PhysicsFrame::ToPhysState(const PhysicsFrame& physObj)
 {
 	PhysState ps = {};
@@ -53,6 +68,7 @@ PhysState PhysicsFrame::ToPhysState(const PhysicsFrame& physObj)
 	ps.angVel = physObj.angVel;
 	Angle angle = {};
 	btQuaternion(physObj.rot.x, physObj.rot.y, physObj.rot.z, physObj.rot._w).getEulerZYX(angle.yaw, angle.pitch, angle.roll);
+	angle.roll = -angle.roll;
 	ps.rotMat = angle.ToRotMat();
 
 	return ps;

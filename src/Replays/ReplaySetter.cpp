@@ -102,20 +102,16 @@ GameState ReplaySetter::ResetState(Arena* arena)
 	int chosenReplayInd = RocketSim::Math::RandInt(0, this->sortedReplays[currentArenaConfig].size());
 	Replay chosenReplay = this->sortedReplays[currentArenaConfig][chosenReplayInd];
 
-	//TODO: An actually good way to pick the frame
 	int chosenFrame = RocketSim::Math::RandInt(0, chosenReplay.metadata.numberOfPlayableFrames);
 	
 	GameState gs = chosenReplay.states[chosenFrame];
 
 	arena->ball->SetState(gs.ballState);
 	auto cars = arena->GetCars();
+	int i = 0;
 	for (Car* c : cars) {
-		for (const PlayerData p : gs.players) {
-			if (p.carId == c->id) {
-				c->SetState(p.carState);
-				break;
-			}
-		}
+		c->SetState(gs.players[i].carState);
+		i++;
 	}
 	
 	return GameState(arena);

@@ -12,9 +12,9 @@ void ReplaySaver::SaveReplay(std::string path, Replay replay)
 	if (std::filesystem::exists(path)) {
 		REPLAY_SAVER_LOG("A file already exists at " << path << ". Overwriting.");
 	}
-	json jReplay = SerializeReplay(replay);
 	std::ofstream ofs = std::ofstream(path, std::ofstream::trunc);
-	ofs << jReplay;
+	std::vector<json> vectoredReplay = { SerializeReplay(replay)};
+	ofs << vectoredReplay;
 	ofs.close();
 
 	REPLAY_SAVER_LOG("Replay successfully saved at " << path);
