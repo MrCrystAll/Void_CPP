@@ -30,6 +30,9 @@ public:
 	virtual RLGSC::GameState ResetState(Arena* arena) override;
 };
 
+/// <summary>
+/// A kickoff state setter, but without boost
+/// </summary>
 class EmptyBoostKickoffSetter : public RLGSC::StateSetter {
 public:
 	virtual RLGSC::GameState ResetState(Arena* arena) override;

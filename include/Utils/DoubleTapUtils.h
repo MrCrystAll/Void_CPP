@@ -9,6 +9,7 @@
 #pragma once
 
 #include <Utils/VoidUtils.h>
+#include <Utils/LoggingUtils.h>
 
 /**
  * @brief Namespace name
@@ -47,6 +48,4 @@
  */
 bool IsOutsideBackboardZone(const RLGSC::PhysObj physObj, int distFromBackboard, int minHeight);
 
-
-
-
+USE_LOGGING_NS;

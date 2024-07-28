@@ -9,6 +9,7 @@
 #pragma once
 
 #include <Utils/VoidUtils.h>
+#include <Utils/LoggingUtils.h>
 
 /**
  * @brief Namespace name
@@ -37,3 +38,5 @@
 #define USE_STATES_PINCH_NS USE_STATES_SUB_NS(PINCH_NS);
 #define USE_ACTION_PARSER_PINCH_NS USE_ACTION_PARSER_SUB_NS(PINCH_NS);
 #define USE_OBS_BUILDERS_PINCH_NS USE_OBS_BUILDER_SUB_NS(PINCH_NS);
+
+USE_LOGGING_NS;

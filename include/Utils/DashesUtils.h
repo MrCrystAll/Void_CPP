@@ -8,6 +8,7 @@
 #pragma once
 
 #include <Utils/VoidUtils.h>
+#include <Utils/LoggingUtils.h>
 
  /**
   * @brief Namespace name
@@ -35,3 +36,5 @@
 #define USE_STATES_DASHES_NS USE_STATES_SUB_NS(DASHES_NS);
 #define USE_ACTION_PARSER_DASHES_NS USE_ACTION_PARSER_SUB_NS(DASHES_NS);
 #define USE_OBS_BUILDERS_DASHES_NS USE_OBS_BUILDER_SUB_NS(DASHES_NS);
+
+USE_LOGGING_NS;

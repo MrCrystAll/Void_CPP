@@ -2,6 +2,8 @@
 
 #include <Logging/LoggableReward.h>
 
+USE_LOGGING_NS;
+
 
 void LoggableReward::LogAll(RLGPC::Report& report, bool final, std::string name, float weight)
 {

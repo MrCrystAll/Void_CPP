@@ -2,6 +2,8 @@
 #include <RLGymPPO_CPP/Util/Report.h>
 #include <Logging/LoggableReward.h>
 
+USE_LOGGING_NS;
+
 using namespace RLGPC;
 
 void LoggedCombinedReward::LogAll(RLGPC::Report& report, bool final, std::string name, float weight)

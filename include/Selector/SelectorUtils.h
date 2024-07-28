@@ -1,4 +1,5 @@
 #include <Utils/VoidUtils.h>
+#include <Utils/LoggingUtils.h>
 
 //Base namespace utils (Auto-generated comment)
 #define SELECTOR_NS Selector
@@ -16,3 +17,5 @@
 #define USE_SELECTOR_STATES_NS USE_VOID_SUB_NS(SELECTOR_NS::States)
 #define USE_SELECTOR_AP_NS USE_VOID_SUB_NS(SELECTOR_NS::AP)
 #define USE_SELECTOR_OB_NS USE_VOID_SUB_NS(SELECTOR_NS::OB)
+
+USE_LOGGING_NS;

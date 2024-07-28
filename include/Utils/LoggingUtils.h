@@ -8,11 +8,21 @@
 
 #pragma once
 
-#include "LoggerUtils.h"
 #include <map>
 #include <vector>
 #include <algorithm>
 #include <numeric>
+
+#include <Utils/LoggerUtils.h>
+#include <Utils/VoidUtils.h>
+
+#define LOGGING_NS Logging
+
+#define START_LOGGING_NS START_VOID_SUB_NS(LOGGING_NS)
+#define END_LOGGING_NS END_NS
+#define USE_LOGGING_NS USE_VOID_SUB_NS(LOGGING_NS)
+
+START_LOGGING_NS
 
 typedef std::pair<float, std::string> Log;
 
@@ -132,3 +142,4 @@ struct LoggedFloat
 	 */
 	void ResetAll();
 };
+END_LOGGING_NS

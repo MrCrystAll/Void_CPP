@@ -7,8 +7,10 @@
  *********************************************************************/
 
 #pragma once
-#include "Logging/LoggableReward.h"
+#include <Logging/LoggableReward.h>
 #include <RLGymSim_CPP/Utils/CommonValues.h>
+
+START_LOGGING_NS
 
 using namespace RLGSC;
 
@@ -28,3 +30,5 @@ public:
 		return this->ComputeReward();
 	}
 };
+
+END_LOGGING_NS
