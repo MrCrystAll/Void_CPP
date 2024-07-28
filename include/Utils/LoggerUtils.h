@@ -20,6 +20,11 @@ constexpr auto REWARD_HEADER = "Rewards/";
 constexpr auto METRICS_HEADER = "Metrics/";
 
 /**
+ * @brief The header to organize the selector logging
+ */
+constexpr auto SELECTOR_HEADER = "Selector/";
+
+/**
  * @brief Logs the content on the out channel (Used for normal logs)
  */
 #define VOID_LOG(content) std::cout << content << std::endl
