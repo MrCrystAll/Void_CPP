@@ -15,6 +15,9 @@ START_ACTION_PARSER_NS
 
 using namespace RLGSC;
 
+/// <summary>
+/// A parser that removes the throttle actions
+/// </summary>
 class DashParser: public RLGSC::ActionParser
 {
 public:

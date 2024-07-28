@@ -13,6 +13,9 @@
 
 START_LOGGERS_NS
 
+/// <summary>
+/// A structure to hold a name and a bool to check if average
+/// </summary>
 struct Metric {
 	std::string name;
 	bool isAvg = true;

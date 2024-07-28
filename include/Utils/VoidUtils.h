@@ -9,7 +9,6 @@
 #pragma once
 
 #include "LoggerUtils.h"
-#include "LoggingUtils.h"
 
 /**
  * @brief Base void namespace
@@ -84,3 +83,15 @@
 
 #define START_STATES_SUB_NS(ns) START_VOID_SUB_NS(STATES_NS::ns)
 #define USE_STATES_SUB_NS(ns) USE_VOID_SUB_NS(STATES_NS::ns)
+
+ /**
+  * @brief Terminal condition
+  */
+
+#define TC_NS States
+#define USE_TC_NS USE_VOID_SUB_NS(TC_NS)
+#define START_TC_NS START_VOID_SUB_NS(TC_NS)
+#define END_TC_NS END_NS
+
+#define START_TC_SUB_NS(ns) START_VOID_SUB_NS(TC_NS::ns)
+#define USE_TC_SUB_NS(ns) USE_VOID_SUB_NS(TC_NS::ns)

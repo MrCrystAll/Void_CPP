@@ -7,7 +7,10 @@
  *********************************************************************/
 
 #pragma once
+#include <Utils/VoidUtils.h>
 #include <RLGymSim_CPP/Utils/TerminalConditions/TerminalCondition.h>
+
+START_TC_NS
 
 class TimeoutCondition : public RLGSC::TerminalCondition {
 public:
@@ -34,3 +37,5 @@ class TouchTimeoutCondition : public RLGSC::TerminalCondition {
 	// Inherited via TerminalCondition
 	bool IsTerminal(const RLGSC::GameState& currentState) override;
 };
+
+END_TC_NS

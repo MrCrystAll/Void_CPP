@@ -1,5 +1,7 @@
 #include "TerminalConditions.h"
 
+USE_TC_NS;
+
 TimeoutCondition::TimeoutCondition(int steps_before_to) : totalSteps(steps_before_to), currentSteps(0)
 {
 	

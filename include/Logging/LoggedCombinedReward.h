@@ -13,12 +13,20 @@
 #include <RLGymPPO_CPP/Util/Report.h>
 #include <Utils/LoggerUtils.h>
 
+START_LOGGING_NS
+
 using namespace RLGSC;
 
+/// <summary>
+/// A combined reward that logs every reward it has
+/// </summary>
 class LoggedCombinedReward: public RLGSC::RewardFunction
 {
 public:
 
+	/// <summary>
+	/// A tuple of Reward function, weight and name (name is for non-loggable)
+	/// </summary>
 	struct RewardArg {
 		RLGSC::RewardFunction* rf;
 		float w = 1.0f;
@@ -52,3 +60,5 @@ public:
 private:
 
 };
+
+END_LOGGING_NS

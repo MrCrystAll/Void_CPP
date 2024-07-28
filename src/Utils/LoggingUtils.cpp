@@ -6,6 +6,8 @@
 #include <cmath>
 #include "Utils/LoggingUtils.h"
 
+USE_LOGGING_NS;
+
 LoggedFloat LoggedFloat::operator+(Log other)
 {
 	this->value += other.first;

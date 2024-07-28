@@ -1,6 +1,9 @@
 #pragma once
 
 #include <RLGymSim_CPP/Utils/OBSBuilders/DefaultOBS.h>
+#include <Utils/VoidUtils.h>
+
+START_OBS_BUILDER_NS
 
 class DashObsBuilder: public RLGSC::DefaultOBS {
 public:
@@ -19,3 +22,5 @@ public:
 	// Inherited via OBSBuilder
 	RLGSC::FList BuildOBS(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction) override;
 };
+
+END_OBS_BUILDER_NS

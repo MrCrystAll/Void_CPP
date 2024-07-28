@@ -1,5 +1,7 @@
 #include "ObsBuilders/Dashes/DashObsBuilder.h"
 
+USE_OBS_BUILDER_NS;
+
 void DashObsBuilder::AddPlayerToOBS(RLGSC::FList& obs, const RLGSC::PlayerData& player, bool inv)
 {
 	RLGSC::PhysObj phys = player.GetPhys(inv);

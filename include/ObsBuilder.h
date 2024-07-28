@@ -25,10 +25,11 @@ public:
 
 using namespace RLGSC;
 
+/// <summary>
+/// An obs builder that only takes a given number of players per team
+/// </summary>
 class LockedDefaultObs : public RLGSC::DefaultOBS {
 public:
-	Vec posCoef;
-	float velCoef, angVelCoef;
 	int teamSize = 3;
 	bool spawnOpponents = true;
 	LockedDefaultObs(

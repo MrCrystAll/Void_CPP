@@ -11,6 +11,8 @@
 #include <RLGymPPO_CPP/Util/Report.h>
 #include <Utils/LoggingUtils.h>
 
+START_LOGGING_NS
+
 using namespace RLGSC;
 using namespace RLGPC;
 
@@ -82,6 +84,9 @@ public:
 	virtual float GetReward(const PlayerData& player, const GameState& state, const Action& prevAction) = 0;
 };
 
+/// <summary>
+/// A wrapper to log a non-loggable reward
+/// </summary>
 class LoggableWrapper : public LoggableReward {
 public:
 	/**
@@ -106,3 +111,5 @@ public:
 private:
 	RewardFunction* rfn;
 };
+
+END_LOGGING_NS
