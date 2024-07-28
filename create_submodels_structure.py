@@ -144,6 +144,7 @@ def create_reward_file(path: str, name: str, header: bool):
             _add_include("Logging/LoggableReward.h", f)
             f.write("\n")
             
+            f.write("USE_LOGGING_NS")
             f.write("using namespace RLGSC;\n\n")
             
             f.write(start_macro(name, REWARD_NS_NAME) + "\n\n")
@@ -219,6 +220,9 @@ def _add_namespaces_and_uses(name: str, file: TextIOWrapper):
     for ns in all_ns:
         _add_define(use_macro(name, ns), f"USE_VOID_SUB_NS({ns_var_name}::{ns})", file)
     
+    file.write("\n")
+    file.write("USE_LOGGING_NS;\n")
+    
 
 def create_folder_structure(path: str, name: str, is_header: bool):
     
@@ -247,6 +251,7 @@ def create_folder_structure(path: str, name: str, is_header: bool):
             _add_include(f"{name}/{utils_file_name[:-4] + '.h'}", f)
         else:
             _add_include("Utils/VoidUtils.h", f)
+            _add_include("Logging/LoggableReward.h", f)
             _add_namespaces_and_uses(name, f)
         
             

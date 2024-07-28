@@ -91,14 +91,11 @@ struct Stat
 	 */
 	StatResult ComputeAll();
 
-	/**
-	 * @brief Resets the stat
-	 * 
-	 */
-	void Reset();
-
 	Stat operator+(float value);
 	Stat operator+=(float value);
+
+	Stat operator-(float value);
+	Stat operator-=(float value);
 };
 
 /**
@@ -113,6 +110,15 @@ struct LoggedFloat
 
 	LoggedFloat operator+(Log other);
 	LoggedFloat operator+=(Log other);
+
+	LoggedFloat operator-(Log other);
+	LoggedFloat operator-=(Log other);
+
+	LoggedFloat operator*(Log other);
+	LoggedFloat operator*=(Log other);
+
+	LoggedFloat operator/(Log other);
+	LoggedFloat operator/=(Log other);
 
 	LoggedFloat(std::vector<std::string> metrics = {}) : metrics(metrics) { InitMetrics(); };
 

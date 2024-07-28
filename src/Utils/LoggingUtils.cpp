@@ -4,6 +4,7 @@
 #include <map>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include "Utils/LoggingUtils.h"
 
 USE_LOGGING_NS;
@@ -23,7 +24,6 @@ LoggedFloat LoggedFloat::operator+(Log other)
 
 	
 	this->logs["_total"] += other.first;
-	//VOID_LOG("Logging " << other.second << ": " << other.first << " (Total: " << this->logs["_total"].value << ")");
 	return *this;
 }
 
@@ -32,11 +32,86 @@ LoggedFloat LoggedFloat::operator+=(Log other)
 	return *this + other;
 }
 
-float Stat::ComputeAvg() const { return count > 0 ? value / count : 0; }
+LoggedFloat LoggedFloat::operator-(Log other)
+{
+	this->value -= other.first;
+	if (this->logs.contains(other.second))
+	{
+		this->logs[other.second] -= other.first;
+	}
+	else
+	{
+		this->logs[other.second] = { .value = -other.first, .count = this->nbSteps };
+		this->metrics.push_back(other.second);
+	}
+
+
+	this->logs["_total"] -= other.first;
+	return *this;
+}
+
+LoggedFloat LoggedFloat::operator-=(Log other)
+{
+	return *this - other;
+}
+
+LoggedFloat LoggedFloat::operator*(Log other)
+{
+	float difference = (other.first - 1) * this->value;
+	this->value += difference;
+	if (this->logs.contains(other.second))
+	{
+		this->logs[other.second] += difference;
+	}
+	else
+	{
+		this->logs[other.second] = { .value = difference, .count = this->nbSteps };
+		this->metrics.push_back(other.second);
+	}
+	
+	this->logs["_total"] += difference;
+	return *this;
+}
+
+LoggedFloat LoggedFloat::operator*=(Log other)
+{
+	return *this * other;
+}
+
+LoggedFloat LoggedFloat::operator/(Log other)
+{
+	//This is negative (unless you divide by a negative number, then it's positive)
+	float difference = (this->value * (1 - other.first)) / other.first;
+
+	this->value += difference;
+	if (this->logs.contains(other.second))
+	{
+		this->logs[other.second] += other.first;
+	}
+	else
+	{
+		this->logs[other.second] = { .value = difference, .count = this->nbSteps };
+		this->metrics.push_back(other.second);
+	}
+
+
+	this->logs["_total"] += other.first;
+	return *this;
+}
+
+LoggedFloat LoggedFloat::operator/=(Log other)
+{
+	return *this / other;
+}
+
+float Stat::ComputeAvg() const { 
+	double sum = std::accumulate(allValues.begin(), allValues.end(), 0.0);
+	return sum / count;
+}
 
 float Stat::ComputeMedian() {
 	std::sort(allValues.begin(), allValues.end(), std::less_equal<float>());
-	int n = allValues.size();
+	size_t n = allValues.size();
 
 	if (n % 2 != 0)
 		return allValues[n / 2];
@@ -67,11 +142,10 @@ Stat::StatResult Stat::ComputeAll() {
 	return { .mean = ComputeAvg(), .median = ComputeMedian(), .std = ComputeStd(), .min = ComputeMin(), .max = ComputeMax() };
 }
 
-void Stat::Reset() { value = 0; count = 0; this->allValues.clear(); }
-
 Stat Stat::operator+(float value) { this->value += value; allValues.push_back(value); return *this; }
-Stat Stat::operator+=(float value) { return *this + value; };
-
+Stat Stat::operator+=(float value) { return *this + value; }
+Stat Stat::operator-(float value) { this->value -= value; allValues.push_back(value); return *this; }
+Stat Stat::operator-=(float value) { return *this - value; }
 
 void LoggedFloat::InitMetrics() {
 	for (std::string s : metrics) {
@@ -90,7 +164,9 @@ void LoggedFloat::Step() {
 	}
 }
 
-void LoggedFloat::Reset() { this->value = 0; }
+void LoggedFloat::Reset() { 
+	this->value = 0;
+}
 void LoggedFloat::ResetAll() {
 	this->logs.clear();
 	this->InitMetrics();

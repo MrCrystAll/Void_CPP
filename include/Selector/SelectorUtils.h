@@ -5,6 +5,7 @@
 #define SELECTOR_NS Selector
 #define START_SELECTOR_NS START_VOID_SUB_NS(SELECTOR_NS)
 #define END_SELECTOR_NS END_NS
+#define USE_SELECTOR_NS USE_VOID_SUB_NS(SELECTOR_NS)
 
 //Sub namespaces start macros (Auto-generated comment)
 #define START_SELECTOR_REWARDS_NS START_VOID_SUB_NS(SELECTOR_NS::Rewards)

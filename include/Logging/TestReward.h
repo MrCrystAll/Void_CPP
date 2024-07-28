@@ -21,11 +21,9 @@ class DummyReward : public LoggableReward {
 public:
 	DummyReward(std::string name = "Dummy") : LoggableReward(name) {};
 	virtual float GetReward(const PlayerData& player, const GameState& state, const Action& prevAction) {
-
-		/*if (state.ball.pos.z < 100) {
-			reward += {1, "Ball height"};
-		}*/
 		reward += {player.carState.vel.Length() / RLGSC::CommonValues::CAR_MAX_SPEED, "Ball speed"};
+
+		reward *= {20, "Fuck multipliers"};
 
 		return this->ComputeReward();
 	}

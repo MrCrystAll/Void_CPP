@@ -65,6 +65,14 @@ file(GLOB MAIN_SELECTOR_SRC "mains/SelectorMain.cpp")
 add_executable(Void_Selector ${MAIN_SELECTOR_SRC})
 list(APPEND TARGETS Void_Selector)
 
+file(GLOB MAIN_DOUBLETAP_SRC "mains/DoubleTapMain.cpp")
+add_executable(Void_DoubleTap ${MAIN_DOUBLETAP_SRC})
+list(APPEND TARGETS Void_DoubleTap)
+
+file(GLOB MAIN_RECOVERY_SRC "mains/RecoveryMain.cpp")
+add_executable(Void_Recovery ${MAIN_RECOVERY_SRC})
+list(APPEND TARGETS Void_Recovery)
+
 # Replace here
 
 foreach(tgt ${TARGETS})

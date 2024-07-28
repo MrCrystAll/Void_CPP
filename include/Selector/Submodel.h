@@ -16,7 +16,7 @@
 #include <RLGymSim_CPP/Utils/OBSBuilders/DefaultOBS.h>
 
 #include <RLGymPPO_CPP/Util/PolicyInferUnit.h>
-#include <Utils/Selector/SelectorUtils.h>
+#include <Selector/SelectorUtils.h>
 
 START_SELECTOR_NS
 

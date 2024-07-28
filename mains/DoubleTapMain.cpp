@@ -1,56 +1,53 @@
+//The double tap config
+#include <DoubleTap/DoubleTapUtils.h>
+#include <DoubleTap/ActionParsers/DoubleTapActionParser.h>
+#include <DoubleTap/StateSetters/DoubleTapStateSetter.h>
+#include <DoubleTap/Rewards/GroundDoubleTapReward.h>
+#include <DoubleTap/ObsBuilders/DoubleTapObsBuilder.h>
+
+//The learner
 #include <RLGymPPO_CPP/Learner.h>
-#include <RLGymPPO_CPP/Util/SkillTrackerConfig.h>
 
-#include <RLGymSim_CPP/Utils/RewardFunctions/CommonRewards.h>
-#include <RLGymSim_CPP/Utils/RewardFunctions/CombinedReward.h>
-#include <RLGymSim_CPP/Utils/TerminalConditions/NoTouchCondition.h>
-#include <RLGymSim_CPP/Utils/TerminalConditions/GoalScoreCondition.h>
-#include <RLGymSim_CPP/Utils/StateSetters/RandomState.h>
-#include <RLGymSim_CPP/Utils/StateSetters/KickoffState.h>
-#include <RLGymSim_CPP/Utils/ActionParsers/DiscreteAction.h>
-#include <RLGymSim_CPP/Utils/OBSBuilders/DefaultOBSPadded.h>
-
+//RLBot
 #include "RLBotClient.h"
+
+//VOID_LOG, VOID_WARN and VOID_ERR, all the metrics headers
 #include "Utils/LoggerUtils.h"
-#include "WandbConfig.h"
-#include "ObsBuilder.h"
 
 //Reward logging
 #include <Logging/LoggedCombinedReward.h>
-#include <Logging/TestReward.h>
 
-
-//Pinch
-#include "Rewards/Pinch/CeilingPinch.h"
-#include "Rewards/Pinch/WallPinch.h"
-
-#include <States.h>
-#include <TerminalConditions.h>
+//Loggers
 #include <Loggers.h>
+
+//Run config
 #include <LearnerConfigUtils.h>
+#include "WandbConfig.h"
 
-#include <Replays/ReplayLoader.h>
+//Replay setting
 #include <Replays/ReplaySetter.h>
-#include <Replays/ReplayUtils.h>
 
-#include <Replays/RCF/ReplayFilter.h>
-#include <Replays/RCF/CommonRCFs.h>
-
+//Basic utils
 #include <Utils/VoidUtils.h>
+
+//TC
+#include <RLGymSim_CPP/Utils/TerminalConditions/GoalScoreCondition.h>
+#include <TerminalConditions.h>
+
 using namespace RLGPC; // RLGymPPO
 using namespace RLGSC; // RLGymSim
 
+//Uses (Auto-generated comment)
+USE_DOUBLETAP_REWARDS_NS;
+USE_DOUBLETAP_STATES_NS;
+USE_DOUBLETAP_AP_NS;
+USE_DOUBLETAP_OB_NS;
 
-USE_REWARDS_PINCH_NS;
-
-USE_OBS_BUILDER_NS;
 USE_LOGGERS_NS;
-USE_TC_NS;
 
 USE_VOID_NS;
+USE_TC_NS;
 USE_REPLAY_NS;
-
-USE_RCF_NS;
 
 std::vector<Logger*> loggers = {
 	//Ball Loggers
@@ -66,6 +63,11 @@ std::vector<Logger*> loggers = {
 };
 
 float maxBallVel = 0.;
+
+auto stateSetter = new ReplaySetter({
+		.loadExistingReplays = {false, {"replays/1v1.json", "replays/2v2.json", "replays/3v3.json"}, 30},
+		.loadNewReplays = {false, {"replays"}, 30}
+	});
 
 // This is our step callback, it's called every step from every RocketSim game
 // WARNING: This is called from multiple threads, often simultaneously, 
@@ -95,7 +97,7 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 	std::map<std::string, AvgTracker> mTrackersAvg = {};
 	std::map<std::string, float> mTrackers = {};
 	std::map<std::string, AvgTracker> rTrackers = {};
-	
+
 	// Get metrics for every gameInst
 	auto allGameMetrics = learner->GetAllGameMetrics();
 
@@ -133,7 +135,7 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 		}
 
 		for (auto& tracker : rTrackers) {
-			if(gameReport.Has(tracker.first) or gameReport.Has(tracker.first + "_avg_total"))
+			if (gameReport.Has(tracker.first) or gameReport.Has(tracker.first + "_avg_total"))
 			{
 				tracker.second += gameReport.GetAvg(tracker.first);
 			}
@@ -151,7 +153,7 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 	for (const auto& tracker : mTrackersAvg) {
 		allMetrics[tracker.first] = tracker.second.Get();
 	}
-	
+
 	allMetrics[METRICS_HEADER + std::string("max_ball_speed")] = maxBallVel / CommonValues::BALL_MAX_SPEED * 216;
 	maxBallVel = 0;
 	std::cout << "End of iteration callback" << std::endl;
@@ -163,95 +165,32 @@ EnvCreateResult EnvCreateFunc() {
 	constexpr float NO_TOUCH_TIMEOUT_SECS = 7.f;
 	constexpr float BOUNCE_TIMEOUT_SECS = 1.f;
 
-	PinchWallSetupReward::PinchWallSetupArgs args(
-		{
-			.creepingDistance = 2000.0f,
-			.groundBanDistance = 1500.0f,
-			.maxDistToTrigger = 4000.0f,
-		},
-		{
-			.hasFlipReward = 0.8f,
-			.hasFlipPunishment = -1.5f,
-			.maxDistance = 250.0f
-		},
-		{
-			.similarityBallAgentReward = 10.0f,
-			.similarityBallAgentThresh = 0.9f,
-			.similarityBallWallThresh = 0.9f,
-		},
-		{
-			.groundBanPunishment = -10.0f,
-			.groundBanReward = 3.0f,
-			.creepingDistanceReward = 0.01f
-		},
-		{
-			.ballDistReduction = 500.0f,
-			.speedMatchW = 2.0f,
-			.agentDistToBallThresh = 500.0f,
-			.ballOffsetX = 200.0f,
-			.ballOffsetY = 200.0f,
-			.behindTheBallReward = 100.0f
-		},
-		{
-			.wallMinHeightToPinch = 150.0f
-		},
-		{
-			.ballHandling = {
-				.ballVelW = 10000.0f,
-				.touchW = 200.0f,
-				.goalDirectionW = 300.0f,
-				.isFlippingW = 300.0f
-			}
-		}
-	);
+	DoubleTapReward::DoubleTapArgs dtArgs = {
+		.ballHandling = {
+			.distBallReduction = 5000.0f,
+			.touchW = 10.0f,
+			.similarityAgentBallW = 2.0f,
 
-	PinchCeilingSetupReward::PinchCeilingSetupArgs pinchCeilingArgs = {
-		{
-			.agentSimilarity =
-			{
-				.similarityBallAgentReward = 1.0f,
-				.similarityBallAgentThresh = 0.9f,
-				.speedMatchW = 0.1f
-			},
-			.ballGroundHandling =
-			{
-				.agentDistToBallThresh = 550.0f,
-				.ballDistReduction = 2000.0f,
-				.ballOffsetX = 250.0f,
-				.ballOffsetY = 250.0f,
-				.behindTheBallReward = 3.5f,
-			},
-			.distWallThresh = 50.0f + RLGSC::CommonValues::BALL_RADIUS,
-			.groundThresh = 250.0f,
-			.touchReward = 40.0f,
-			.wallAgentAndBallThreshold = 0.8f,
-			.wallAgentAndBallPunishment = -2.0f
 		},
-		{
-			.ballDistReduction = 50.0f,
-			.ballHeightW = 20.0f,
-			.underTheBallReward = 50.0f,
-			.underBallOffsetY = 350.0f
-		},
-		{
-			.distToCeilThresh = RLGSC::CommonValues::BALL_RADIUS + 50.0f,
-			.onCeilingReward = 10.0f,
-			.banZoneHeight = 1500.0f,
-			.groundedBan = -350.0f,
-			.ungroundedReward = 60.0f
-		},
-		{
-			.ballHandling =
-			{
-				.ballVelW = 20000.0f,
-				.touchW = 200.0f
-			}
+		.goalHandling = {
+			.similarityGoalBallW = 10000.0f,
+			.goalW = 1000.0f,
+			.goalSpeedW = 1000.0f
 		}
+	};
+
+	GroundDoubleTapReward::GroundDTArgs gdtArgs = {
+		.ballZoning = {
+			.distFromBackboard = 500.0f,
+		},
+		.ballHandling = {
+			.distToZoneReduction = 10000.0f
+}
 	};
 
 	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc, weight (optional, default = 1), name (optional for loggable rewards, mandatory for non loggable) }
 		{
-			{new DummyReward()}
+			{new GroundDoubleTapReward(gdtArgs, dtArgs)}
 		}
 	);
 
@@ -265,7 +204,18 @@ EnvCreateResult EnvCreateFunc() {
 	auto obs = new DefaultOBSPadded(6);
 	auto actionParser = new DiscreteAction();
 
-	auto stateSetter = new KickoffState();
+
+	/*DoubleTapState::DoubleTapStateArgs stateArgs = {
+		.bothSides = true,
+		.carVariance = {
+			.posVariance = Vec(1000.0f, 300.0f, 100.0f),
+			.velVariance = Vec(100.0f, 300.0f, 100.0f),
+		},
+		.ballVariance = {
+			.velVariance = Vec(600.0f, 1000.0f, 100.0f)
+		},
+
+	};*/
 
 	Match* match = new Match(
 		rewards,
