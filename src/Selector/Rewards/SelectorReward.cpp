@@ -1,6 +1,7 @@
-#include "Rewards/Selector/SelectorReward.h"
+#include <Selector/SelectorUtils.h>
+#include <Selector/Rewards/SelectorReward.h>
 
-USE_SELECTOR_NS;
+USE_SELECTOR_REWARDS_NS;
 
 float SelectorReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction)
 {

@@ -29,16 +29,21 @@ project("Void")
 
 file(GLOB_RECURSE FILES_SRC_E "src/*.cpp")
 file(GLOB_RECURSE FILES_H_E "include/*.h")
+file(GLOB MAIN_GLOBAL_SRC "mains/main.cpp")
+file(GLOB MAIN_RCF_SRC "mains/RCFMain.cpp")
 
-add_executable(Void ${FILES_SRC_E} ${FILES_H_E})
+add_library(Void ${FILES_SRC_E} ${FILES_H_E})
+add_executable(Void_Main ${MAIN_GLOBAL_SRC})
+add_executable(Void_RCF ${MAIN_RCF_SRC})
 
-target_include_directories(Void PUBLIC "include")
-
-# Set C++ version to 20
 set_target_properties(Void PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(Void PROPERTIES CXX_STANDARD 20)
-
 GroupSourcesByFolder(Void)
+
+list(APPEND TARGETS Void_Main Void_RCF)
+
+target_include_directories(Void PUBLIC "include")
+target_link_libraries(Void_Main Void)
 
 
 # Make sure RLGymPPO_CPP is going to build in the same directory as us
@@ -55,3 +60,16 @@ target_link_libraries(Void RLGymPPO_CPP)
 # Include RLBot
 add_subdirectory(RLBotCPP)
 target_link_libraries(Void RLBotCPP)
+
+file(GLOB MAIN_SELECTOR_SRC "mains/SelectorMain.cpp")
+add_executable(Void_Selector ${MAIN_SELECTOR_SRC})
+list(APPEND TARGETS Void_Selector)
+
+# Replace here
+
+foreach(tgt ${TARGETS})
+    set_target_properties(${tgt} PROPERTIES LINKER_LANGUAGE CXX)
+    set_target_properties(${tgt} PROPERTIES CXX_STANDARD 20)
+    GroupSourcesByFolder(${tgt})
+    target_link_libraries(${tgt} Void)
+endforeach()
