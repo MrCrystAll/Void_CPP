@@ -30,17 +30,17 @@ project("Void")
 file(GLOB_RECURSE FILES_SRC_E "src/*.cpp")
 file(GLOB_RECURSE FILES_H_E "include/*.h")
 file(GLOB MAIN_GLOBAL_SRC "mains/main.cpp")
-
-
+file(GLOB MAIN_RCF_SRC "mains/RCFMain.cpp")
 
 add_library(Void ${FILES_SRC_E} ${FILES_H_E})
 add_executable(Void_Main ${MAIN_GLOBAL_SRC})
+add_executable(Void_RCF ${MAIN_RCF_SRC})
 
 set_target_properties(Void PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(Void PROPERTIES CXX_STANDARD 20)
 GroupSourcesByFolder(Void)
 
-list(APPEND TARGETS Void_Main)
+list(APPEND TARGETS Void_Main Void_RCF)
 
 target_include_directories(Void PUBLIC "include")
 target_link_libraries(Void_Main Void)
