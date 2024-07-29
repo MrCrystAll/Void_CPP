@@ -19,11 +19,6 @@
 #include <Logging/LoggedCombinedReward.h>
 #include <Logging/TestReward.h>
 
-
-//Pinch
-#include "Rewards/Pinch/CeilingPinch.h"
-#include "Rewards/Pinch/WallPinch.h"
-
 #include <States.h>
 #include <TerminalConditions.h>
 #include <Loggers.h>
@@ -40,8 +35,7 @@
 using namespace RLGPC; // RLGymPPO
 using namespace RLGSC; // RLGymSim
 
-
-USE_REWARDS_PINCH_NS;
+USE_LOGGING_NS;
 
 USE_OBS_BUILDER_NS;
 USE_LOGGERS_NS;
@@ -163,7 +157,7 @@ EnvCreateResult EnvCreateFunc() {
 	constexpr float NO_TOUCH_TIMEOUT_SECS = 7.f;
 	constexpr float BOUNCE_TIMEOUT_SECS = 1.f;
 
-	PinchWallSetupReward::PinchWallSetupArgs args(
+	/*PinchWallSetupReward::PinchWallSetupArgs args(
 		{
 			.creepingDistance = 2000.0f,
 			.groundBanDistance = 1500.0f,
@@ -247,7 +241,7 @@ EnvCreateResult EnvCreateFunc() {
 				.touchW = 200.0f
 			}
 		}
-	};
+	};*/
 
 	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc, weight (optional, default = 1), name (optional for loggable rewards, mandatory for non loggable) }
 		{

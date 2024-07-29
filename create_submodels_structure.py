@@ -144,7 +144,6 @@ def create_reward_file(path: str, name: str, header: bool):
             _add_include("Logging/LoggableReward.h", f)
             f.write("\n")
             
-            f.write("USE_LOGGING_NS")
             f.write("using namespace RLGSC;\n\n")
             
             f.write(start_macro(name, REWARD_NS_NAME) + "\n\n")
