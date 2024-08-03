@@ -26,14 +26,14 @@ USE_REPLAY_NS;
 USE_RCF_NS;
 
 int main() {
-	std::string INPUT_PATH = "Wall2v2.json"; //Can be replay or json
-	std::string OUTPUT_PATH = "GroundWall2v2.json"; //Has to be json
+	std::string INPUT_PATH = "replays/3s"; //Can be replay or json
+	std::string OUTPUT_PATH = "FlipResets3v3.json"; //Has to be json
 	bool IS_JSON = INPUT_PATH.ends_with(".json");
 
 	bool isDirectory = std::filesystem::is_directory(INPUT_PATH);
 
 	//RCF and filter
-	AbstractRCF* rcf = new OnGroundRCF();
+	AbstractRCF* rcf = new FlipResetRCF();
 
 	ReplayFilter filter = ReplayFilter(rcf);
 	ReplaySaver saver = ReplaySaver();
@@ -62,7 +62,7 @@ int main() {
 			std::vector<Replay> filteredReplays = filter.FilterReplays(replays);
 			VOID_LOG("Finished filtering");
 
-			saver.SaveReplays(OUTPUT_PATH, filteredReplays);
+			saver.SaveReplays(OUTPUT_PATH, filteredReplays, false);
 
 			replayFile.close();
 		}
@@ -85,6 +85,6 @@ int main() {
 		}
 
 		std::vector<Replay> filteredReplays = filter.FilterReplays(replays);
-		saver.SaveReplays(OUTPUT_PATH, filteredReplays);
+		saver.SaveReplays(OUTPUT_PATH, filteredReplays, true);
 	}
 }

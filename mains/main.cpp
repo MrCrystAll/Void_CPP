@@ -61,6 +61,11 @@ std::vector<Logger*> loggers = {
 
 float maxBallVel = 0.;
 
+auto stateSetter = new ReplaySetter({
+		.loadExistingReplays = {true, {"Shots_Saves3v3.json"}, 0},
+		.loadNewReplays = {false, {"replays"}, 30}
+	});
+
 // This is our step callback, it's called every step from every RocketSim game
 // WARNING: This is called from multiple threads, often simultaneously, 
 //	so don't access things apart from these arguments unless you know what you're doing.
@@ -252,14 +257,14 @@ EnvCreateResult EnvCreateFunc() {
 	std::vector<TerminalCondition*> terminalConditions = {
 		new TimeoutCondition(NO_TOUCH_TIMEOUT_SECS * 120 / TICK_SKIP),
 		//new BounceTimeoutCondition(BOUNCE_TIMEOUT_SECS * 120 / TICK_SKIP),
-		new TouchTimeoutCondition(),
+		//new TouchTimeoutCondition(),
 		new GoalScoreCondition()
 	};
 
 	auto obs = new DefaultOBSPadded(6);
 	auto actionParser = new DiscreteAction();
 
-	auto stateSetter = new KickoffState();
+	//auto stateSetter = new KickoffState();
 
 	Match* match = new Match(
 		rewards,
@@ -268,7 +273,7 @@ EnvCreateResult EnvCreateFunc() {
 		actionParser,
 		stateSetter,
 
-		2, // Team size
+		3, // Team size
 		true // Spawn opponents
 	);
 

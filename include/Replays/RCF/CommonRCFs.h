@@ -52,4 +52,32 @@ public:
 	virtual bool PlayerFilter(const PlayerData player, const GameState state) override;
 };
 
+/// <summary>
+/// Dribble situations
+/// </summary>
+class DribbleRCF : public AbstractRCF {
+public:
+	virtual bool PlayerFilter(const PlayerData player, const GameState state) override;
+};
+
+class ShootingRCF : public AbstractQueuedRCF {
+public:
+	ShootingRCF(int queueSize = 100) : AbstractQueuedRCF(queueSize) {};
+	std::map<int, int> lastMatchShots = {};
+	virtual bool PlayerFilter(const PlayerData player, const GameState state) override;
+};
+
+class SavingRCF : public AbstractQueuedRCF {
+public:
+	SavingRCF(int queueSize = 100) : AbstractQueuedRCF(queueSize) {};
+	std::map<int, int> lastMatchSaves = {};
+	virtual bool PlayerFilter(const PlayerData player, const GameState state) override;
+};
+
+class FlipResetRCF : public AbstractQueuedRCF {
+public:
+	FlipResetRCF(int queueSize = 50) : AbstractQueuedRCF(queueSize) {};
+	virtual bool PlayerFilter(const PlayerData player, const GameState state) override;
+};
+
 END_RCF_NS

@@ -7,20 +7,18 @@ float SelectorReward::GetReward(const RLGSC::PlayerData& player, const RLGSC::Ga
 {
 	std::vector<Submodel> chosenModels = this->choice->GetCurrentSubmodels();
 	this->reward += {this->cbr->GetReward(player, state, prevAction), "Total without weight"};
+	this->reward *= {chosenModels[playerMapping[player.carId]].GetWeight(), "Model choice"};
 
-	float weight = chosenModels[playerMapping[player.carId]].GetWeight();
-
-	return reward.value * weight;
+	return this->ComputeReward();
 }
 
 float SelectorReward::GetFinalReward(const PlayerData& player, const GameState& state, const Action& prevAction)
 {
 	std::vector<Submodel> chosenModels = this->choice->GetCurrentSubmodels();
 	this->reward += {this->cbr->GetFinalReward(player, state, prevAction), "Total without weight"};
+	this->reward *= {chosenModels[playerMapping[player.carId]].GetWeight(), "Model choice"};
 
-	float weight = chosenModels[playerMapping[player.carId]].GetWeight();
-
-	return reward.value * weight;
+	return this->ComputeReward();
 }
 
 void SelectorReward::LogAll(Report& report, bool final, std::string name, float weight)

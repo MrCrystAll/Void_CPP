@@ -28,6 +28,8 @@ public:
 /// </summary>
 class AllRCF : public MultiRCF {
 public:
+	AllRCF(std::vector<AbstractRCF*> rcfs) : MultiRCF(rcfs) {};
+
 	// Inherited via MultiRCF
 	virtual bool PlayerFilter(const PlayerData player, const GameState state) override;
 	virtual bool AllPlayersFilter(const GameState state);
@@ -38,6 +40,7 @@ public:
 /// </summary>
 class AnyRCF : public MultiRCF {
 public:
+	AnyRCF(std::vector<AbstractRCF*> rcfs) : MultiRCF(rcfs) {};
 	// Inherited via MultiRCF
 	virtual bool PlayerFilter(const PlayerData player, const GameState state) override;
 	virtual bool AllPlayersFilter(const GameState state);

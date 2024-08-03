@@ -6,7 +6,7 @@ USE_REPLAY_NS;
 
 int main(){
 	std::string INPUT_PATH = "replays"; //Can be replay or directory
-	std::string OUTPUT_PATH = "2v2.json"; //Has to be json
+	std::string OUTPUT_PATH = "3v3.json"; //Has to be json
 
 	bool isDirectory = std::filesystem::is_directory(INPUT_PATH);
 
