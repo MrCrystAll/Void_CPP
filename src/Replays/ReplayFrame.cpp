@@ -14,37 +14,6 @@ BallState BallFrame::ToBallState(const BallFrame& ballFrame)
 	return bs;
 }
 
-RLGSC::PlayerData PlayerFrame::ToPlayerData(const PlayerFrame& playerFrame)
-{
-	RLGSC::PlayerData playerData = {};
-	playerData.team = (Team)(playerFrame.team - 15);
-	playerData.boostPickups = playerFrame.boostPickup;
-	playerData.boostFraction = playerFrame.boostAmount / 100;
-
-	PhysState ps = PlayerFrame::ToPhysState(playerFrame);
-	CarState cs = {};
-
-	cs.pos = ps.pos;
-	cs.vel = ps.vel;
-	cs.angVel = ps.angVel;
-	cs.rotMat = ps.rotMat;
-
-	cs.boost = playerFrame.boostAmount / 100;
-	cs.isFlipping = playerFrame.isFlipCarActive;
-	cs.isDemoed = playerFrame.isSleeping;
-	cs.handbrakeVal = playerFrame.handbrake;
-	cs.isJumping = playerFrame.isJumpActive;
-	
-	playerData.matchSaves = playerFrame.matchSaves;
-	playerData.matchShots = playerFrame.matchShots;
-	playerData.matchGoals = playerFrame.matchGoals;
-	playerData.matchAssists = playerFrame.matchAssists;
-
-	playerData.carState = cs;
-
-	return playerData;
-}
-
 RocketSim::CarState PlayerFrame::ToCarState(const PlayerFrame& playerFrame)
 {
 	PhysState ps = PlayerFrame::ToPhysState(playerFrame);
@@ -55,9 +24,31 @@ RocketSim::CarState PlayerFrame::ToCarState(const PlayerFrame& playerFrame)
 	cs.angVel = ps.angVel;
 
 	cs.boost = playerFrame.boostAmount;
-	cs.isFlipping = playerFrame.isFlipCarActive;
+	cs.isFlipping = playerFrame.isDodgeActive;
+	cs.hasFlipped = playerFrame.hasFlipped;
+	cs.hasJumped = playerFrame.hasJumped;
+	cs.isDemoed = playerFrame.isDemoed;
 
 	return cs;
+}
+
+void PlayerFrame::ToCarState(const PlayerFrame& playerFrame, CarState& carState)
+{
+	PhysState ps = PlayerFrame::ToPhysState(playerFrame);
+	carState.pos = ps.pos;
+	carState.vel = ps.vel;
+	carState.rotMat = ps.rotMat;
+	carState.angVel = ps.angVel;
+
+	carState.boost = playerFrame.boostAmount;
+	carState.isFlipping = playerFrame.isDodgeActive;
+
+	VOID_LOG(playerFrame.isJumpActive);
+	carState.isJumping = playerFrame.isJumpActive;
+
+	carState.hasFlipped = playerFrame.hasFlipped;
+	carState.hasJumped = playerFrame.hasJumped;
+	carState.isDemoed = playerFrame.isDemoed;
 }
 
 PhysState PhysicsFrame::ToPhysState(const PhysicsFrame& physObj)

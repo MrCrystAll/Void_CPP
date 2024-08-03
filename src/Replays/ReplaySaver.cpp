@@ -7,7 +7,7 @@ json ReplaySaver::SerializeReplay(Replay replay)
 	return replay;
 }
 
-void ReplaySaver::SaveReplay(std::string path, Replay replay)
+void ReplaySaver::SaveReplay(std::string path, Replay replay, bool overwrite)
 {
 	if (std::filesystem::exists(path)) {
 		REPLAY_SAVER_LOG("A file already exists at " << path << ". Overwriting.");
@@ -20,18 +20,35 @@ void ReplaySaver::SaveReplay(std::string path, Replay replay)
 	REPLAY_SAVER_LOG("Replay successfully saved at " << path);
 }
 
-void ReplaySaver::SaveReplays(std::string path, std::vector<Replay> replays)
+void ReplaySaver::SaveReplays(std::string path, std::vector<Replay> replays, bool overwrite)
 {
+	std::vector<Replay> additionalReplays = {};
 	if (std::filesystem::exists(path)) {
-		REPLAY_SAVER_LOG("A file already exists at " << path << ". Overwriting.");
+		if(overwrite) REPLAY_SAVER_LOG("A file already exists at " << path << ". Overwriting.");
+		else {
+			std::ifstream ifs = std::ifstream(path);
+			if(!std::filesystem::is_empty(path)){
+				json j;
+				REPLAY_SAVER_LOG("Getting existing data from \"" << path << "\"...");
+				ifs >> j;
+				additionalReplays = j;
+				REPLAY_SAVER_LOG("Got " << additionalReplays.size() << " replay(s) from \"" << path << "\"");
+			}
+			else {
+				REPLAY_SAVER_WARN(path << " is empty. Ignoring.");
+			}
+			
+		}
 	}
 
-	REPLAY_SAVER_LOG("Saving " << replays.size() << " replay(s)...");
+	additionalReplays.insert(additionalReplays.end(), replays.begin(), replays.end());
 
-	json jReplays = replays;
+	REPLAY_SAVER_LOG("Saving " << additionalReplays.size() << " replay(s)...");
+
+	json jReplays = additionalReplays;
 	std::ofstream ofs = std::ofstream(path, std::ofstream::trunc);
 	ofs << jReplays;
 	ofs.close();
 
-	REPLAY_SAVER_LOG(replays.size() << " replay(s) successfully saved at " << path);
+	REPLAY_SAVER_LOG(additionalReplays.size() << " replay(s) successfully saved at " << path);
 }

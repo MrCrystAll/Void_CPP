@@ -35,14 +35,16 @@ public:
 	/// </summary>
 	/// <param name="path">Path to the file</param>
 	/// <param name="replay">Replay to save</param>
-	void SaveReplay(std::string path, Replay replay);
+	/// <param name="overwrite">Overwrite file if the file is already here</param>
+	void SaveReplay(std::string path, Replay replay, bool overwrite = true);
 
 	/// <summary>
 	/// Saves replays to a file
 	/// </summary>
 	/// <param name="path">Path to the file</param>
 	/// <param name="replays">Replays to save</param>
-	void SaveReplays(std::string path, std::vector<Replay> replays);
+	/// <param name="overwrite">Overwrite file if the file is already here</param>
+	void SaveReplays(std::string path, std::vector<Replay> replays, bool overwrite = true);
 };
 
 END_REPLAY_NS

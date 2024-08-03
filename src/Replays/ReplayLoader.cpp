@@ -144,6 +144,18 @@ std::vector<BallFrame> ReplayLoader::LoadBallFrames(std::string path, ReplayAnal
 	return ballFrames;
 }
 
+std::pair<bool, float> ParseFloat(std::string input) {
+	std::string::size_type sz;
+
+	try {
+		float result = std::stof(input, &sz);
+		return { true, result };
+	}
+	catch (std::invalid_argument& _) {
+		return { false, NAN };
+	}
+}
+
 std::vector<std::vector<PlayerFrame>> ReplayLoader::LoadPlayersFrames(std::string path, ReplayAnalysis analysis)
 {
 	std::vector<std::vector<PlayerFrame>> playerFrames = {};
@@ -185,12 +197,12 @@ std::vector<std::vector<PlayerFrame>> ReplayLoader::LoadPlayersFrames(std::strin
 
 		io::CSVReader<37> reader = io::CSVReader<37>(playerFilePath);
 
-		reader.read_header(io::ignore_missing_column, "is_sleeping", "pos_x", "pos_y", "pos_z", "vel_x", "vel_y", "vel_z", "quat_w", "quat_x", "quat_y", "quat_z", "ang_vel_x", "ang_vel_y", "ang_vel_z", "throttle", "steer", "handbrake", "match_score", "match_goals", "match_assists", "match_saves", "match_shots", "team", "ping", "boost_is_active", "boost_amount", "boost_pickup", "jump_is_active", "double_jump_is_active", "flip_car_is_active", "dodge_is_active", "double_jump_torque_x", "double_jump_torque_y", "double_jump_torque_z", "dodge_torque_x", "dodge_torque_y", "dodge_torque_z");
+		reader.read_header(io::ignore_no_column, "is_sleeping", "pos_x", "pos_y", "pos_z", "vel_x", "vel_y", "vel_z", "quat_w", "quat_x", "quat_y", "quat_z", "ang_vel_x", "ang_vel_y", "ang_vel_z", "throttle", "steer", "handbrake", "match_score", "match_goals", "match_assists", "match_saves", "match_shots", "team", "ping", "boost_is_active", "boost_amount", "boost_pickup", "jump_is_active", "double_jump_is_active", "flip_car_is_active", "dodge_is_active", "double_jump_torque_x", "double_jump_torque_y", "double_jump_torque_z", "dodge_torque_x", "dodge_torque_y", "dodge_torque_z");
 
 		//Forgive me for that
-		float pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, rot_x, rot_y, rot_z, rot_w, angVel_x, angVel_y, angVel_z, boost_amount, double_jump_torque_x, double_jump_torque_y, double_jump_torque_z, dodge_torque_x, dodge_torque_y, dodge_torque_z;
-		int isSleeping, throttle, steer, match_score, match_goals, match_assists, match_saves, match_shots, team, ping, boost_is_active, boost_pickup, jump_is_active, double_jump_is_active, flip_car_is_active, dodge_is_active;
-		std::string handbrake;
+		float pos_y, pos_z, vel_x, vel_y, vel_z, rot_x, rot_y, rot_z, rot_w, angVel_x, angVel_y, angVel_z, boost_amount, double_jump_torque_x, double_jump_torque_y, double_jump_torque_z, dodge_torque_x, dodge_torque_y, dodge_torque_z;
+		float isSleeping, throttle, steer, match_score, match_goals, match_assists, match_saves, match_shots, team, ping, boost_is_active, boost_pickup;
+		std::string pos_x, handbrake, jump_is_active, double_jump_is_active, flip_car_is_active, dodge_is_active;
 
 		while (reader.read_row(isSleeping, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, rot_w, rot_x, rot_y, rot_z, angVel_x, angVel_y, angVel_z, throttle, steer, handbrake, match_score, match_goals, match_assists, match_saves, match_shots, team, ping, boost_is_active, boost_amount, boost_pickup, jump_is_active, double_jump_is_active, flip_car_is_active, dodge_is_active, double_jump_torque_x, double_jump_torque_y, double_jump_torque_z, dodge_torque_x, dodge_torque_y, dodge_torque_z)) {
 			PlayerFrame pf = {};
@@ -200,7 +212,10 @@ std::vector<std::vector<PlayerFrame>> ReplayLoader::LoadPlayersFrames(std::strin
 				continue;
 			}
 
-			pf.pos = Vec(pos_x, pos_y, pos_z);
+			auto posResult = ParseFloat(pos_x);
+			pf.isDemoed = not posResult.first;
+
+			pf.pos = Vec(posResult.second, pos_y, pos_z);
 			pf.vel = Vec(vel_x, vel_y, vel_z);
 			pf.angVel = Vec(angVel_x, angVel_y, angVel_z);
 			pf.rot = Vec(rot_x, rot_y, rot_z, rot_w);
@@ -220,10 +235,26 @@ std::vector<std::vector<PlayerFrame>> ReplayLoader::LoadPlayersFrames(std::strin
 			pf.dodgeTorque = Vec(dodge_torque_x, dodge_torque_y, dodge_torque_z);
 
 			pf.isBoostActive = boost_is_active;
-			pf.isDodgeActive = dodge_is_active;
-			pf.isDoubleJumpActive = double_jump_is_active;
-			pf.isFlipCarActive = flip_car_is_active;
-			pf.isJumpActive = jump_is_active;
+
+			//Dodge stuff
+			auto dodgeActiveResult = ParseFloat(dodge_is_active);
+			pf.hasFlipped = not dodgeActiveResult.first;
+			pf.isDodgeActive = not pf.hasFlipped and dodgeActiveResult.second;
+
+			//Jump stuff
+			auto jumpResult = ParseFloat(jump_is_active);
+			pf.hasJumped = not jumpResult.first;
+			VOID_LOG(totalPlayersFrameIn << ": " << jumpResult.first << " | " << jumpResult.second);
+			pf.isJumpActive = not pf.hasJumped and jumpResult.second;
+
+			//Double jump stuff
+			auto doubleJumpResult = ParseFloat(double_jump_is_active);
+			pf.hasDoubleJumped = not doubleJumpResult.first;
+			pf.isDoubleJumpActive = not pf.hasDoubleJumped and doubleJumpResult.second;
+
+			//Demo stuff
+			pf.isDemoed = not posResult.first;
+			pf.hasRespawned = posResult.first;
 
 			pf.team = team;
 
@@ -326,10 +357,15 @@ void ReplayFrameToState(ReplayFrame frame, Arena* arena)
 	BallState bs = BallFrame::ToBallState(frame.ball);
 	arena->ball->SetState(bs);
 
+	arena->tickTime = frame.game.time;
+	arena->tickCount = frame.game.time / 120;
+
 	int i = 0;
 	for (Car* c : arena->GetCars()) {
-		CarState cs = PlayerFrame::ToCarState(frame.players[i]);
-		c->SetState(cs);
+		CarState cs = c->GetState();
+		PlayerFrame::ToCarState(frame.players[i], cs);
+
+		VOID_LOG(cs.hasFlipped);
 		i++;
 	}
 }
@@ -357,7 +393,16 @@ std::vector<RLGSC::GameState> ReplayLoader::InterpolateReplays(ConvertedReplay r
 	for (const ReplayFrame rf : replay.frames) {
 		ReplayFrameToState(rf, arena);
 		arena->Step();
-		states[i] = RLGSC::GameState(arena);
+
+		RLGSC::GameState updatedState = RLGSC::GameState(arena);
+		for (int j = 0; j < updatedState.players.size(); j++) {
+			updatedState.players[j].matchAssists = rf.players[j].matchAssists;
+			updatedState.players[j].matchShots = rf.players[j].matchShots;
+			updatedState.players[j].matchSaves = rf.players[j].matchSaves;
+			updatedState.players[j].matchGoals = rf.players[j].matchGoals;
+		}
+
+		states[i] = updatedState;
 		i++;
 	}
 	REPLAY_LOADER_LOG("Interpolation complete");
