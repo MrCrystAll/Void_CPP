@@ -15,8 +15,6 @@ class OverfittingGroundRecoveryState : public RLGSC::StateSetter{
 class RandomRecoveryState : public RLGSC::StateSetter {
 	// Inherited via StateSetter
 	GameState ResetState(Arena* arena) override;
-
-	RandomState randomState = RandomState(true, true, true);
 };
 
 END_RECOVERY_NS

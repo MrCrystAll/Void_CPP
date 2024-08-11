@@ -144,7 +144,7 @@ Stat::StatResult Stat::ComputeAll() {
 
 Stat Stat::operator+(float value) { this->value += value; allValues.push_back(value); return *this; }
 Stat Stat::operator+=(float value) { return *this + value; }
-Stat Stat::operator-(float value) { this->value -= value; allValues.push_back(value); return *this; }
+Stat Stat::operator-(float value) { this->value -= value; allValues.push_back(-value); return *this; }
 Stat Stat::operator-=(float value) { return *this - value; }
 
 void LoggedFloat::InitMetrics() {

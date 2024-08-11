@@ -1,9 +1,19 @@
 //Recovery stuff
 #include <Recovery/RecoveryUtils.h>
+
 #include <Recovery/ActionParsers/RecoveryActionParser.h>
+
+#include <Recovery/StateSetters/AboveGroundState.h>
 #include <Recovery/StateSetters/RecoveryStateSetter.h>
+
 #include <Recovery/Rewards/RecoveryReward.h>
+#include <Recovery/Rewards/IsFlippingReward.h>
+#include <Recovery/Rewards/TimeBetweenFlipsPunishment.h>
+
 #include <Recovery/ObsBuilders/RecoveryObsBuilder.h>
+#include <Recovery/ObsBuilders/DashObsBuilder.h>
+
+#include <RLGymSim_CPP/Utils/RewardFunctions/CommonRewards.h>
 
 //Loggers
 #include <Loggers.h>
@@ -50,11 +60,6 @@ std::vector<Logger*> loggers = {
 };
 
 float maxBallVel = 0.;
-
-auto stateSetter = new ReplaySetter({
-		.loadExistingReplays = {false, {"replays/1v1.json", "replays/2v2.json", "replays/3v3.json"}, 30},
-		.loadNewReplays = {false, {"replays"}, 30}
-	});
 
 // This is our step callback, it's called every step from every RocketSim game
 // WARNING: This is called from multiple threads, often simultaneously, 
@@ -148,13 +153,15 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 
 // Create the RLGymSim environment for each of our games
 EnvCreateResult EnvCreateFunc() {
-	constexpr int TICK_SKIP = 4;
+	constexpr int TICK_SKIP = 2;
 	constexpr float NO_TOUCH_TIMEOUT_SECS = 7.f;
 	constexpr float BOUNCE_TIMEOUT_SECS = 1.f;
 
 	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc, weight (optional, default = 1), name (optional for loggable rewards, mandatory for non loggable) }
 		{
-			{new RecoveryReward(), 1.0f}
+			{new VelocityPlayerToBallReward(), 2.0f, "Velocity player to ball" },
+			{new RecoveryReward(), 5.0f},
+			{new EventReward({.touch = 10.0f}), 1.0f, "Event"}
 		}
 	);
 
@@ -165,8 +172,9 @@ EnvCreateResult EnvCreateFunc() {
 		new GoalScoreCondition()
 	};
 
-	auto obs = new DefaultOBSPadded(6);
-	auto actionParser = new DiscreteAction();
+	auto obs = new DashObsBuilder(6);
+	auto actionParser = new RecoveryActionParser();
+	auto stateSetter = new RandomRecoveryState();
 
 	Match* match = new Match(
 		rewards,
@@ -190,7 +198,7 @@ int main() {
 	// Make configuration for the learner
 	LearnerConfig cfg = {};
 
-	SetupConfig(cfg);
+	SetupConfig(cfg, "Configs/RecoveryConfig.yaml");
 
 	// Make the learner with the environment creation function and the config we just made
 	Learner learner = Learner(EnvCreateFunc, cfg);

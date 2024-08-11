@@ -1,4 +1,5 @@
 cmake_minimum_required (VERSION 3.8)
+include(FetchContent)
 
 function(GroupSourcesByFolder target)
   set(SOURCE_GROUP_DELIMITER "/")
@@ -63,6 +64,22 @@ target_link_libraries(Void RLGymPPO_CPP)
 add_subdirectory(RLBotCPP)
 target_link_libraries(Void RLBotCPP)
 
+
+FetchContent_Declare(
+  yaml-cpp
+  GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+  GIT_TAG 0.8.0 # Can be a tag (yaml-cpp-x.x.x), a commit hash, or a branch name (master)
+)
+FetchContent_GetProperties(yaml-cpp)
+
+if(NOT yaml-cpp_POPULATED)
+  message(STATUS "Fetching yaml-cpp...")
+  FetchContent_Populate(yaml-cpp)
+  add_subdirectory(${yaml-cpp_SOURCE_DIR} ${yaml-cpp_BINARY_DIR})
+endif()
+
+target_link_libraries(Void yaml-cpp::yaml-cpp) # The library or executable that require yaml-cpp library
+
 file(GLOB MAIN_SELECTOR_SRC "mains/SelectorMain.cpp")
 add_executable(Void_Selector ${MAIN_SELECTOR_SRC})
 list(APPEND TARGETS Void_Selector)
@@ -71,7 +88,7 @@ file(GLOB MAIN_DOUBLETAP_SRC "mains/DoubleTapMain.cpp")
 add_executable(Void_DoubleTap ${MAIN_DOUBLETAP_SRC})
 list(APPEND TARGETS Void_DoubleTap)
 
-file(GLOB MAIN_RECOVERY_SRC "mains/RecoveryMain.cpp")
+file(GLOB MAIN_RECOVERY_SRC "mains/RecoveryMain.cpp" "Configs/RecoveryConfig.yaml")
 add_executable(Void_Recovery ${MAIN_RECOVERY_SRC})
 list(APPEND TARGETS Void_Recovery)
 

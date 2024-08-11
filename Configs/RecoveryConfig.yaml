@@ -1,0 +1,41 @@
+config:
+  process-config:
+    numThreads: 8
+    numGamesPerThread: 16
+
+  buffer-config:
+    timestepsPerIteration: 200000
+    expBufferSize: 600000
+
+  learner-buffer-config:
+    batchSize: 200000
+    miniBatchSize: 25000
+
+  learner-hyperparams:
+    epochs: 3
+    entCoef: 0.01
+    policyLR: 0.0008
+    criticLR: 0.0008
+    policyLayerSizes:
+      - 512
+      - 512
+      - 512
+    criticLayerSizes:
+      - 512
+      - 512
+      - 512
+
+  training-config:
+    sendMetrics: true
+    renderMode: false
+    renderTimeScale: 1.5
+    renderDuringTraining: false
+    deterministic: false
+
+  checkpoints-to-keep: 30
+
+  wandb-config:
+    metricsRunName: Recovery
+
+  skill-tracker-config:
+    enabled: true

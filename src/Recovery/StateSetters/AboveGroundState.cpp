@@ -19,18 +19,21 @@ GameState OverfittingGroundRecoveryState::ResetState(Arena* arena)
 		CarState cs = {};
 
 		if (c->team == Team::BLUE) {
-			cs.pos = { borderLeft + stepX * iBlue, -4000, 17 };
+			cs.pos = { borderLeft + stepX * iBlue, -4000, 90 };
 			cs.rotMat = Angle(M_PI_2, 0, M_PI_4).ToRotMat();
 
 			iBlue++;
 		}
 		else {
-			cs.pos = { borderLeft + stepX * iOrange, 4000, 17 };
+			cs.pos = { borderLeft + stepX * iOrange, 4000, 90 };
 			cs.rotMat = Angle(-M_PI_2, 0, M_PI_4).ToRotMat();
 
 			iOrange++;
 		}
 		cs.boost = 0;
+		cs.isFlipping = false;
+		cs.hasFlipped = true;
+		cs.hasJumped = true;
 
 		c->SetState(cs);
 	}
@@ -40,9 +43,24 @@ GameState OverfittingGroundRecoveryState::ResetState(Arena* arena)
 
 GameState RandomRecoveryState::ResetState(Arena* arena)
 {
-	randomState.ResetState(arena);
+
+	BallState bs = {};
+	bs.pos = Vec(Math::RandFloat(-CommonValues::SIDE_WALL_X + 1152, CommonValues::SIDE_WALL_X - 1152), Math::RandFloat(-CommonValues::BACK_WALL_Y + 1152, CommonValues::BACK_WALL_Y - 1152), Math::RandFloat(60, 200));
+	bs.vel = Vec(Math::RandFloat(-1100, 1100), Math::RandFloat(-1100, 1100), Math::RandFloat(-600, 600));
+
+	arena->ball->SetState(bs);
+
 	for (Car* c : arena->GetCars()) {
 		CarState cs = c->GetState();
+
+		cs.pos = Vec(Math::RandFloat(-CommonValues::SIDE_WALL_X + 1152, CommonValues::SIDE_WALL_X - 1152), Math::RandFloat(-CommonValues::BACK_WALL_Y + 1152, CommonValues::BACK_WALL_Y - 1152), Math::RandFloat(60, 200));
+		cs.vel = Vec(Math::RandFloat(-1100, 1100), Math::RandFloat(-1100, 1100), Math::RandFloat(-600, 600));
+		cs.angVel = Vec(Math::RandFloat(-M_PI_2, M_PI_2), Math::RandFloat(-M_PI_2, M_PI_2), Math::RandFloat(-M_PI_2, M_PI_2));
+		cs.rotMat = Angle(Math::RandFloat(-M_PI_2, M_PI_2), Math::RandFloat(-M_PI_2, M_PI_2), Math::RandFloat(-M_PI_2, M_PI_2)).ToRotMat();
+
+
+		cs.hasFlipped = true;
+		cs.hasJumped = true;
 
 		cs.boost = 0;
 
