@@ -191,7 +191,6 @@ def get_all_start_macros(name) -> Iterable[str]:
  
 def get_all_use_macros(name) -> Iterable[str]:   
     return \
-        use_macro(name), \
         use_macro(name, REWARD_NS_NAME), \
         use_macro(name, STATES_NS_NAME), \
         use_macro(name, AP_NS_NAME), \
@@ -274,8 +273,37 @@ def create_main(path, name):
         for use in get_all_use_macros(name):
             f.write(use + ";\n")
         f.write("\n")
+        
+        
+        content = ""
+        with open(os.path.join(os.getcwd(), "templates/main_template.cpp")) as main_template:
+            line = main_template.readline()
+            while line:
+                content += line
+                line = main_template.readline()
+        
+        content = content.replace("# Insert name", name)
+        f.write(content)
+    
+    
+def add_yaml_config(name: str):
+    path_to_yaml_config = os.path.join(os.getcwd(),"Configs/" + name + "Config.yaml")
+    if os.path.exists(path_to_yaml_config):
+        print(f"\"{path_to_yaml_config}\" already exists, can't create")
+        return
+    content = ""
+    
+    with open(os.path.join(os.getcwd(), "templates/ConfigTemplate.yaml"), "r") as config_t:
+        line = config_t.readline()
+        while line:
+            content += line
+            line = config_t.readline()
             
-        f.write("int main(){ return 0; }\n")
+    content = content.replace("# Insert name", name)
+    with open(path_to_yaml_config, "x") as yaml_config:
+        yaml_config.write(content)
+            
+        
                 
 def alter_cmakefile(name):
     path_to_cmakelist = os.path.join(os.getcwd(), "CMakeLists.txt")
@@ -316,5 +344,6 @@ if __name__ == "__main__":
     
     create_folder_structure(os.path.join(os.getcwd(), "include"), name, True)
     create_folder_structure(os.path.join(os.getcwd(), "src"), name, False)
+    add_yaml_config(name)
     create_main(os.path.join(os.getcwd(), "mains"), name)
     alter_cmakefile(name)
