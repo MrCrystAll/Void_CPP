@@ -80,6 +80,10 @@ endif()
 
 target_link_libraries(Void yaml-cpp::yaml-cpp) # The library or executable that require yaml-cpp library
 
+file(GLOB MAIN_RLBOT "mains/RLBotMain.cpp")
+add_executable(Void_RLBot ${MAIN_RLBOT})
+list(APPEND TARGETS Void_RLBot)
+
 file(GLOB MAIN_SELECTOR_SRC "mains/SelectorMain.cpp")
 add_executable(Void_Selector ${MAIN_SELECTOR_SRC})
 list(APPEND TARGETS Void_Selector)
