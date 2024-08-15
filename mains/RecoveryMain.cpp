@@ -56,7 +56,8 @@ std::vector<Logger*> loggers = {
 	new PlayerLoggers::PlayerInAirLogger(),
 	new PlayerLoggers::PlayerSpeedLogger(),
 	new PlayerLoggers::PlayerHeightLogger(),
-	new PlayerLoggers::FlipTimeLogger()
+	new PlayerLoggers::FlipTimeLogger(),
+	new PlayerLoggers::HasJumpedNotFlippedLogger()
 };
 
 float maxBallVel = 0.;
@@ -160,7 +161,7 @@ EnvCreateResult EnvCreateFunc() {
 	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc, weight (optional, default = 1), name (optional for loggable rewards, mandatory for non loggable) }
 		{
 			{new VelocityPlayerToBallReward(), 2.0f, "Velocity player to ball" },
-			{new RecoveryReward(), 1.0f},
+			{new RecoveryReward({.distanceToBallWeight = 2.0f, .flipTimeWeight = 3.0f, .velocityWeight = 0.5f}), 1.0f},
 			{new EventReward({.touch = 10.0f}), 1.0f, "Event"}
 		}
 	);

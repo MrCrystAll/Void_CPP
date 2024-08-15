@@ -106,3 +106,14 @@ RLGSC::FList PlayerLoggers::FlipTimeLogger::GetMetrics(RLGSC::GameState state)
 	return { timer };
 }
 
+RLGSC::FList PlayerLoggers::HasJumpedNotFlippedLogger::GetMetrics(RLGSC::GameState state)
+{
+	float timer = 0;
+	for (const RLGSC::PlayerData& p : state.players) {
+		timer += p.carState.hasJumped and not (p.carState.hasFlipped or p.carState.hasDoubleJumped);
+	}
+
+	timer /= state.players.size();
+
+	return { timer };
+}
