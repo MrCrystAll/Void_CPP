@@ -1,6 +1,9 @@
 #include <Recovery/ActionParsers/RecoveryActionParser.h>
 #include <Recovery/ObsBuilders/DashObsBuilder.h>
 
+#include <RLGymSim_CPP/Utils/OBSBuilders/DefaultOBS.h>
+#include <RLGymSim_CPP/Utils/ActionParsers/DiscreteAction.h>
+
 #include <filesystem>
 #include "RLBotClient.h"
 
@@ -17,11 +20,11 @@ int main(int argc, char* argv[]) {
 
 	RLBotParams params = {
 		.port = 42653,
-		.obsBuilder = new DashObsBuilder(6),
-		.actionParser = new RecoveryActionParser(),
+		.obsBuilder = new DefaultOBS(),
+		.actionParser = new DiscreteAction(),
 		.policyPath = policyPath,
-		.obsSize = 415,
-		.policyLayerSizes = { 512, 512, 512 },
+		.obsSize = 165,
+		.policyLayerSizes = { 256, 256, 256 },
 		.tickSkip = 2
 	};
 	RLBotClient::Run(params);
