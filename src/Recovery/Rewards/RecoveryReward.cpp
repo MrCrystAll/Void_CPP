@@ -5,14 +5,11 @@ USE_RECOVERY_REWARDS_NS;
 
 float RecoveryReward::GetReward(const PlayerData& player, const GameState& state, const Action& prevAction)
 {
-	int numWheels = 0;
-	for (bool wheelContact : player.carState.wheelsWithContact) {
-		numWheels += wheelContact;
-	}
-
-	this->reward += {(numWheels <= 3 and numWheels > 0 and player.carState.isFlipping), "Flipping on less than 4 wheels and on 'ground'"};
-	this->reward -= {player.carState.hasFlipped ? player.carState.flipTime + (player.carState.vel.Length() / CommonValues::CAR_MAX_SPEED - 0.5) : 0, "Flip time (weighted with velocity)"};
-	this->reward -= {player.carState.pos.Dist(state.ball.pos) / 5000, "Distance to ball"};
+	float normalizedPlayerSpeed = player.carState.vel.Length() / CommonValues::CAR_MAX_SPEED;
+	this->reward -= {player.carState.hasDoubleJumped, "Double jump punishment"};
+	this->reward += {player.carState.hasFlipped ? std::exp(-4 * player.carState.flipTime) : 0, "Flip time"};
+	this->reward -= {player.carState.pos.Dist(state.ball.pos) / 2500, "Distance to ball"};
+	this->reward += {std::exp(3 * (normalizedPlayerSpeed - 1)), "Player velocity"};
 
 	return this->ComputeReward();
 }

@@ -17,11 +17,21 @@ void DashObsBuilder::AddPlayerToOBS(RLGSC::FList& obs, const RLGSC::PlayerData& 
 	obs += player.carState.flipTime;
 	obs += player.carState.flipRelTorque;
 
+	int numWheels = 0;
+	for (bool b : player.carState.wheelsWithContact) {
+		numWheels += b;
+	}
+
 	obs += {
 		player.boostFraction,
 			(float)player.carState.isOnGround,
 			(float)player.hasFlip,
 			(float)player.carState.isDemoed,
+			(float)player.carState.hasFlipped,
+			(float)player.carState.hasJumped,
+			(float)player.carState.hasDoubleJumped,
+			(float)player.carState.isFlipping,
+			(float)numWheels
 	};
 }
 
@@ -51,6 +61,9 @@ RLGSC::FList DashObsBuilder::BuildOBS(const RLGSC::PlayerData& player, const RLG
 
 	RLGSC::FList2 teammates = {}, opponents = {};
 
+	result += (player.carState.pos - ball.pos) * posCoef;
+	result += player.carState.pos.Dist(ball.pos) / 5000;
+
 	for (auto& otherPlayer : state.players) {
 		if (otherPlayer.carId == player.carId)
 			continue;
@@ -61,6 +74,7 @@ RLGSC::FList DashObsBuilder::BuildOBS(const RLGSC::PlayerData& player, const RLG
 			otherPlayer,
 			inv
 		);
+
 		((otherPlayer.team == player.team) ? teammates : opponents).push_back(playerObs);
 	}
 
