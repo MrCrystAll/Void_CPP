@@ -49,7 +49,10 @@ void SetupConfig(RLGPC::LearnerConfig& cfg, std::string configPath) {
 	#pragma endregion
 
 	#pragma region Checkpoints
-	cfg.checkpointsToKeep = GetYamlProperty(n, "checkpoints-to-keep", 30);
+	YAML::Node checkpointsConfigNode = n["checkpoints-config"];
+	cfg.checkpointLoadFolder = GetYamlProperty<std::string>(checkpointsConfigNode, "checkpoints-load-folder", "checkpoints");
+	cfg.checkpointSaveFolder = GetYamlProperty<std::string>(checkpointsConfigNode, "checkpoints-save-folder", "checkpoints");
+	cfg.checkpointsToKeep = GetYamlProperty<int>(checkpointsConfigNode, "checkpoints-to-keep", 30);
 	#pragma endregion
 
 	#pragma region Wandb config

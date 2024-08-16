@@ -26,7 +26,7 @@ USE_REPLAY_NS;
 USE_RCF_NS;
 
 int main() {
-	std::string INPUT_PATH = "replays/3s"; //Can be replay or json
+	std::string INPUT_PATH = "replays/3s/b87a9751-4ef8-4533-84d7-afd6df331c4d.replay"; //Can be replay or json
 	std::string OUTPUT_PATH = "FlipResets3v3.json"; //Has to be json
 	bool IS_JSON = INPUT_PATH.ends_with(".json");
 
@@ -62,7 +62,7 @@ int main() {
 			std::vector<Replay> filteredReplays = filter.FilterReplays(replays);
 			VOID_LOG("Finished filtering");
 
-			saver.SaveReplays(OUTPUT_PATH, filteredReplays, false);
+			saver.SaveReplays(OUTPUT_PATH, filteredReplays);
 
 			replayFile.close();
 		}
@@ -85,6 +85,6 @@ int main() {
 		}
 
 		std::vector<Replay> filteredReplays = filter.FilterReplays(replays);
-		saver.SaveReplays(OUTPUT_PATH, filteredReplays, true);
+		saver.SaveReplays(OUTPUT_PATH, filteredReplays);
 	}
 }

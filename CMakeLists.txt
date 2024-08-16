@@ -48,13 +48,10 @@ list(APPEND TARGETS Void_Main Void_RCF Void_Replay_Converter)
 target_include_directories(Void PUBLIC "include")
 target_link_libraries(Void_Main Void)
 
-
 # Make sure RLGymPPO_CPP is going to build in the same directory as us
 # Otherwise, we won't be able to import it at runtime
 set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
-
-file(COPY "submodels" DESTINATION "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
 
 # Include RLGymSim_PPO
 add_subdirectory(RLGymPPO_CPP)

@@ -32,7 +32,10 @@ config:
     renderDuringTraining: false
     deterministic: false
 
-  checkpoints-to-keep: 30
+  checkpoints-config:
+    checkpoints-to-keep: 30
+    checkpoints-load-folder: checkpoints/# Insert name
+    checkpoints-save-folder: checkpoints/# Insert name
 
   wandb-config:
     metricsRunName: # Insert name
