@@ -2,10 +2,10 @@ import sys
 import wandb
 
 from typing import Dict, Any
+from requests import post
 
 def log(*content):
-    print("[PYTHON] -", *content)
-
+    print("[PYTHON] -", *content, flush=True)
 
 wandb_run = None
 
@@ -36,12 +36,43 @@ def init(py_exec_path, project, group, name, id=None):
     else:
         wandb_run = wandb.init(project=project, group=group, name=name)
         log(f"Creating run {wandb_run.id}")
+        
+    api_post("wandbRunData", {
+        "group": group,
+        "name": name,
+        "project": project,
+        "id": wandb_run.id
+    })
 
     return wandb_run.id
+
+def api_post(context, data):
+    log(f"Posting to the API on context /{context}...")
+    post(f"http://localhost:3000/{context}", json=data, headers={"authorization": "validToken"})
+    log(f"Successfully posted data {data}")
+
+def format_from_wandb(key: str, value: Any) -> Dict[str, Any]:
+        all_attr = key.split("/")
+        data = {}
+        temp_ref = data
+
+        len_attrs = 0
+        while len_attrs < len(all_attr) - 1:
+            temp_ref.setdefault(all_attr[len_attrs], {})
+            temp_ref = temp_ref[all_attr[len_attrs]]
+            len_attrs += 1
+
+            if len_attrs == len(all_attr) - 1:
+                temp_ref[all_attr[-1]] = value
+
+        return data
 
 
 def add_metrics(metrics):
     global wandb_run
     new_metrics = {}
     format_to_wandb(metrics, new_metrics)
+    
+    api_post("metrics", new_metrics)
+    
     wandb_run.log(new_metrics)
