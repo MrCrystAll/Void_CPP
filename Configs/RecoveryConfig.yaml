@@ -1,7 +1,7 @@
 config:
   process-config:
-    numThreads: 8
-    numGamesPerThread: 16
+    numThreads: 4
+    numGamesPerThread: 4
 
   buffer-config:
     timestepsPerIteration: 200000
@@ -32,10 +32,15 @@ config:
     renderDuringTraining: false
     deterministic: false
 
-  checkpoints-to-keep: 30
+  checkpoints-config:
+    checkpoints-to-keep: 30
+    checkpoints-load-folder: checkpoints/Recovery
+    checkpoints-save-folder: checkpoints/Recovery
 
   wandb-config:
+    metricsGroupName: cryy_salt
+    metricsProjectName: Void
     metricsRunName: Recovery
 
   skill-tracker-config:
-    enabled: true
+    enabled: false

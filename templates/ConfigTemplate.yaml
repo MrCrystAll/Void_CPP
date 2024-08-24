@@ -38,6 +38,8 @@ config:
     checkpoints-save-folder: checkpoints/# Insert name
 
   wandb-config:
+    metricsGroupName: cryy_salt
+    metricsProjectName: Void
     metricsRunName: # Insert name
 
   skill-tracker-config:

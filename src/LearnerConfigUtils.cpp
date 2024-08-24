@@ -57,8 +57,8 @@ void SetupConfig(RLGPC::LearnerConfig& cfg, std::string configPath) {
 
 	#pragma region Wandb config
 	YAML::Node wandbConfigNode = n["wandb-config"];
-	cfg.metricsGroupName = WANDB_ENTITY;
-	cfg.metricsProjectName = WANDB_PROJECT;
+	cfg.metricsGroupName = GetYamlProperty<std::string>(wandbConfigNode, "metricsGroupName", WANDB_ENTITY);;
+	cfg.metricsProjectName = GetYamlProperty<std::string>(wandbConfigNode, "metricsProjectName", WANDB_PROJECT);;
 	cfg.metricsRunName = GetYamlProperty<std::string>(wandbConfigNode, "metricsRunName", WANDB_RUN_NAME);
 	#pragma endregion
 
@@ -69,7 +69,7 @@ void SetupConfig(RLGPC::LearnerConfig& cfg, std::string configPath) {
 	stc.stepCallback = OnStepSkillTracker;
 
 	cfg.skillTrackerConfig = stc;
-#pragma endregion
+	#pragma endregion
 }
 
 template<typename T>

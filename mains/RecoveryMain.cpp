@@ -173,7 +173,7 @@ EnvCreateResult EnvCreateFunc() {
 		new GoalScoreCondition()
 	};
 
-	auto obs = new DashObsBuilder(6);
+	auto obs = new DefaultOBS();
 	auto actionParser = new RecoveryActionParser();
 	auto stateSetter = new RandomRecoveryState();
 
@@ -184,8 +184,8 @@ EnvCreateResult EnvCreateFunc() {
 		actionParser,
 		stateSetter,
 
-		2, // Team size
-		true // Spawn opponents
+		1, // Team size
+		false // Spawn opponents
 	);
 
 	Gym* gym = new Gym(match, TICK_SKIP);
