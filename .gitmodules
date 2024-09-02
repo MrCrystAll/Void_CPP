@@ -1,3 +1,6 @@
 [submodule "Void-UI"]
 	path = Void-UI
 	url = https://github.com/MrCrystAll/Void-UI
+[submodule "RLGymPPO_CPP"]
+	path = RLGymPPO_CPP
+	url = https://github.com/ZealanL/RLGymPPO_CPP.git

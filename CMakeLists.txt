@@ -57,8 +57,6 @@ set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
 add_subdirectory(RLGymPPO_CPP)
 target_link_libraries(Void RLGymPPO_CPP)
 
-# Include RLBot
-add_subdirectory(RLBotCPP)
 target_link_libraries(Void RLBotCPP)
 
 

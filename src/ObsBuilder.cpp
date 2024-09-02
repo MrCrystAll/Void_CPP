@@ -1,6 +1,5 @@
 #include <RLGymSim_CPP/Utils/OBSBuilders/DefaultOBS.h>
 #include "ObsBuilder.h"
-#include "../RLGymPPO_CPP/RLGymSim_CPP/RocketSim/src/Sim/BallPredTracker/BallPredTracker.h"
 #include <Utils/LoggerUtils.h>
 
 USE_OBS_BUILDER_NS;
@@ -16,33 +15,6 @@ RLGSC::FList OnesObs::BuildOBS(const RLGSC::PlayerData& player, const RLGSC::Gam
 
     return result;
 };
-
-FList BallPredObs::BuildOBS(const PlayerData& player, const GameState& state, const Action& prevAction)
-{
-	FList obs = DefaultOBS::BuildOBS(player, state, prevAction);
-
-	BallState ballPredState = this->bpt->GetBallStateForTime(predTime);
-
-	obs += ballPredState.pos * posCoef;
-	obs += ballPredState.vel * velCoef;
-	obs += ballPredState.angVel * angVelCoef;
-
-	return obs;
-}
-
-void BallPredObs::PreStep(const GameState& state)
-{
-	DefaultOBS::PreStep(state);
-	this->bpt->UpdatePredFromArena(state.lastArena);
-}
-
-void BallPredObs::Reset(const GameState& initialState)
-{
-	DefaultOBS::Reset(initialState);
-	if (bpt == nullptr) {
-		bpt = new BallPredTracker(initialState.lastArena, predTime);
-	}
-}
 
 FList LockedDefaultObs::BuildOBS(const PlayerData& player, const GameState& state, const Action& prevAction)
 {

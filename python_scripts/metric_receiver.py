@@ -1,11 +1,19 @@
+import os
 import sys
-import wandb
 
-from typing import Dict, Any
+lib_path = os.path.join(os.getcwd(), ".venv/Lib/site-packages")
+sys.path.append(lib_path)
+
+import wandb
 from requests import post
+from typing import Dict, Any
+
 
 def log(*content):
     print("[PYTHON] -", *content, flush=True)
+    
+def err_log(*content):
+    log("[ERROR]", content)
 
 wandb_run = None
 
@@ -25,7 +33,7 @@ def init(py_exec_path, project, group, name, id=None):
     # Fix the path of our interpreter so wandb doesn't run RLGym_PPO instead of Python
     # Very strange fix for a very strange problem
     sys.executable = py_exec_path
-
+  
     if wandb_run:
         log(f"Run already exists, returning {wandb_run.id}")
         return wandb_run.id
@@ -47,10 +55,13 @@ def init(py_exec_path, project, group, name, id=None):
     return wandb_run.id
 
 def api_post(context, data):
-    log(f"Posting to the API on context /{context}...")
-    post(f"http://localhost:3000/{context}", json=data, headers={"authorization": "validToken"})
-    log(f"Successfully posted data {data}")
-
+    try:
+        log(f"Posting to the API on context /{context}...")
+        post(f"http://localhost:3000/{context}", json=data, headers={"authorization": "validToken"})
+        log(f"Successfully posted data {data}")
+    except Exception as e:
+        err_log(e)
+        
 def format_from_wandb(key: str, value: Any) -> Dict[str, Any]:
         all_attr = key.split("/")
         data = {}

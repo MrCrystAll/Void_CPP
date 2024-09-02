@@ -9,7 +9,6 @@
 #pragma once
 #include <RLGymSim_CPP/Utils/OBSBuilders/OBSBuilder.h>
 #include <RLGymSim_CPP/Utils/OBSBuilders/DefaultOBS.h>
-#include "../RLGymPPO_CPP/RLGymSim_CPP/RocketSim/src/Sim/BallPredTracker/BallPredTracker.h"
 #include <Utils/VoidUtils.h>
 
 START_OBS_BUILDER_NS
@@ -43,28 +42,6 @@ public:
 	}
 
 	virtual FList BuildOBS(const PlayerData& player, const GameState& state, const Action& prevAction);
-};
-
-/**
- * @brief Obs with ball prediction
- */
-class BallPredObs : public RLGSC::DefaultOBS {
-public:
-	BallPredObs(
-		Vec posCoef = Vec(1 / CommonValues::SIDE_WALL_X, 1 / CommonValues::BACK_WALL_Y, 1 / CommonValues::CEILING_Z),
-		float velCoef = 1 / CommonValues::CAR_MAX_SPEED,
-		float angVelCoef = 1 / CommonValues::CAR_MAX_ANG_VEL,
-		float predictionTime = 120
-	) : DefaultOBS(posCoef, velCoef, angVelCoef), predTime(predictionTime)
-	{};
-
-	virtual FList BuildOBS(const PlayerData& player, const GameState& state, const Action& prevAction);
-	virtual void PreStep(const GameState& state);
-	virtual void Reset(const GameState& initialState);
-
-private:
-	BallPredTracker* bpt;
-	float predTime;
 };
 
 /**
