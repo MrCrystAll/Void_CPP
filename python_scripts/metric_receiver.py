@@ -1,8 +1,14 @@
 import os
 import sys
 
-lib_path = os.path.join(os.getcwd(), ".venv/Lib/site-packages")
-sys.path.append(lib_path)
+lib_path_from_root = os.path.join(os.getcwd(), ".venv/Lib/site-packages")
+lib_path_from_release = os.path.join(os.getcwd(), "../.venv/Lib/site-packages")
+
+if os.path.exists(lib_path_from_release):
+    sys.path.append(lib_path_from_release)
+
+if os.path.exists(lib_path_from_root):
+    sys.path.append(lib_path_from_root)
 
 import wandb
 from requests import post
