@@ -4,3 +4,6 @@
 [submodule "RLGymPPO_CPP"]
 	path = RLGymPPO_CPP
 	url = https://github.com/ZealanL/RLGymPPO_CPP.git
+[submodule "python_scripts/RocketSimVis"]
+	path = python_scripts/RocketSimVis
+	url = https://github.com/ZealanL/RocketSimVis
