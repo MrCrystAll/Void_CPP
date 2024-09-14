@@ -4,7 +4,7 @@ from typing import Tuple
 import numpy as np
 from rlgym_sim.utils.state_setters.state_setter import StateSetter, StateWrapper
 from rlgym_tools.extra_state_setters.weighted_sample_setter import WeightedSampleSetter
-from rlgym_sim.utils.common_values import BALL_RADIUS, BLUE_TEAM, ORANGE_TEAM, BACK_WALL_Y
+from rlgym_sim.utils.common_values import BALL_RADIUS, BLUE_TEAM, ORANGE_TEAM, BACK_WALL_Y, SIDE_WALL_X
 
 class TeamSizeSetter(StateSetter):
     def __init__(self, gm_probs: Tuple[float, float, float], setters: Tuple[StateSetter, ...],
@@ -165,4 +165,49 @@ class DoubleTapSetter(StateSetter):
 
             c.boost = 1
 
+        return state_wrapper
+
+
+class DashStateSetter(StateSetter):
+    def reset(self, state_wrapper: StateWrapper):
+        
+        state_wrapper.ball.set_pos(
+            random.uniform(-SIDE_WALL_X + 1152, SIDE_WALL_X + 1152),
+            random.uniform(-BACK_WALL_Y + 1152, BACK_WALL_Y - 1152),
+            random.uniform(60, 200)
+        )
+        
+        state_wrapper.ball.set_lin_vel(
+            random.uniform(-1100, 1100),
+            random.uniform(-1100, 1100),
+            random.uniform(-600, 600)
+        )
+        
+        for c in state_wrapper.cars:
+            c.set_pos(
+                random.uniform(-SIDE_WALL_X + 1152, SIDE_WALL_X + 1152),
+                random.uniform(-BACK_WALL_Y + 1152, BACK_WALL_Y - 1152),
+                random.uniform(60, 200)
+            )
+            
+            c.set_lin_vel(
+                random.uniform(-1100, 1100),
+                random.uniform(-1100, 1100),
+                random.uniform(-600, 600)
+            )
+            
+            c.set_ang_vel(
+                random.uniform(-pi / 2, pi / 2),
+                random.uniform(-pi / 2, pi / 2),
+                random.uniform(-pi / 2, pi / 2)
+            )
+            
+            c.set_rot(
+                random.uniform(-pi / 2, pi / 2),
+                random.uniform(-pi / 2, pi / 2),
+                random.uniform(-pi / 2, pi / 2)
+            )
+            
+            c.boost = 0
+        
         return state_wrapper

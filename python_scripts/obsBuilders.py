@@ -164,6 +164,9 @@ class DefaultObsCpp(ObsBuilder):
 
         return player_car
     
+    def get_obs_space(self) -> gym.spaces.Space:
+        return gym.spaces.Box(-np.inf, np.inf, (70, ))
+    
     
 class DefaultObsCppPadded(DefaultObsCpp):
     PLAYER_SIZE: int = 19

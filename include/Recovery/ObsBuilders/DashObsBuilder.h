@@ -19,8 +19,11 @@ public:
 	}
 
 	void AddPlayerToOBS(RLGSC::FList& obs, const RLGSC::PlayerData& player, bool inv);
+	virtual void PreStep(const GameState& state) override;
 	// Inherited via OBSBuilder
 	RLGSC::FList BuildOBS(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction) override;
+private:
+	int delaySinceLastFlip = 0, delaySinceOnlyJump = 0;
 };
 
 END_RECOVERY_NS

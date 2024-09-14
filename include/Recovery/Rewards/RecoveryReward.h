@@ -1,4 +1,5 @@
 #include <Recovery/RecoveryUtils.h>
+#include <RLGymSim_CPP/Utils/RewardFunctions/CommonRewards.h>
 
 using namespace RLGSC;
 
@@ -26,12 +27,31 @@ public:
 		/// Double jump weight
 		/// </summary>
 		float doubleJumpWeight = 1.0f;
+
+		/// <summary>
+		/// Facing up weight
+		/// </summary>
+		float facingUpWeight = 2.0f;
 	};
 
 	RecoveryReward(RecoveryArgs args = {}, std::string name = "Recovery") : LoggableReward(name), config(args) {};
+	virtual void PreStep(const GameState& state) override;
 	virtual float GetReward(const PlayerData& player, const GameState& state, const Action& prevAction) override;
 private:
 	RecoveryArgs config;
+	int delaySinceLastHasFlipped = 0;
+	int delaySinceOnlyJump = 0;
+
+	RLGSC::FaceBallReward* faceball = new FaceBallReward();
+
+	void AddDoubleJumpPunishment(const PlayerData& player);
+	void FlîpTimeReward(const PlayerData& player);
+	void DistToBall(const PlayerData& player, const GameState& state);
+	void VelocityReward(const PlayerData& player);
+	void UpFacingReward(const PlayerData& player);
+	void FlipDelayReward(const PlayerData& player);
+	void FlipTimeReward(const PlayerData& player);
+	void OnlyJumpHeldTooLongPunishment(const PlayerData& player);
 };
 
 END_RECOVERY_NS

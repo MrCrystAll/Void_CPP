@@ -191,6 +191,16 @@ namespace PlayerLoggers {
 	/**
 	 * @brief Logger that tracks the average flip time
 	 */
+	class FlipTimeWhenAboveZeroLogger : public Logger {
+	public:
+		FlipTimeWhenAboveZeroLogger() : Logger({ {.name = "flip_time_above_zero", .isAvg = true} }) {};
+	protected:
+		virtual RLGSC::FList GetMetrics(RLGSC::GameState state) override;
+	};
+
+	/**
+	 * @brief Logger that tracks the average flip time
+	 */
 	class HasJumpedNotFlippedLogger : public Logger {
 	public:
 		HasJumpedNotFlippedLogger() : Logger({ {.name = "only_jump_time", .isAvg = true} }) {};

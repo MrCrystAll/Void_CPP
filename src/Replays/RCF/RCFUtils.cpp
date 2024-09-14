@@ -27,6 +27,10 @@ bool IsOnWall(const PlayerData player, int wallHeightTolerance, int wallWidthTol
 
     if (isOnFlatWall) return true;
 
+    return isOnCorner(player, wallWidthTolerance);
+}
+
+bool isOnCorner(const PlayerData player, int wallWidthTolerance) {
     bool isOnCorner = false;
 
     for (int a : {-1, 1}) {

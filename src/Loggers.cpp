@@ -7,10 +7,10 @@ void Logger::Log(RLGPC::Report& report, RLGSC::GameState state)
 {
 	RLGSC::FList data = GetMetrics(state);
 	int size = data.size();
-	if (data.size() != metrics.size()) {
+	/*if (data.size() != metrics.size()) {
 		VOID_ERR("Expected " << metrics.size() << " metrics, got " << data.size());
 		size = data.size() > metrics.size() ? metrics.size() : data.size();
-	}
+	}*/
 
 	for (int i = 0; i < size; i++) {
 		if (metrics[i].isAvg) {
@@ -115,5 +115,23 @@ RLGSC::FList PlayerLoggers::HasJumpedNotFlippedLogger::GetMetrics(RLGSC::GameSta
 
 	timer /= state.players.size();
 
+	return { timer };
+}
+
+RLGSC::FList PlayerLoggers::FlipTimeWhenAboveZeroLogger::GetMetrics(RLGSC::GameState state)
+{
+	float timer = 0;
+	int nPlayers = 0;
+	for (const RLGSC::PlayerData& p : state.players) {
+		if (p.carState.flipTime > 0) {
+			timer += p.carState.flipTime;
+			nPlayers++;
+		}
+		
+	}
+
+	if (nPlayers == 0) return {};
+	timer /= nPlayers;
+	
 	return { timer };
 }

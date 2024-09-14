@@ -16,16 +16,16 @@ USE_RECOVERY_OB_NS;
 
 int main(int argc, char* argv[]) {
     std::filesystem::path exePath = std::filesystem::path(argv[0]);
-    std::filesystem::path policyPath = exePath.parent_path() / "RLBotModel/PPO_POLICY.lt";
+    std::filesystem::path policyPath = exePath.parent_path() / "RLBotModel/Recovery/257108224/PPO_POLICY.lt";
 
 	RLBotParams params = {
 		.port = 42653,
 		.obsBuilder = new DefaultOBS(),
-		.actionParser = new DiscreteAction(),
+		.actionParser = new RecoveryActionParser(),
 		.policyPath = policyPath,
-		.obsSize = 165,
-		.policyLayerSizes = { 256, 256, 256 },
-		.tickSkip = 2
+		.obsSize = 70,
+		.policyLayerSizes = { 512, 512, 512 },
+		.tickSkip = 2,
 	};
 	RLBotClient::Run(params);
 

@@ -37,6 +37,14 @@ bool IsGoalScored(const GameState state);
 bool IsOnWall(const PlayerData player, int wallHeightTolerance = 100, int wallWidthTolerance = 100);
 
 /// <summary>
+/// Checks if a player is in a corner
+/// </summary>
+/// <param name="player">The player to check</param>
+/// <param name="wallWidthTolerance">The distance off the walls where the players starts to be considered on the wall</param>
+/// <returns>Whether the player is in a corner</returns>
+bool isOnCorner(const PlayerData player, int wallWidthTolerance = 100);
+
+/// <summary>
 /// Checks if a player is on the ceiling
 /// </summary>
 /// <param name="player">The player to check</param>

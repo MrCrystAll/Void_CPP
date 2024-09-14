@@ -1,4 +1,5 @@
 #include <Recovery/ObsBuilders/DashObsBuilder.h>
+#include <Replays/RCF/RCFUtils.h>
 
 USE_RECOVERY_OB_NS;
 
@@ -35,6 +36,11 @@ void DashObsBuilder::AddPlayerToOBS(RLGSC::FList& obs, const RLGSC::PlayerData& 
 	};
 }
 
+void DashObsBuilder::PreStep(const GameState& state)
+{
+	this->delaySinceLastFlip = std::min(this->delaySinceLastFlip + 1, 300);
+}
+
 RLGSC::FList DashObsBuilder::BuildOBS(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction)
 {
 	RLGSC::FList result = {};
@@ -63,6 +69,50 @@ RLGSC::FList DashObsBuilder::BuildOBS(const RLGSC::PlayerData& player, const RLG
 
 	result += (player.carState.pos - ball.pos) * posCoef;
 	result += player.carState.pos.Dist(ball.pos) / 5000;
+
+	//Is jumping, basically
+	result += player.carState.hasJumped and not (player.carState.hasFlipped or player.carState.hasDoubleJumped);
+	bool isOnWall = Void::Replays::RCF::IsOnWall(player);
+	bool isOnCeiling = Void::Replays::RCF::IsOnCeiling(player);
+	bool isOnCorner = Void::Replays::RCF::isOnCorner(player);
+
+	Vec up = Vec(0, 0, 1);
+
+	result += isOnWall;
+	result += isOnCeiling;
+	result += isOnCorner;
+
+	if (isOnWall) up = player.carState.pos.x < 0 ? Vec(1, 0, 0) : Vec(-1, 0, 0);
+	if (isOnCeiling) up = -up;
+	if (isOnCorner) {
+		float directionFrom45Deg = std::sqrt(2.0f) / 2;
+		if (player.carState.pos.x > 0) {
+			if (player.carState.pos.y > 0) {
+				up = Vec(-directionFrom45Deg, -directionFrom45Deg, 0);
+			}
+			else {
+				up = Vec(directionFrom45Deg, -directionFrom45Deg, 0);
+			}
+		}
+		else {
+			if (player.carState.pos.y > 0) {
+				up = Vec(-directionFrom45Deg, directionFrom45Deg, 0);
+			}
+			else {
+				up = Vec(directionFrom45Deg, directionFrom45Deg, 0);
+			}
+		}
+	}
+
+	result += up;
+
+	if (player.carState.hasFlipped and not player.carState.isFlipping) this->delaySinceLastFlip = 0;
+
+	if (player.carState.hasJumped and not (player.carState.hasFlipped or player.carState.hasDoubleJumped)) this->delaySinceOnlyJump = std::min(300, this->delaySinceOnlyJump + 1);
+	else this->delaySinceOnlyJump = 0;
+
+	result += this->delaySinceLastFlip;
+	result += this->delaySinceOnlyJump;
 
 	for (auto& otherPlayer : state.players) {
 		if (otherPlayer.carId == player.carId)

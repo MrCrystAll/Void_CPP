@@ -13,19 +13,19 @@ from rlgym_sim.utils.terminal_conditions.common_conditions import TimeoutConditi
 from rlgym_sim.utils.state_setters.default_state import DefaultState
 from rlgym_sim.utils.common_values import BLUE_TEAM, ORANGE_TEAM
 from rlgym_sim.utils.gamestates.game_state import GameState
-from parsers import NectoAction, SwappedNectoAction
+from parsers import NectoAction, SwappedNectoAction, DashParser
 from obsBuilders import DefaultObsCpp, DefaultObsCppPadded, OnesObs, SwappedDefaultObsCpp
 from rlgym_tools.extra_action_parsers.lookup_act import LookupAction
 
-from setters import OverfitCeilingPinchSetter, RandomPinchSetter, TeamSizeSetter, PinchSetter, DoubleTapSetter
+from setters import OverfitCeilingPinchSetter, RandomPinchSetter, TeamSizeSetter, PinchSetter, DoubleTapSetter, DashStateSetter
 from utils import get_latest_model_path, live_log
 
 # endregion
 # region ========================= Environment settings ============================
-tick_skip = 8
+tick_skip = 2
 STEP_TIME = tick_skip / 120.
 
-spawn_opponents = True
+spawn_opponents = False
 blue_count = 1
 orange_count = 1 if spawn_opponents else 0
 
@@ -42,11 +42,11 @@ double_tap_args = DoubleTapSetter.DoubleTapSetterArgs(
 
 state_mutator = TeamSizeSetter(
     setters=(
-        DoubleTapSetter(double_tap_args),
+        DashStateSetter(),
         # dynamic_replay
     ),
     weights=(1,),
-    gm_probs=(1, 1, 1)
+    gm_probs=(1, 0, 0)
 )
 reward_fn = ConstantReward()
 
@@ -58,7 +58,7 @@ termination_conditions = [
 # endregion
 # region ========================= Model Settings =============================
 
-action_parser = NectoAction()
+action_parser = DashParser()
 action_size = action_parser.get_action_space().n
 
 obs_builder = DefaultObsCpp()
@@ -96,7 +96,7 @@ agent = PPOLearner(
 # region ========================= Live instance Settings =============================
 deterministic = True
 
-model_to_load = "checkpoints/double_tap/dt_v1"
+model_to_load = "checkpoints/Recovery/v1"
 
 minutes_before_update = 15
 seconds_before_update = 0
@@ -118,9 +118,7 @@ def create_env(sim: bool = True):
             terminal_conditions=termination_conditions,
             tick_skip=tick_skip,
             team_size=blue_count,
-            spawn_opponents=spawn_opponents,
-            # game_speed=1,
-            # launch_preference=LaunchPreference.EPIC
+            spawn_opponents=spawn_opponents
         )
     else:
         import rlgym
@@ -142,7 +140,7 @@ def create_env(sim: bool = True):
 
 def model_reload():
     global agent, current_time
-    latest_model_path = get_latest_model_path("checkpoints")
+    latest_model_path = get_latest_model_path("checkpoints/Recovery")
     agent.load_from(latest_model_path)
     live_log("Model reloaded")
     current_time = time.time()
@@ -151,7 +149,7 @@ def model_reload():
 def playstyle_switch():
     global deterministic
 
-    deterministic = random.uniform(0, 1) > 0.5
+    deterministic = random.uniform(0, 1) > 1.0
 
 
 def print_live_state():
@@ -168,7 +166,7 @@ def print_live_state():
 if __name__ == "__main__":
 
     # agent.load_from(model_to_load)
-    sim = True
+    sim = False
     env = create_env(sim=sim)
     current_time = time.time()
     refresh_time = current_time
@@ -176,6 +174,7 @@ if __name__ == "__main__":
     while True:
         playstyle_switch()
         obs, info = env.reset(return_info=True)
+        print_live_state()
         terminated = False
         
         cnt_blue_count = len([0 for p in info["state"].players if p.team_num == BLUE_TEAM ])
@@ -187,8 +186,7 @@ if __name__ == "__main__":
         
         while not terminated:
             if time.time() - refresh_time >= 1:
-                refresh_time = time.time()
-                # print_live_state()            
+                refresh_time = time.time()            
             
             if cnt_blue_count + cnt_orange_count == 1:
                 obs = [obs]
