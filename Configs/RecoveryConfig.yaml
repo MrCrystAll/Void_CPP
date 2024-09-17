@@ -5,7 +5,7 @@ config:
 
   buffer-config:
     timestepsPerIteration: 500000
-    expBufferSize: 600000
+    expBufferSize: 500000
 
   learner-buffer-config:
     batchSize: 500000

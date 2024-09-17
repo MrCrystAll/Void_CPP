@@ -37,10 +37,12 @@ public:
 	RecoveryReward(RecoveryArgs args = {}, std::string name = "Recovery") : LoggableReward(name), config(args) {};
 	virtual void PreStep(const GameState& state) override;
 	virtual float GetReward(const PlayerData& player, const GameState& state, const Action& prevAction) override;
+	virtual void Reset(const GameState& initialState) override;
 private:
 	RecoveryArgs config;
-	int delaySinceLastHasFlipped = 0;
-	int delaySinceOnlyJump = 0;
+
+	std::map<int, int> delaySinceLastHasFlipped = {};
+	std::map<int, int> delaySinceOnlyJump = {};
 
 	RLGSC::FaceBallReward* faceball = new FaceBallReward();
 
@@ -52,6 +54,7 @@ private:
 	void FlipDelayReward(const PlayerData& player);
 	void FlipTimeReward(const PlayerData& player);
 	void OnlyJumpHeldTooLongPunishment(const PlayerData& player);
+	void HeightLimitPunishment(const PlayerData& player);
 };
 
 END_RECOVERY_NS
