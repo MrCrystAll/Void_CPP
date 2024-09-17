@@ -1,95 +1,73 @@
-import os
+import signal
+import site
 import sys
-
-lib_path_from_root = os.path.join(os.getcwd(), ".venv/Lib/site-packages")
-lib_path_from_release = os.path.join(os.getcwd(), "../.venv/Lib/site-packages")
-
-if os.path.exists(lib_path_from_release):
-    sys.path.append(lib_path_from_release)
-
-if os.path.exists(lib_path_from_root):
-    sys.path.append(lib_path_from_root)
-
-import wandb
-from requests import post
-from typing import Dict, Any
-
-
-def log(*content):
-    print("[PYTHON] -", *content, flush=True)
-    
-def err_log(*content):
-    log("[ERROR]", content)
+import os
 
 wandb_run = None
 
-def format_to_wandb(data: Dict[str, Any], new_data: Dict, trace: str = ""):
-    for k, v in data.items():
-        if isinstance(v, Dict):
-            format_to_wandb(v, new_data, trace + k + "/")
-        else:
-            new_data.setdefault(trace + k, v)
-
-
 # Takes in the python executable path, the three wandb init strings, and optionally the current run ID
 # Returns the ID of the run (either newly created or resumed)
-def init(py_exec_path, project, group, name, id=None):
-    global wandb_run
+def init(py_exec_path, project, group, name, id = None):
+	"""Takes in the python executable path, the three wandb init strings, and optionally the current run ID. Returns the ID of the run (either newly created or resumed)
 
-    # Fix the path of our interpreter so wandb doesn't run RLGym_PPO instead of Python
-    # Very strange fix for a very strange problem
-    sys.executable = py_exec_path
-  
-    if wandb_run:
-        log(f"Run already exists, returning {wandb_run.id}")
-        return wandb_run.id
+	Args:
+		py_exec_path (str): Python executable path, necessary to fix a bug where the wrong interpreter is used
+		project (str): Wandb project name
+		group (str): Wandb group name
+		name (str): Wandb run name
+		id (str, optional): Id of the wandb run, if None, a new run is created
 
-    if not (id is None) and len(id) > 0:
-        wandb_run = wandb.init(project=project, group=group, name=name, id=id, resume="allow")
-        log(f"Continuing run {wandb_run.id}")
-    else:
-        wandb_run = wandb.init(project=project, group=group, name=name)
-        log(f"Creating run {wandb_run.id}")
-        
-    api_post("wandbRunData", {
-        "group": group,
-        "name": name,
-        "project": project,
-        "id": wandb_run.id
-    })
+	Raises:
+		Exception: Failed to import wandb
 
-    return wandb_run.id
+	Returns:
+		str: The id of the created or continued run
+	"""
 
-def api_post(context, data):
-    try:
-        log(f"Posting to the API on context /{context}...")
-        post(f"http://localhost:3000/{context}", json=data, headers={"authorization": "validToken"})
-        log(f"Successfully posted data {data}")
-    except Exception as e:
-        err_log(e)
-        
-def format_from_wandb(key: str, value: Any) -> Dict[str, Any]:
-        all_attr = key.split("/")
-        data = {}
-        temp_ref = data
-
-        len_attrs = 0
-        while len_attrs < len(all_attr) - 1:
-            temp_ref.setdefault(all_attr[len_attrs], {})
-            temp_ref = temp_ref[all_attr[len_attrs]]
-            len_attrs += 1
-
-            if len_attrs == len(all_attr) - 1:
-                temp_ref[all_attr[-1]] = value
-
-        return data
-
+	global wandb_run
+	
+	# Fix the path of our interpreter so wandb doesn't run RLGym_PPO instead of Python
+	# Very strange fix for a very strange problem
+	sys.executable = py_exec_path
+	
+	try:
+		site_packages_dir = os.path.join(os.path.join(os.path.dirname(py_exec_path), "Lib"), "site-packages")
+		sys.path.append(site_packages_dir)
+		site.addsitedir(site_packages_dir)
+		import wandb
+	except Exception as e:
+		raise Exception(f"""
+			FAILED to import wandb! Make sure RLGymPPO_CPP isn't using the wrong Python installation.
+			This installation's site packages: {site.getsitepackages()}
+			Exception: {repr(e)}"""
+		)
+	
+	print("Calling wandb.init()...")
+	if not (id is None) and len(id) > 0:
+		wandb_run = wandb.init(project = project, group = group, name = name, id = id, resume = "allow")
+	else:
+		wandb_run = wandb.init(project = project, group = group, name = name)
+	return wandb_run.id
 
 def add_metrics(metrics):
-    global wandb_run
-    new_metrics = {}
-    format_to_wandb(metrics, new_metrics)
-    
-    api_post("metrics", new_metrics)
-    
-    wandb_run.log(new_metrics)
+	"""Logs metrics to the wandb run
+
+	Args:
+		metrics (Dict[str, Any]): The metrics to log
+	"""
+	global wandb_run
+	wandb_run.log(metrics)
+
+
+def end(_signal):
+	"""Runs post-mortem tasks
+
+	Args:
+		signal (int): Received signal
+	"""
+	print(f"Received signal {_signal}, running post-mortem tasks")
+
+	# SIGBREAK crashes wandb_run.finish on a WinError[10054].
+
+	if _signal != signal.Signals.SIGBREAK.value:
+		wandb_run.finish()
