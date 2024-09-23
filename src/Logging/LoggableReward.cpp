@@ -96,3 +96,66 @@ float LoggableWrapper::GetFinalReward(const PlayerData& player, const GameState&
 	this->reward += {this->rfn->GetFinalReward(player, state, prevAction), "__temp"};
 	return this->ComputeReward();
 }
+
+#pragma region ZeroSum
+
+void ZeroSumLoggedWrapper::Reset(const GameState& initialState)
+{
+	LoggableReward::Reset(initialState);
+	this->rfn->Reset(initialState);
+}
+
+void ZeroSumLoggedWrapper::PreStep(const GameState& state)
+{
+	LoggableReward::PreStep(state);
+	this->rfn->PreStep(state);
+}
+
+float ZeroSumLoggedWrapper::GetReward(const PlayerData& player, const GameState& state, const Action& prevAction)
+{
+	return this->rfn->GetReward(player, state, prevAction);
+}
+
+float ZeroSumLoggedWrapper::GetFinalReward(const PlayerData& player, const GameState& state, const Action& prevAction)
+{
+	return this->rfn->GetFinalReward(player, state, prevAction);
+}
+
+std::vector<float> ZeroSumLoggedWrapper::GetAllRewards(const GameState& state, const ActionSet& prevActions, bool final)
+{
+	std::vector<float> rewards = LoggableReward::GetAllRewards(state, prevActions, final);
+
+	int teamCounts[2] = {};
+	float avgTeamRewards[2] = {};
+
+	for (int i = 0; i < state.players.size(); i++) {
+		int teamIdx = (int)state.players[i].team;
+		teamCounts[teamIdx]++;
+		avgTeamRewards[teamIdx] += rewards[i];
+	}
+
+	for (int i = 0; i < 2; i++)
+		avgTeamRewards[i] /= RS_MAX(teamCounts[i], 1);
+
+	for (int i = 0; i < state.players.size(); i++) {
+		auto& player = state.players[i];
+		int teamIdx = (int)player.team;
+		int teamCount = teamCounts[teamIdx];
+
+		this->reward.value = rewards[i];
+		this->reward *= {1 - this->teamSpirit, "Zero sum | Team spirit distribution"};
+		this->reward += {avgTeamRewards[teamIdx] * this->teamSpirit, "Zero sum | Team spirit"};
+		this->reward -= {avgTeamRewards[1 - teamIdx] * this->oppScaling, "Zero sum | Opponent scaling"};
+
+		this->reward.Reset();
+
+		rewards[i] =
+			rewards[i] * (1 - this->teamSpirit)
+			+ (avgTeamRewards[teamIdx] * this->teamSpirit)
+			- (avgTeamRewards[1 - teamIdx] * this->oppScaling);
+	}
+
+	return rewards;
+}
+
+#pragma endregion

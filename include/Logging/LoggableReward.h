@@ -112,4 +112,45 @@ private:
 	RewardFunction* rfn;
 };
 
+/// <summary>
+/// A wrapper to use to transform a reward into a zero sum reward
+/// </summary>
+class ZeroSumLoggedWrapper : public LoggableReward {
+public:
+	/**
+	 * @brief Resets the reward.
+	 *
+	 * \param initialState The state usable to setup your reward for the current episode
+	 */
+	virtual void Reset(const GameState& initialState);
+
+	/**
+	 * @brief Computes stuff before stepping
+	 *
+	 * \param state The state you'll calculate the reward on
+	 */
+	virtual void PreStep(const GameState& state);
+
+	virtual float GetReward(const PlayerData& player, const GameState& state, const Action& prevAction);
+
+	virtual float GetFinalReward(const PlayerData& player, const GameState& state, const Action& prevAction);
+
+	ZeroSumLoggedWrapper(RewardFunction* rfn, float teamSpirit, float oppScaling, std::string name = "Zero sum") : LoggableReward(name), rfn(rfn), teamSpirit(teamSpirit), oppScaling(oppScaling) {
+		LoggableReward* reward = dynamic_cast<LoggableReward*>(rfn);
+		if (reward == nullptr) {
+			if (name.empty()) {
+				VOID_ERR("Cannot log reward given to zero sum. No name provided");
+				std::exit(EXIT_FAILURE);
+			}
+			this->rfn = new LoggableWrapper(this->rfn, this->name + " (Zero summed)");
+		}
+	};
+
+	// Get all rewards for all players
+	virtual std::vector<float> GetAllRewards(const GameState& state, const ActionSet& prevActions, bool final) override;
+private:
+	RewardFunction* rfn;
+	float teamSpirit = 1.0f, oppScaling = 1.0f;
+};
+
 END_LOGGING_NS
