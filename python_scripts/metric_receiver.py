@@ -51,12 +51,12 @@ def init(py_exec_path, project, group, name, id=None):
         wandb_run = wandb.init(project=project, group=group, name=name)
         log(f"Creating run {wandb_run.id}")
         
-    api_post("wandbRunData", {
-        "group": group,
-        "name": name,
-        "project": project,
-        "id": wandb_run.id
-    })
+    # api_post("wandbRunData", {
+    #     "group": group,
+    #     "name": name,
+    #     "project": project,
+    #     "id": wandb_run.id
+    # })
 
     return wandb_run.id
 
@@ -90,6 +90,10 @@ def add_metrics(metrics):
     new_metrics = {}
     format_to_wandb(metrics, new_metrics)
     
-    api_post("metrics", new_metrics)
+    # api_post("metrics", new_metrics)
     
     wandb_run.log(new_metrics)
+
+
+def end(signal):
+    pass

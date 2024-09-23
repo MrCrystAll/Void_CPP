@@ -161,7 +161,7 @@ EnvCreateResult EnvCreateFunc() {
 	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc, weight (optional, default = 1), name (optional for loggable rewards, mandatory for non loggable) }
 		{
 			{new VelocityPlayerToBallReward(), 3.5f, "Velocity player to ball" },
-			{new RecoveryReward({.distanceToBallWeight = 0.0f, .velocityWeight = 5.0f, .doubleJumpWeight = 2.0f, .facingUpWeight = 2.5f}), 1.0f},
+			{new RecoveryReward({.distanceToBallWeight = 0.0f, .flipTimeWeight = 2.0f, .velocityWeight = 5.0f,  .doubleJumpWeight = 2.0f, .facingUpWeight = 1.5f}), 1.0f},
 			{new EventReward({.touch = 10.0f}), 1.0f, "Event"}
 		}
 	);
@@ -169,11 +169,11 @@ EnvCreateResult EnvCreateFunc() {
 	std::vector<TerminalCondition*> terminalConditions = {
 		new TimeoutCondition(NO_TOUCH_TIMEOUT_SECS * 120 / TICK_SKIP),
 		//new BounceTimeoutCondition(BOUNCE_TIMEOUT_SECS * 120 / TICK_SKIP),
-		new TouchTimeoutCondition(),
+		new NTouchTimeoutCondition(3),
 		new GoalScoreCondition()
 	};
 
-	auto obs = new DefaultOBS();
+	auto obs = new DashObsBuilder(1);
 	auto actionParser = new RecoveryActionParser();
 	auto stateSetter = new RandomRecoveryState();
 

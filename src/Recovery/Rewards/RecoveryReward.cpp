@@ -8,14 +8,32 @@ void RecoveryReward::PreStep(const GameState& state)
 {
 	LoggableReward::PreStep(state);
 
-	for (PlayerData p : state.players) {
+	for (const PlayerData& p : state.players) {
+
+		if (not this->lastHasFlipped.contains(p.carId)) {
+			this->lastHasFlipped[p.carId] = p.carState.hasFlipped;
+			this->lastIsOnGround[p.carId] = p.carState.isOnGround;
+			this->dashStreaks[p.carId] = 0;
+		}
+		else {
+			if (not p.carState.isOnGround and not p.carState.hasJumped and this->lastHasFlipped[p.carId] and this->lastIsOnGround[p.carId]) {
+				this->dashStreaks[p.carId]++;
+			}
+		}
+
+		if (p.carState.hasJumped) {
+			this->dashStreaks[p.carId] = 0;
+		}
+
 		if (this->delaySinceLastHasFlipped.contains(p.carId)) {
 			this->delaySinceLastHasFlipped[p.carId] = std::min(300, this->delaySinceLastHasFlipped[p.carId] + 1);
 		}
 		else {
 			this->delaySinceLastHasFlipped[p.carId] = 1;
 		}
+
 	}
+
 }
 
 void RecoveryReward::AddDoubleJumpPunishment(const PlayerData& player) {
@@ -81,7 +99,7 @@ void RecoveryReward::UpFacingReward(const PlayerData& player) {
 
 void RecoveryReward::FlipDelayReward(const PlayerData& player) {
 	if (player.carState.isFlipping) {
-		this->reward += {std::logf(-(this->delaySinceLastHasFlipped[player.carId] / 330) + 1) + 1, "Delay between flips"};
+		this->reward += {std::sqrtf(this->delaySinceLastHasFlipped[player.carId] / 10.0f), "Delay between flips"};
 	}
 
 	if (player.carState.hasFlipped and not player.carState.isFlipping) this->delaySinceLastHasFlipped[player.carId] = 0;
@@ -119,6 +137,11 @@ void RecoveryReward::HeightLimitPunishment(const PlayerData& player)
 	}
 }
 
+void RecoveryReward::DashStreakReward(const PlayerData& player)
+{
+	this->reward += { this->dashStreaks.contains(player.carId) and this->dashStreaks[player.carId] > 0 ? std::exp(this->dashStreaks[player.carId]) * 100 : 0, "Dash streak"};
+}
+
 float RecoveryReward::GetReward(const PlayerData& player, const GameState& state, const Action& prevAction)
 {
 	//Avoid double jump
@@ -138,12 +161,16 @@ float RecoveryReward::GetReward(const PlayerData& player, const GameState& state
 	this->FlipTimeReward(player);
 
 	//Only jump is held too long
-	this->OnlyJumpHeldTooLongPunishment(player);
+	//this->OnlyJumpHeldTooLongPunishment(player);
+	this->DashStreakReward(player);
 
 	this->HeightLimitPunishment(player);
 
 	//Facing the ball
 	this->reward += {this->faceball->GetReward(player, state, prevAction) * 0.1f, "Facing ball"};
+
+	this->lastIsOnGround[player.carId] = player.carState.isOnGround;
+	this->lastHasFlipped[player.carId] = player.carState.hasFlipped;
 
 	return this->ComputeReward();
 }
@@ -153,4 +180,7 @@ void RecoveryReward::Reset(const GameState& initialState)
 	LoggableReward::Reset(initialState);
 	this->delaySinceLastHasFlipped.clear();
 	this->delaySinceOnlyJump.clear();
+	this->dashStreaks.clear();
+	this->lastHasFlipped.clear();
+	this->lastIsOnGround.clear();
 }

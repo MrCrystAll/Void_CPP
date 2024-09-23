@@ -22,8 +22,11 @@ public:
 	virtual void PreStep(const GameState& state) override;
 	// Inherited via OBSBuilder
 	RLGSC::FList BuildOBS(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction) override;
+	virtual void Reset(const GameState& initialState) override;
 private:
-	int delaySinceLastFlip = 0, delaySinceOnlyJump = 0;
+	std::map<int, int> dashStreaks = {};
+	std::map<int, bool> lastIsOnGround = {};
+	std::map<int, bool> lastHasFlipped = {};
 };
 
 END_RECOVERY_NS

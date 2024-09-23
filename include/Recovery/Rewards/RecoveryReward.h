@@ -43,6 +43,11 @@ private:
 
 	std::map<int, int> delaySinceLastHasFlipped = {};
 	std::map<int, int> delaySinceOnlyJump = {};
+	std::map<int, int> dashStreaks = {};
+
+
+	std::map<int, bool> lastIsOnGround = {};
+	std::map<int, bool> lastHasFlipped = {};
 
 	RLGSC::FaceBallReward* faceball = new FaceBallReward();
 
@@ -55,6 +60,7 @@ private:
 	void FlipTimeReward(const PlayerData& player);
 	void OnlyJumpHeldTooLongPunishment(const PlayerData& player);
 	void HeightLimitPunishment(const PlayerData& player);
+	void DashStreakReward(const PlayerData& player);
 };
 
 END_RECOVERY_NS
