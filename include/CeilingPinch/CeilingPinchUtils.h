@@ -1,4 +1,5 @@
 #include <Utils/VoidUtils.h>
+#include <Logging/LoggableReward.h>
 
 //Base namespace utils (Auto-generated comment)
 #define CEILINGPINCH_NS CeilingPinch
@@ -16,3 +17,5 @@
 #define USE_CEILINGPINCH_STATES_NS USE_VOID_SUB_NS(CEILINGPINCH_NS::States)
 #define USE_CEILINGPINCH_AP_NS USE_VOID_SUB_NS(CEILINGPINCH_NS::AP)
 #define USE_CEILINGPINCH_OB_NS USE_VOID_SUB_NS(CEILINGPINCH_NS::OB)
+
+USE_LOGGING_NS;

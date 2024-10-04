@@ -105,7 +105,14 @@ float LoggableWrapper::GetFinalReward(const PlayerData& player, const GameState&
 
 std::vector<float> LoggableWrapper::GetAllRewards(const GameState& state, const ActionSet& prevActions, bool final)
 {
-	return this->rfn->GetAllRewards(state, prevActions, final);
+	FList rewards = this->rfn->GetAllRewards(state, prevActions, final);
+
+	if (this->standalone) {
+		this->reward.Reset();
+		this->reward.Step();
+	}
+	
+	return rewards;
 }
 
 #pragma region ZeroSum
@@ -190,9 +197,7 @@ std::vector<float> ZeroSumLoggedWrapper::GetAllRewards(const GameState& state, c
 void ZeroSumLoggedWrapper::PrintReward(float weight, bool showMedian, bool showStd, bool showMin, bool showMax)
 {
 	LoggableReward::PrintReward(weight, showMedian, showStd, showMin, showMax);
-	LoggableReward* rw = dynamic_cast<LoggableReward*>(this->rfn);
-	RG_ASSERT(rw != nullptr);
-	rw->PrintReward(weight, showMedian, showStd, showMin, showMax);
+	this->rfn->PrintReward(weight, showMedian, showStd, showMin, showMax);
 }
 
 void ZeroSumLoggedWrapper::LogAll(Report& report, bool final, std::string name, float weight)

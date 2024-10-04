@@ -105,7 +105,7 @@ public:
 	 */
 	virtual void PreStep(const GameState& state);
 
-	LoggableWrapper(RewardFunction* rfn, std::string name) : LoggableReward(name), rfn(rfn) {};
+	LoggableWrapper(RewardFunction* rfn, std::string name, bool standalone = false) : LoggableReward(name), rfn(rfn), standalone(standalone) {};
 
 	virtual float GetReward(const PlayerData& player, const GameState& state, const Action& prevAction);
 
@@ -114,6 +114,7 @@ public:
 	virtual std::vector<float> GetAllRewards(const GameState& state, const ActionSet& prevActions, bool final) override;
 private:
 	RewardFunction* rfn;
+	bool standalone;
 };
 
 /// <summary>
