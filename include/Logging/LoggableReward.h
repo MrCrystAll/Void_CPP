@@ -82,6 +82,8 @@ public:
 	LoggableReward(std::string name) : name(name) {};
 
 	virtual float GetReward(const PlayerData& player, const GameState& state, const Action& prevAction) = 0;
+
+	virtual std::vector<float> GetAllRewards(const GameState& state, const ActionSet& prevActions, bool final) override;
 };
 
 /// <summary>
@@ -103,13 +105,16 @@ public:
 	 */
 	virtual void PreStep(const GameState& state);
 
-	LoggableWrapper(RewardFunction* rfn, std::string name) : LoggableReward(name), rfn(rfn) {};
+	LoggableWrapper(RewardFunction* rfn, std::string name, bool standalone = false) : LoggableReward(name), rfn(rfn), standalone(standalone) {};
 
 	virtual float GetReward(const PlayerData& player, const GameState& state, const Action& prevAction);
 
 	virtual float GetFinalReward(const PlayerData& player, const GameState& state, const Action& prevAction);
+
+	virtual std::vector<float> GetAllRewards(const GameState& state, const ActionSet& prevActions, bool final) override;
 private:
 	RewardFunction* rfn;
+	bool standalone;
 };
 
 /// <summary>
@@ -117,6 +122,12 @@ private:
 /// </summary>
 class ZeroSumLoggedWrapper : public LoggableReward {
 public:
+
+	struct RewardArg {
+		RewardFunction* rf;
+		std::string name;
+	};
+
 	/**
 	 * @brief Resets the reward.
 	 *
@@ -135,21 +146,16 @@ public:
 
 	virtual float GetFinalReward(const PlayerData& player, const GameState& state, const Action& prevAction);
 
-	ZeroSumLoggedWrapper(RewardFunction* rfn, float teamSpirit, float oppScaling, std::string name = "Zero sum") : LoggableReward(name), rfn(rfn), teamSpirit(teamSpirit), oppScaling(oppScaling) {
-		LoggableReward* reward = dynamic_cast<LoggableReward*>(rfn);
-		if (reward == nullptr) {
-			if (name.empty()) {
-				VOID_ERR("Cannot log reward given to zero sum. No name provided");
-				std::exit(EXIT_FAILURE);
-			}
-			this->rfn = new LoggableWrapper(this->rfn, this->name + " (Zero summed)");
-		}
-	};
+	ZeroSumLoggedWrapper(RewardArg rwArgs, float teamSpirit, float oppScaling, std::string name = "Zero sum");
 
 	// Get all rewards for all players
 	virtual std::vector<float> GetAllRewards(const GameState& state, const ActionSet& prevActions, bool final) override;
+
+	virtual void PrintReward(float weight = 1.0f, bool showMedian = false, bool showStd = false, bool showMin = false, bool showMax = false) override;
+	virtual void LogAll(Report& report, bool final, std::string name, float weight) override;
+
 private:
-	RewardFunction* rfn;
+	LoggableReward* rfn;
 	float teamSpirit = 1.0f, oppScaling = 1.0f;
 };
 

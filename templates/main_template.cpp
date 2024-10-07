@@ -40,13 +40,10 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 	auto allGameMetrics = learner->GetAllGameMetrics();
 
 
-	for (auto metric : allGameMetrics[0].data) {
-		if (metric.first.starts_with(REWARD_HEADER)) {
-			if (metric.first.ends_with("_avg_total")) {
-				rTrackers[metric.first.substr(0, metric.first.size() - 10)] += 0;
-			}
-			else if (!metric.first.ends_with("_avg_count")) {
-				rTrackers[metric.first] += 0;
+	for (auto& [key, val] : allGameMetrics[0].data) {
+		if (key.starts_with(REWARD_HEADER)) {
+			if (key.ends_with("_avg_total")) {
+				rTrackers[key.substr(0, key.size() - 10)] += val / allGameMetrics[0].data[key.substr(0, key.size() - 10) + "_avg_count"];
 			}
 		}
 	}
