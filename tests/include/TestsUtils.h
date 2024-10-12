@@ -1,2 +1,7 @@
+#pragma once
+
+#include <RLGymSim_CPP/Utils/Gamestates/GameState.h>
+
 #define VOID_TESTS_TAG "[Void_Tests]"
-#define VOID_REWARDS_TAG "[Void_Rewards]"
+
+using namespace RLGSC;
