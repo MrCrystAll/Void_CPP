@@ -1,20 +1,21 @@
 cmake_minimum_required(VERSION 3.20)
 project(Void_Tests)
 
-find_package (Boost COMPONENTS system REQUIRED)
+include(CTest)
 
-get_cmake_property(_variableNames VARIABLES)
-list (SORT _variableNames)
-foreach (_variableName ${_variableNames})
-  message(STATUS "${_variableName}=${${_variableName}}")
-endforeach()
-execute_process(COMMAND "${CMAKE_COMMAND}" "-E" "environment")
+file(GLOB_RECURSE FILES_SRC_TESTS "src/*.cpp")
+file(GLOB_RECURSE FILES_H_TESTS "include/*.h")
 
-add_definitions (-DBOOST_TEST_DYN_LINK)
-add_executable (Tests ${FILES_SRC_TESTS})
+set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
+set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
+
+add_subdirectory(Catch2)
+add_executable (Tests ${FILES_SRC_TESTS} ${FILES_H_TESTS})
+GroupSourcesByFolder(Tests)
+
+set_target_properties(Tests PROPERTIES LINKER_LANGUAGE CXX)
+set_target_properties(Tests PROPERTIES CXX_STANDARD 20)
+
+
 target_include_directories(Tests PUBLIC "include")
-target_include_directories(Tests PUBLIC ${BOOST_LIBRARY_INCLUDES})
-target_link_libraries (Tests
-                       "../Release/Void"
-                       ${boost_BINARY_DIR}
-                       )
+target_link_libraries(Tests PRIVATE Catch2::Catch2WithMain Void)

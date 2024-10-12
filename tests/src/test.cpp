@@ -1,13 +1,14 @@
-#include <boost/assert.hpp>
-#include <boost/test/included/unit_test.hpp>
+#include <assert.h>
+#include <iostream>
+#include <catch2/catch_all.hpp>
+#include <TestsUtils.h>
+#include <Rewards/Rewards.h>
 
-void test2() {
-	BOOST_ASSERT(1 == 1);
+TEST_CASE("Testing framework is working fine", "[Catch2]")
+{
+    // Tests have to meet some requirements to be considered valid
+    REQUIRE(true);
 }
 
-
-
-int main(){
-	BOOST_TEST_CASE(test2);
-	return 0;
+TEST_CASE("Void rewards", VOID_REWARDS_TAG){
 }
