@@ -34,7 +34,7 @@ file(GLOB MAIN_GLOBAL_SRC "mains/main.cpp")
 file(GLOB MAIN_RCF_SRC "mains/RCFMain.cpp")
 file(GLOB MAIN_REPLAYS_SRC "mains/VoidReplaysConverter.cpp")
 
-add_library(Void ${FILES_SRC_E} ${FILES_H_E})
+add_library(Void SHARED ${FILES_SRC_E} ${FILES_H_E})
 add_executable(Void_Main ${MAIN_GLOBAL_SRC})
 add_executable(Void_RCF ${MAIN_RCF_SRC})
 add_executable(Void_Replay_Converter ${MAIN_REPLAYS_SRC})
@@ -56,6 +56,8 @@ set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
 # Include RLGymSim_PPO
 add_subdirectory(RLGymPPO_CPP)
 target_link_libraries(Void RLGymPPO_CPP)
+
+add_subdirectory(tests)
 
 target_link_libraries(Void RLBotCPP)
 
