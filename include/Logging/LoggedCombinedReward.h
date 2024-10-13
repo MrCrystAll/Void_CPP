@@ -20,7 +20,7 @@ using namespace RLGSC;
 /// <summary>
 /// A combined reward that logs every reward it has
 /// </summary>
-class LoggedCombinedReward: public RLGSC::RewardFunction
+class LoggedCombinedReward: public LoggableReward
 {
 public:
 
@@ -32,17 +32,26 @@ public:
 		float w = 1.0f;
 		std::string name = "";
 	};
+
+	struct RewardProp {
+		LoggableReward* rf;
+		float w = 1.0f;
+		std::string name = "";
+	};
 	
-	LoggedCombinedReward(std::vector<RewardArg> rewardsAndWeights) : rewardsAndWeights(rewardsAndWeights) {
-		for (size_t i = 0; i < this->rewardsAndWeights.size(); i++)
+	LoggedCombinedReward(std::vector<RewardArg> rewardsAndWeights, std::string name = "Logged combined reward") : LoggableReward(name) {
+		for (size_t i = 0; i < rewardsAndWeights.size(); i++)
 		{
-			LoggableReward* temp = dynamic_cast<LoggableReward*>(this->rewardsAndWeights[i].rf);
+			LoggableReward* temp = dynamic_cast<LoggableReward*>(rewardsAndWeights[i].rf);
 			if (temp == nullptr) {
-				if (this->rewardsAndWeights[i].name.empty()) {
+				if (rewardsAndWeights[i].name.empty()) {
 					VOID_ERR("Cannot log reward number " << i + 1 << ". No name provided");
 					std::exit(EXIT_FAILURE);
 				}
-				this->rewardsAndWeights[i].rf = new LoggableWrapper(this->rewardsAndWeights[i].rf, this->rewardsAndWeights[i].name);
+				this->rewardsAndWeights.push_back({ new LoggableWrapper(rewardsAndWeights[i].rf, rewardsAndWeights[i].name), rewardsAndWeights[i].w, rewardsAndWeights[i].name});
+			}
+			else {
+				this->rewardsAndWeights.push_back({temp, rewardsAndWeights[i].w, rewardsAndWeights[i].name});
 			}
 		}
 	};
@@ -54,9 +63,9 @@ public:
 	virtual std::vector<float> GetAllRewards(const GameState& state, const ActionSet& prevActions, bool final);
 
 	virtual void LogAll(RLGPC::Report& report, bool final, std::string name = "", float weight = 1);
-	virtual void PrintRewards(bool showMedian = false, bool showStd = false, bool showMin = false, bool showMax = false);
+	virtual void PrintReward(float weight = 1.0f, bool showMedian = false, bool showStd = false, bool showMin = false, bool showMax = false);
 
-	std::vector<RewardArg> rewardsAndWeights;
+	std::vector<RewardProp> rewardsAndWeights;
 private:
 
 };
