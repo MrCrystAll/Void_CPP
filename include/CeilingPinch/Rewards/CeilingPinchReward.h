@@ -6,6 +6,7 @@ using namespace RLGSC;
 
 START_CEILINGPINCH_REWARDS_NS
 USE_PINCH_REWARDS_NS;
+USE_LOGGING_NS;
 
 class CeilingPinchReward: public LoggableReward{
 public:

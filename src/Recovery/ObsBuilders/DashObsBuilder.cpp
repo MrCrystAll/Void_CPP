@@ -1,6 +1,6 @@
 #include <Recovery/ObsBuilders/DashObsBuilder.h>
 #include <Replays/RCF/RCFUtils.h>
-
+ 
 USE_RECOVERY_OB_NS;
 
 void DashObsBuilder::AddPlayerToOBS(RLGSC::FList& obs, const RLGSC::PlayerData& player, bool inv)

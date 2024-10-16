@@ -1,5 +1,4 @@
 #include <Utils/VoidUtils.h>
-#include <Logging/LoggableReward.h>
 
 //Base namespace utils (Auto-generated comment)
 #define RECOVERY_NS Recovery
@@ -17,5 +16,3 @@
 #define USE_RECOVERY_STATES_NS USE_VOID_SUB_NS(RECOVERY_NS::States)
 #define USE_RECOVERY_AP_NS USE_VOID_SUB_NS(RECOVERY_NS::AP)
 #define USE_RECOVERY_OB_NS USE_VOID_SUB_NS(RECOVERY_NS::OB)
-
-USE_LOGGING_NS;

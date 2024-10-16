@@ -1,5 +1,4 @@
 #include <Utils/VoidUtils.h>
-#include <Logging/LoggableReward.h>
 
 //Base namespace utils (Auto-generated comment)
 #define DOUBLETAP_NS DoubleTap
@@ -18,10 +17,10 @@
 #define USE_DOUBLETAP_AP_NS USE_VOID_SUB_NS(DOUBLETAP_NS::AP)
 #define USE_DOUBLETAP_OB_NS USE_VOID_SUB_NS(DOUBLETAP_NS::OB)
 
-START_DOUBLETAP_NS
-
 #include "RLGymSim_CPP/Utils/Gamestates/PhysObj.h"
 
+
+START_DOUBLETAP_NS
 /**
  * @brief Checks if the physics object is within the backboard zone
  *
@@ -31,6 +30,4 @@ START_DOUBLETAP_NS
  */
 bool IsOutsideBackboardZone(const RLGSC::PhysObj physObj, int distFromBackboard, int minHeight);
 
-END_DOUBLETAP_NS
-
-USE_LOGGING_NS;
+END_DOUBLETAP_NS;
