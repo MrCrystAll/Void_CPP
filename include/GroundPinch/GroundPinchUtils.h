@@ -1,5 +1,4 @@
 #include <Utils/VoidUtils.h>
-#include <Logging/LoggableReward.h>
 
 //Base namespace utils (Auto-generated comment)
 #define GROUNDPINCH_NS GroundPinch
@@ -17,5 +16,3 @@
 #define USE_GROUNDPINCH_STATES_NS USE_VOID_SUB_NS(GROUNDPINCH_NS::States)
 #define USE_GROUNDPINCH_AP_NS USE_VOID_SUB_NS(GROUNDPINCH_NS::AP)
 #define USE_GROUNDPINCH_OB_NS USE_VOID_SUB_NS(GROUNDPINCH_NS::OB)
-
-USE_LOGGING_NS;

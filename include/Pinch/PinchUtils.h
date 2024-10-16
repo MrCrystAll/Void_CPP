@@ -1,6 +1,5 @@
 #pragma once
 #include <Utils/VoidUtils.h>
-#include <Utils/LoggingUtils.h>
 
 //Base namespace utils (Auto-generated comment)
 #define PINCH_NS Pinch
@@ -18,5 +17,3 @@
 #define USE_PINCH_STATES_NS USE_VOID_SUB_NS(PINCH_NS::States)
 #define USE_PINCH_AP_NS USE_VOID_SUB_NS(PINCH_NS::AP)
 #define USE_PINCH_OB_NS USE_VOID_SUB_NS(PINCH_NS::OB)
-
-USE_LOGGING_NS;

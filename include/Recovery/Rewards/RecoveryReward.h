@@ -1,8 +1,10 @@
 #include <Recovery/RecoveryUtils.h>
+#include <Logging/LoggableReward.h>
 #include <RLGymSim_CPP/Utils/RewardFunctions/CommonRewards.h>
 
 using namespace RLGSC;
 
+USE_LOGGING_NS;
 START_RECOVERY_REWARDS_NS
 
 class RecoveryReward: public LoggableReward{

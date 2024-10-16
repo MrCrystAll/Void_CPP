@@ -1,5 +1,8 @@
 #pragma once
 #include <Recovery/RecoveryUtils.h>
+#include <Logging/LoggableReward.h>
+
+USE_LOGGING_NS;
 
 START_RECOVERY_REWARDS_NS
 

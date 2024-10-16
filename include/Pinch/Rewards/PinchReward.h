@@ -3,6 +3,8 @@
 #include <Pinch/PinchUtils.h>
 #include <Logging/LoggableReward.h>
 
+USE_LOGGING_NS;
+
 START_PINCH_REWARDS_NS
 
 /**

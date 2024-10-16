@@ -1,5 +1,4 @@
 #include <Utils/VoidUtils.h>
-#include <Logging/LoggableReward.h>
 
 //Base namespace utils (Auto-generated comment)
 #define WALLPINCH_NS WallPinch
@@ -17,5 +16,3 @@
 #define USE_WALLPINCH_STATES_NS USE_VOID_SUB_NS(WALLPINCH_NS::States)
 #define USE_WALLPINCH_AP_NS USE_VOID_SUB_NS(WALLPINCH_NS::AP)
 #define USE_WALLPINCH_OB_NS USE_VOID_SUB_NS(WALLPINCH_NS::OB)
-
-USE_LOGGING_NS;
