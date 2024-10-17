@@ -157,34 +157,21 @@ EnvCreateResult EnvCreateFunc() {
 	constexpr float NO_TOUCH_TIMEOUT_SECS = 7.f;
 	constexpr float BOUNCE_TIMEOUT_SECS = 1.f;
 
-	/*auto rewards = new LoggedCombinedReward( // Format is { RewardFunc, weight (optional, default = 1), name (optional for loggable rewards, mandatory for non loggable) }
+	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc, weight (optional, default = 1), name (optional for loggable rewards, mandatory for non loggable) }
 		{
 			{new VelocityPlayerToBallReward(), 3.5f, "Velocity player to ball" },
 			{new RecoveryReward({.distanceToBallWeight = 0.0f, .flipTimeWeight = 2.0f, .velocityWeight = 5.0f,  .doubleJumpWeight = 2.0f, .facingUpWeight = 1.5f}), 1.0f},
 			{new EventReward({.touch = 10.0f}), 1.0f, "Event"}
 		}
-	);*/
-
-	auto rewards = new ZeroSumLoggedWrapper(
-		{
-			new LoggedCombinedReward(
-				{
-					{ new Void::Logging::DummyReward(), 1.0f, "Dummy" }
-				}
-			)
-		},
-		0.5,
-		0.5
 	);
 
 	std::vector<TerminalCondition*> terminalConditions = {
 		new TimeoutCondition(NO_TOUCH_TIMEOUT_SECS * 120 / TICK_SKIP),
 		//new BounceTimeoutCondition(BOUNCE_TIMEOUT_SECS * 120 / TICK_SKIP),
-		new TimeoutCondition(20),
 		new GoalScoreCondition()
 	};
 
-	auto obs = new DashObsBuilder(4);
+	auto obs = new DashObsBuilder(1);
 	auto actionParser = new RecoveryActionParser();
 	auto stateSetter = new RandomRecoveryState();
 
@@ -195,8 +182,8 @@ EnvCreateResult EnvCreateFunc() {
 		actionParser,
 		stateSetter,
 
-		2, // Team size
-		true // Spawn opponents
+		1, // Team size
+		false // Spawn opponents
 	);
 
 	Gym* gym = new Gym(match, TICK_SKIP);

@@ -8,6 +8,7 @@ using namespace RLGPC;
 
 void LoggedCombinedReward::LogAll(RLGPC::Report& report, bool final, std::string name, float weight)
 {
+	LoggableReward::LogAll(report, final, name, weight);
 	for (size_t i = 0; i < this->rewardsAndWeights.size(); i++)
 	{
 		RewardProp pair = this->rewardsAndWeights[i];
@@ -16,6 +17,8 @@ void LoggedCombinedReward::LogAll(RLGPC::Report& report, bool final, std::string
 }
 
 void LoggedCombinedReward::Reset(const GameState& initialState) {
+	LoggableReward::Reset(initialState);
+
 	for (size_t i = 0; i < this->rewardsAndWeights.size(); i++)
 	{
 		RewardProp pair = this->rewardsAndWeights[i];
@@ -25,6 +28,7 @@ void LoggedCombinedReward::Reset(const GameState& initialState) {
 }
 
 void LoggedCombinedReward::PreStep(const GameState& state) {
+	LoggableReward::PreStep(state);
 	for (size_t i = 0; i < this->rewardsAndWeights.size(); i++)
 	{
 		RewardProp pair = this->rewardsAndWeights[i];
@@ -46,6 +50,7 @@ float LoggedCombinedReward::GetReward(const PlayerData& player, const GameState&
 }
 
 float LoggedCombinedReward::GetFinalReward(const PlayerData& player, const GameState& state, const Action& prevAction) {
+	LoggableReward::GetFinalReward(player, state, prevAction);
 	for (size_t i = 0; i < this->rewardsAndWeights.size(); i++)
 	{
 		RewardProp pair = this->rewardsAndWeights[i];

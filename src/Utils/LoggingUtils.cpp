@@ -143,6 +143,14 @@ Stat Stat::operator+=(float value) { return *this + value; }
 Stat Stat::operator-(float value) { this->value -= value; allValues.push_back(-value); return *this; }
 Stat Stat::operator-=(float value) { return *this - value; }
 
+Stat::~Stat()
+{
+	this->allValues.clear();
+
+	//I mean, that's dumb
+	this->count = 0;
+}
+
 void LoggedFloat::InitMetrics() {
 	for (std::string s : metrics) {
 		logs[s] = {};

@@ -1,15 +1,15 @@
 config:
   process-config:
     numThreads: 8
-    numGamesPerThread: 8
+    numGamesPerThread: 16
 
   buffer-config:
     timestepsPerIteration: 500000
     expBufferSize: 500000
 
   learner-buffer-config:
-    batchSize: 500000
-    miniBatchSize: 50000
+    batchSize: 250000
+    miniBatchSize: 25000
 
   learner-hyperparams:
     epochs: 3

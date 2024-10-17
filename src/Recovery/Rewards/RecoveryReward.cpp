@@ -39,12 +39,6 @@ void RecoveryReward::PreStep(const GameState& state)
 void RecoveryReward::AddDoubleJumpPunishment(const PlayerData& player) {
 	this->reward -= {player.carState.hasDoubleJumped * config.doubleJumpWeight, "Double jump punishment"};
 }
-
-void RecoveryReward::FlîpTimeReward(const PlayerData& player) {
-	float normalizedPlayerSpeed = player.carState.vel.Length() / CommonValues::CAR_MAX_SPEED;
-	this->reward += {((player.carState.hasFlipped ? std::exp(-4 * player.carState.flipTime) : 0) * normalizedPlayerSpeed) * config.flipTimeWeight, "Flip time"};
-}
-
 void RecoveryReward::DistToBall(const PlayerData& player, const GameState& state) {
 	this->reward -= {(player.carState.pos.Dist(state.ball.pos) / 5000) * config.distanceToBallWeight, "Distance to ball"};
 }
@@ -142,6 +136,11 @@ void RecoveryReward::DashStreakReward(const PlayerData& player)
 	this->reward += { this->dashStreaks.contains(player.carId) and this->dashStreaks[player.carId] > 0 ? std::exp(this->dashStreaks[player.carId]) * 100 : 0, "Dash streak"};
 }
 
+void RecoveryReward::DashReward(const PlayerData& player)
+{
+	this->reward += { this->dashStreaks.contains(player.carId) and this->dashStreaks[player.carId] > 0 ? 1 : 0, "Dash"};
+}
+
 float RecoveryReward::GetReward(const PlayerData& player, const GameState& state, const Action& prevAction)
 {
 	//Avoid double jump
@@ -163,6 +162,8 @@ float RecoveryReward::GetReward(const PlayerData& player, const GameState& state
 	//Only jump is held too long
 	//this->OnlyJumpHeldTooLongPunishment(player);
 	this->DashStreakReward(player);
+
+	this->DashReward(player);
 
 	this->HeightLimitPunishment(player);
 

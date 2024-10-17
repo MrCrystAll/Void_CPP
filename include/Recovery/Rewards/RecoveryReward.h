@@ -54,7 +54,6 @@ private:
 	RLGSC::FaceBallReward* faceball = new FaceBallReward();
 
 	void AddDoubleJumpPunishment(const PlayerData& player);
-	void FlîpTimeReward(const PlayerData& player);
 	void DistToBall(const PlayerData& player, const GameState& state);
 	void VelocityReward(const PlayerData& player);
 	void UpFacingReward(const PlayerData& player);
@@ -63,6 +62,7 @@ private:
 	void OnlyJumpHeldTooLongPunishment(const PlayerData& player);
 	void HeightLimitPunishment(const PlayerData& player);
 	void DashStreakReward(const PlayerData& player);
+	void DashReward(const PlayerData& player);
 };
 
 END_RECOVERY_NS

@@ -34,6 +34,8 @@ file(GLOB MAIN_GLOBAL_SRC "mains/main.cpp")
 file(GLOB MAIN_RCF_SRC "mains/RCFMain.cpp")
 file(GLOB MAIN_REPLAYS_SRC "mains/VoidReplaysConverter.cpp")
 
+SET(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
 add_library(Void SHARED ${FILES_SRC_E} ${FILES_H_E})
 add_executable(Void_Main ${MAIN_GLOBAL_SRC})
 add_executable(Void_RCF ${MAIN_RCF_SRC})
