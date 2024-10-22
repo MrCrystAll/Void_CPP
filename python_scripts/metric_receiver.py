@@ -5,6 +5,8 @@ import os
 
 wandb_run = None
 
+from db_interface import send_metrics, save_run, db_end_run
+
 # Takes in the python executable path, the three wandb init strings, and optionally the current run ID
 # Returns the ID of the run (either newly created or resumed)
 def init(py_exec_path, project, group, name, id = None):
@@ -47,6 +49,8 @@ def init(py_exec_path, project, group, name, id = None):
 		wandb_run = wandb.init(project = project, group = group, name = name, id = id, resume = "allow")
 	else:
 		wandb_run = wandb.init(project = project, group = group, name = name)
+  
+	save_run(name, wandb_run.id, project, group, id is not None)
 
 	return wandb_run.id
 
@@ -57,6 +61,7 @@ def add_metrics(metrics):
 		metrics (Dict[str, Any]): The metrics to log
 	"""
 	global wandb_run
+	send_metrics(wandb_run.name, wandb_run.id, metrics)
 	wandb_run.log(metrics)
 
 
@@ -72,3 +77,5 @@ def end(_signal):
 
 	if _signal != signal.Signals.SIGBREAK.value:
 		wandb_run.finish()
+
+	db_end_run(wandb_run.name, wandb_run.id)

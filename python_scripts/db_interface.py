@@ -27,10 +27,10 @@ def save_run(run_name, run_id, project_name, group_name, _continue: bool = True)
     if __get_n_runs(run_name, run_id) < 1:
         runs_collection.insert_one(run)
     else:
-        runs_collection.update_one({"Run name": run_name, "Run ID": run_id}, {"$set": {"Running": True}})
+        runs_collection.update_one({"Run ID": run_id}, {"$set": {"Running": True}})
     
-def __get_n_runs(run_name, run_id):
-    return runs_collection.count_documents({"Run name": run_name, "Run ID": run_id})
+def __get_n_runs(run_id):
+    return runs_collection.count_documents({"Run ID": run_id})
 
-def db_end_run(run_name, run_id):
-    runs_collection.update_one({"Run name": run_name, "Run ID": run_id}, {"$set": {"Running": False}})
+def db_end_run(run_id):
+    runs_collection.update_one({"Run ID": run_id}, {"$set": {"Running": False}})
