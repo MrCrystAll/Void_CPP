@@ -119,7 +119,7 @@ void RecoveryReward::OnlyJumpHeldTooLongPunishment(const PlayerData& player)
 
 void RecoveryReward::HeightLimitPunishment(const PlayerData& player)
 {
-	const int tolerance = 100;
+	const int tolerance = 200;
 	if (Void::Replays::RCF::isOnCorner(player, tolerance) or Void::Replays::RCF::IsOnWall(player, tolerance, tolerance) or Void::Replays::RCF::IsOnCeiling(player, tolerance, tolerance)) {
 		this->reward += {1, "Within height range"};
 	}
@@ -138,7 +138,7 @@ void RecoveryReward::DashStreakReward(const PlayerData& player)
 
 void RecoveryReward::DashReward(const PlayerData& player)
 {
-	this->reward += { this->dashStreaks.contains(player.carId) and this->dashStreaks[player.carId] > 0 ? 1 : 0, "Dash"};
+	this->reward += { this->dashStreaks.contains(player.carId) and this->dashStreaks[player.carId] > 0 ? 1000 : 0, "Dash"};
 }
 
 float RecoveryReward::GetReward(const PlayerData& player, const GameState& state, const Action& prevAction)
@@ -161,7 +161,7 @@ float RecoveryReward::GetReward(const PlayerData& player, const GameState& state
 
 	//Only jump is held too long
 	//this->OnlyJumpHeldTooLongPunishment(player);
-	this->DashStreakReward(player);
+	//this->DashStreakReward(player);
 
 	this->DashReward(player);
 

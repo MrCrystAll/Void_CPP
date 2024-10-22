@@ -8,7 +8,6 @@ using namespace RLGPC;
 
 void LoggedCombinedReward::LogAll(RLGPC::Report& report, bool final, std::string name, float weight)
 {
-	LoggableReward::LogAll(report, final, name, weight);
 	for (size_t i = 0; i < this->rewardsAndWeights.size(); i++)
 	{
 		RewardProp pair = this->rewardsAndWeights[i];
