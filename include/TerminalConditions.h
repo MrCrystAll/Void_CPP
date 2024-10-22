@@ -38,4 +38,17 @@ class TouchTimeoutCondition : public RLGSC::TerminalCondition {
 	bool IsTerminal(const RLGSC::GameState& currentState) override;
 };
 
+class NTouchTimeoutCondition : public RLGSC::TerminalCondition {
+public:
+	NTouchTimeoutCondition(int nTouches) : nTouches(nTouches) {};
+
+	// Inherited via TerminalCondition
+	bool IsTerminal(const RLGSC::GameState& currentState) override;
+	virtual void Reset(const RLGSC::GameState& initialState) override;
+
+private:
+	int nTouches = 0;
+	std::map<int, int> currentNTouches;
+};
+
 END_TC_NS

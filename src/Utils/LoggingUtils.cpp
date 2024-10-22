@@ -12,15 +12,14 @@ USE_LOGGING_NS;
 LoggedFloat LoggedFloat::operator+(Log other)
 {
 	this->value += other.first;
-	if (this->logs.contains(other.second)) 
+	if (not this->logs.contains(other.second))
 	{
-		this->logs[other.second] += other.first;
-	}
-	else
-	{
-		this->logs[other.second] = { .value = other.first, .count = this->nbSteps };
+		this->logs[other.second] = { .count = this->nbSteps };
 		this->metrics.push_back(other.second);
+
 	}
+
+	this->logs[other.second] += other.first;
 
 	
 	this->logs["_total"] += other.first;
@@ -35,15 +34,14 @@ LoggedFloat LoggedFloat::operator+=(Log other)
 LoggedFloat LoggedFloat::operator-(Log other)
 {
 	this->value -= other.first;
-	if (this->logs.contains(other.second))
+	if (not this->logs.contains(other.second))
 	{
-		this->logs[other.second] -= other.first;
-	}
-	else
-	{
-		this->logs[other.second] = { .value = -other.first, .count = this->nbSteps };
+		this->logs[other.second] = { .count = this->nbSteps };
 		this->metrics.push_back(other.second);
+
 	}
+
+	this->logs[other.second] -= other.first;
 
 
 	this->logs["_total"] -= other.first;
@@ -59,15 +57,14 @@ LoggedFloat LoggedFloat::operator*(Log other)
 {
 	float difference = (other.first - 1) * this->value;
 	this->value += difference;
-	if (this->logs.contains(other.second))
+	if (not this->logs.contains(other.second))
 	{
-		this->logs[other.second] += difference;
-	}
-	else
-	{
-		this->logs[other.second] = { .value = difference, .count = this->nbSteps };
+		this->logs[other.second] = { .count = this->nbSteps };
 		this->metrics.push_back(other.second);
+
 	}
+
+	this->logs[other.second] += difference;
 	
 	this->logs["_total"] += difference;
 	return *this;
@@ -84,15 +81,14 @@ LoggedFloat LoggedFloat::operator/(Log other)
 	float difference = (this->value * (1 - other.first)) / other.first;
 
 	this->value += difference;
-	if (this->logs.contains(other.second))
+	if (not this->logs.contains(other.second))
 	{
-		this->logs[other.second] += other.first;
-	}
-	else
-	{
-		this->logs[other.second] = { .value = difference, .count = this->nbSteps };
+		this->logs[other.second] = { .count = this->nbSteps };
 		this->metrics.push_back(other.second);
+		
 	}
+	
+	this->logs[other.second] += difference;
 
 
 	this->logs["_total"] += other.first;
@@ -147,6 +143,14 @@ Stat Stat::operator+=(float value) { return *this + value; }
 Stat Stat::operator-(float value) { this->value -= value; allValues.push_back(-value); return *this; }
 Stat Stat::operator-=(float value) { return *this - value; }
 
+Stat::~Stat()
+{
+	this->allValues.clear();
+
+	//I mean, that's dumb
+	this->count = 0;
+}
+
 void LoggedFloat::InitMetrics() {
 	for (std::string s : metrics) {
 		logs[s] = {};
@@ -157,10 +161,15 @@ void LoggedFloat::InitMetrics() {
 void LoggedFloat::Clear() { this->logs.clear(); }
 
 void LoggedFloat::Step() {
+	nbSteps++;
 	for (auto& [key, val] : this->logs) {
-		if (val.allValues.size() < val.count) val.allValues.push_back(0.0f);
+		if (val.allValues.size() < val.count) val += 0;
+		/*std::cout << key << ": ";
+		for (float f : val.allValues) {
+			std::cout << f << ", ";
+		}
+		std::cout << std::endl;*/
 		val.count++;
-		nbSteps++;
 	}
 }
 

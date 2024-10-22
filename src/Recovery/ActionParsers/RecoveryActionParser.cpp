@@ -12,9 +12,9 @@ RecoveryActionParser::RecoveryActionParser()
 		R_B[] = { 0, 1 },
 
 		// Float input (hint: you can add partial inputs here)
-		R_F[] = { -1, 0, 1 };
+		R_F[] = { -1, -0.5, 0, 0.5, 1 };
 
-	// TODO: Use std permutations here or whatever			
+	// TODO: Use std permutations here or whatever
 
 	// Ground
 	for (float steer : R_F) {

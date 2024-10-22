@@ -16,14 +16,17 @@ public:
 		float angVelCoef = 1 / RLGSC::CommonValues::CAR_MAX_ANG_VEL
 	) : DefaultOBS(posCoef, velCoef, angVelCoef), maxPlayers(maxPlayers) {
 
-	}
+	};
 
 	void AddPlayerToOBS(RLGSC::FList& obs, const RLGSC::PlayerData& player, bool inv);
-	virtual void PreStep(const GameState& state) override;
+	virtual void PreStep(const RLGSC::GameState& state) override;
 	// Inherited via OBSBuilder
 	RLGSC::FList BuildOBS(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction) override;
+	virtual void Reset(const RLGSC::GameState& initialState) override;
 private:
-	int delaySinceLastFlip = 0, delaySinceOnlyJump = 0;
+	std::map<int, int> dashStreaks = {};
+	std::map<int, bool> lastIsOnGround = {};
+	std::map<int, bool> lastHasFlipped = {};
 };
 
 END_RECOVERY_NS

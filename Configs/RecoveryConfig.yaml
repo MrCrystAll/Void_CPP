@@ -5,11 +5,11 @@ config:
 
   buffer-config:
     timestepsPerIteration: 500000
-    expBufferSize: 600000
+    expBufferSize: 500000
 
   learner-buffer-config:
-    batchSize: 500000
-    miniBatchSize: 50000
+    batchSize: 250000
+    miniBatchSize: 25000
 
   learner-hyperparams:
     epochs: 3
@@ -26,8 +26,8 @@ config:
       - 512
 
   training-config:
-    sendMetrics: true
-    renderMode: false   
+    sendMetrics: false
+    renderMode: true  
     renderTimeScale: 1.5
     renderDuringTraining: false
     deterministic: false

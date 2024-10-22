@@ -1,6 +1,6 @@
 #include <Recovery/ObsBuilders/DashObsBuilder.h>
 #include <Replays/RCF/RCFUtils.h>
-
+ 
 USE_RECOVERY_OB_NS;
 
 void DashObsBuilder::AddPlayerToOBS(RLGSC::FList& obs, const RLGSC::PlayerData& player, bool inv)
@@ -38,7 +38,16 @@ void DashObsBuilder::AddPlayerToOBS(RLGSC::FList& obs, const RLGSC::PlayerData& 
 
 void DashObsBuilder::PreStep(const GameState& state)
 {
-	this->delaySinceLastFlip = std::min(this->delaySinceLastFlip + 1, 300);
+	for (const PlayerData& p : state.players) {
+		if (not p.carState.isOnGround and not p.carState.hasJumped and this->lastHasFlipped[p.carId] and this->lastIsOnGround[p.carId]) {
+			this->dashStreaks[p.carId]++;
+		}
+
+		if (p.carState.hasJumped) {
+			this->dashStreaks[p.carId] = 0;
+		}
+	}
+	
 }
 
 RLGSC::FList DashObsBuilder::BuildOBS(const RLGSC::PlayerData& player, const RLGSC::GameState& state, const RLGSC::Action& prevAction)
@@ -105,14 +114,9 @@ RLGSC::FList DashObsBuilder::BuildOBS(const RLGSC::PlayerData& player, const RLG
 	}
 
 	result += up;
-
-	if (player.carState.hasFlipped and not player.carState.isFlipping) this->delaySinceLastFlip = 0;
-
-	if (player.carState.hasJumped and not (player.carState.hasFlipped or player.carState.hasDoubleJumped)) this->delaySinceOnlyJump = std::min(300, this->delaySinceOnlyJump + 1);
-	else this->delaySinceOnlyJump = 0;
-
-	result += this->delaySinceLastFlip;
-	result += this->delaySinceOnlyJump;
+	result += this->dashStreaks[player.carId];
+	result += this->lastHasFlipped[player.carId];
+	result += this->lastIsOnGround[player.carId];
 
 	for (auto& otherPlayer : state.players) {
 		if (otherPlayer.carId == player.carId)
@@ -153,5 +157,21 @@ RLGSC::FList DashObsBuilder::BuildOBS(const RLGSC::PlayerData& player, const RLG
 	for (auto& opponent : opponents)
 		result += opponent;
 
+	this->lastHasFlipped[player.carId] = player.carState.hasFlipped;
+	this->lastIsOnGround[player.carId] = player.carState.isOnGround;
+
 	return result;
+}
+
+void DashObsBuilder::Reset(const GameState& initialState)
+{
+	this->dashStreaks.clear();
+	this->lastHasFlipped.clear();
+	this->lastIsOnGround.clear();
+
+	for (const PlayerData& p : initialState.players) {
+		this->lastHasFlipped[p.carId] = p.carState.hasFlipped;
+		this->lastIsOnGround[p.carId] = p.carState.isOnGround;
+		this->dashStreaks[p.carId] = 0;
+	}
 }

@@ -47,6 +47,7 @@ def init(py_exec_path, project, group, name, id = None):
 		wandb_run = wandb.init(project = project, group = group, name = name, id = id, resume = "allow")
 	else:
 		wandb_run = wandb.init(project = project, group = group, name = name)
+
 	return wandb_run.id
 
 def add_metrics(metrics):

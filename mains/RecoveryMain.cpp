@@ -27,6 +27,7 @@ USE_REPLAY_NS;
 
 //Logging
 #include <Logging/LoggedCombinedReward.h>
+#include <Logging/TestReward.h>
 USE_LOGGING_NS;
 
 //TC
@@ -68,9 +69,9 @@ float maxBallVel = 0.;
 // gameMetrics: The metrics for this specific game
 void OnStep(GameInst* gameInst, const RLGSC::Gym::StepResult& stepResult, Report& gameMetrics) {
 	auto& gameState = stepResult.state;
-	LoggedCombinedReward* lrw = dynamic_cast<LoggedCombinedReward*>(gameInst->match->rewardFn);
+	LoggableReward* lrw = dynamic_cast<LoggableReward*>(gameInst->match->rewardFn);
 	if (lrw != nullptr) {
-		lrw->LogAll(gameMetrics, stepResult.done);
+		lrw->LogAll(gameMetrics, stepResult.done, "", 1.0f);
 	}
 
 	float ballVel = gameState.ball.vel.Length();
@@ -95,13 +96,10 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 	auto allGameMetrics = learner->GetAllGameMetrics();
 
 
-	for (auto metric : allGameMetrics[0].data) {
-		if (metric.first.starts_with(REWARD_HEADER)) {
-			if (metric.first.ends_with("_avg_total")) {
-				rTrackers[metric.first.substr(0, metric.first.size() - 10)] += 0;
-			}
-			else if (!metric.first.ends_with("_avg_count")) {
-				rTrackers[metric.first] += 0;
+	for (auto& [key, val] : allGameMetrics[0].data) {
+		if (key.starts_with(REWARD_HEADER)) {
+			if (key.ends_with("_avg_total")) {
+				rTrackers[key.substr(0, key.size() - 10)] += val / allGameMetrics[0].data[key.substr(0, key.size() - 10) + "_avg_count"];
 			}
 		}
 	}
@@ -118,7 +116,8 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 	}
 
 
-	for (auto& gameReport : allGameMetrics) {
+	for (int i = 1; i < allGameMetrics.size(); i++) {
+		Report& gameReport = allGameMetrics[i];
 		for (auto& val : mTrackers) {
 			val.second += gameReport[val.first];
 		}
@@ -160,8 +159,8 @@ EnvCreateResult EnvCreateFunc() {
 
 	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc, weight (optional, default = 1), name (optional for loggable rewards, mandatory for non loggable) }
 		{
-			{new VelocityPlayerToBallReward(), 2.0f, "Velocity player to ball" },
-			{new RecoveryReward({.distanceToBallWeight = 0.0f, .velocityWeight = 2.5f, .doubleJumpWeight = 2.0f, .facingUpWeight = 2.5f}), 1.0f},
+			{new VelocityPlayerToBallReward(), 1.5f, "Velocity player to ball" },
+			{new RecoveryReward({.distanceToBallWeight = 0.0f, .flipTimeWeight = 1.0f, .velocityWeight = 10.0f,  .doubleJumpWeight = 1.0f, .facingUpWeight = 3.0f}), 1.0f},
 			{new EventReward({.touch = 10.0f}), 1.0f, "Event"}
 		}
 	);
@@ -169,11 +168,10 @@ EnvCreateResult EnvCreateFunc() {
 	std::vector<TerminalCondition*> terminalConditions = {
 		new TimeoutCondition(NO_TOUCH_TIMEOUT_SECS * 120 / TICK_SKIP),
 		//new BounceTimeoutCondition(BOUNCE_TIMEOUT_SECS * 120 / TICK_SKIP),
-		new TouchTimeoutCondition(),
 		new GoalScoreCondition()
 	};
 
-	auto obs = new DefaultOBS();
+	auto obs = new DashObsBuilder(1);
 	auto actionParser = new RecoveryActionParser();
 	auto stateSetter = new RandomRecoveryState();
 

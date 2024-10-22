@@ -96,6 +96,8 @@ struct Stat
 
 	Stat operator-(float value);
 	Stat operator-=(float value);
+
+	~Stat();
 };
 
 /**

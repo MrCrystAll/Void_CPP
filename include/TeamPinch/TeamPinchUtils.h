@@ -1,5 +1,4 @@
 #include <Utils/VoidUtils.h>
-#include <Logging/LoggableReward.h>
 
 //Base namespace utils (Auto-generated comment)
 #define TEAMPINCH_NS TeamPinch
@@ -17,5 +16,3 @@
 #define USE_TEAMPINCH_STATES_NS USE_VOID_SUB_NS(TEAMPINCH_NS::States)
 #define USE_TEAMPINCH_AP_NS USE_VOID_SUB_NS(TEAMPINCH_NS::AP)
 #define USE_TEAMPINCH_OB_NS USE_VOID_SUB_NS(TEAMPINCH_NS::OB)
-
-USE_LOGGING_NS;
