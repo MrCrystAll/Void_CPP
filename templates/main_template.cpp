@@ -66,7 +66,9 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 		}
 
 		for (auto& tracker : mTrackersAvg) {
-			tracker.second += gameReport.GetAvg(tracker.first);
+			if (gameReport.Has(tracker.first) or gameReport.Has(tracker.first + "_avg_total")){
+				tracker.second += gameReport.GetAvg(tracker.first);
+			}
 		}
 
 		for (auto& tracker : rTrackers) {

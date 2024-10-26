@@ -95,6 +95,7 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 	// Get metrics for every gameInst
 	auto allGameMetrics = learner->GetAllGameMetrics();
 
+	VOID_LOG("Creating keys...");
 
 	for (auto& [key, val] : allGameMetrics[0].data) {
 		if (key.starts_with(REWARD_HEADER)) {
@@ -114,16 +115,22 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 			}
 		}
 	}
+	VOID_LOG("Calculating values...");
 
 
 	for (int i = 1; i < allGameMetrics.size(); i++) {
 		Report& gameReport = allGameMetrics[i];
+
 		for (auto& val : mTrackers) {
 			val.second += gameReport[val.first];
 		}
 
 		for (auto& tracker : mTrackersAvg) {
-			tracker.second += gameReport.GetAvg(tracker.first);
+			
+			if(gameReport.Has(tracker.first) or gameReport.Has(tracker.first + "_avg_total"))
+			{
+				tracker.second += gameReport.GetAvg(tracker.first);
+			}
 		}
 
 		for (auto& tracker : rTrackers) {
@@ -133,6 +140,8 @@ void OnIteration(Learner* learner, Report& allMetrics) {
 			}
 		}
 	}
+
+	VOID_LOG("Creating final report...");
 
 	for (const auto& tracker : rTrackers) {
 		allMetrics[tracker.first] = tracker.second.Get();

@@ -26,8 +26,8 @@ config:
       - 512
 
   training-config:
-    sendMetrics: false
-    renderMode: true  
+    sendMetrics: true
+    renderMode: false  
     renderTimeScale: 1.5
     renderDuringTraining: false
     deterministic: false
