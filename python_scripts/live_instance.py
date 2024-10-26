@@ -18,7 +18,7 @@ from obsBuilders import DefaultObsCpp, DefaultObsCppPadded, OnesObs, SwappedDefa
 from rlgym_tools.extra_action_parsers.lookup_act import LookupAction
 
 from setters import OverfitCeilingPinchSetter, RandomPinchSetter, TeamSizeSetter, PinchSetter, DoubleTapSetter, DashStateSetter
-from utils import get_latest_model_path, live_log
+from utils import AgentConfig, JsonConfig, get_latest_model_path, live_log, load_latest_checkpoint
 
 # endregion
 # region ========================= Environment settings ============================
@@ -74,8 +74,6 @@ print("Observation size:", obs_size)
 print("Action size:", action_size)
 print("==============================")
 
-
-
 agent = PPOLearner(
     obs_space_size=obs_size,
     act_space_size=action_size,
@@ -92,11 +90,13 @@ agent = PPOLearner(
     clip_range=0.2,
     ent_coef=0.005)
 
+agent_config = AgentConfig(agent, json_config=JsonConfig())
+
 # endregion
 # region ========================= Live instance Settings =============================
 deterministic = True
 
-model_to_load = "checkpoints/Recovery/v1"
+submodel = "Recovery"
 
 minutes_before_update = 15
 seconds_before_update = 0
@@ -139,9 +139,8 @@ def create_env(sim: bool = True):
 
 
 def model_reload():
-    global agent, current_time
-    latest_model_path = get_latest_model_path("checkpoints/Recovery")
-    agent.load_from(latest_model_path)
+    global agent_config, current_time, submodel
+    agent_config = load_latest_checkpoint(agent_config.ppo_learner, submodel)
     live_log("Model reloaded")
     current_time = time.time()
 
@@ -153,20 +152,21 @@ def playstyle_switch():
 
 
 def print_live_state():
+    global agent_config, tick_skip
     ttu = time_before_update - (time.time() - current_time)
     os.system('cls')
     live_log(" === State report === ")
     live_log(f" Mode : {'Deterministic' if deterministic else 'Stochastic'}")
     live_log(f" Model reload in {int(ttu // 60):02d}:{int(ttu % 60):02d}")
-    live_log(f" Last episode reward (Average per player) : {last_ep_reward:.6f}")
+    live_log(f"Current model training time: {agent_config.json_config.training_time(tick_skip)}")
 
 # endregion
 # region ========================= Main loop =========================
 
 if __name__ == "__main__":
 
-    # agent.load_from(model_to_load)
-    sim = False
+    agent_config = load_latest_checkpoint(agent_config.ppo_learner, submodel)
+    sim = True
     env = create_env(sim=sim)
     current_time = time.time()
     refresh_time = current_time
