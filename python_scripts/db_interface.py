@@ -24,7 +24,7 @@ def save_run(run_name, run_id, project_name, group_name, _continue: bool = True)
         "Running": True
     }
     
-    if __get_n_runs(run_name, run_id) < 1:
+    if __get_n_runs(run_id) < 1:
         runs_collection.insert_one(run)
     else:
         runs_collection.update_one({"Run ID": run_id}, {"$set": {"Running": True}})

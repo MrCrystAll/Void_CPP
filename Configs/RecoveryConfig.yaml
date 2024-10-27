@@ -1,7 +1,7 @@
 config:
   process-config:
-    numThreads: 8
-    numGamesPerThread: 16
+    numThreads: 2
+    numGamesPerThread: 4
 
   buffer-config:
     timestepsPerIteration: 500000
@@ -26,8 +26,8 @@ config:
       - 512
 
   training-config:
-    sendMetrics: false
-    renderMode: true  
+    sendMetrics: true
+    renderMode: false  
     renderTimeScale: 1.5
     renderDuringTraining: false
     deterministic: false
