@@ -3,6 +3,7 @@
 #include <catch2/catch_all.hpp>
 #include <TestsUtils.h>
 #include <Rewards/RewardsUtils.h>
+#include <Replays/ReplaysUtils.h>
 #include <Rewards/ZeroSumTests.h>
 
 TEST_CASE("Testing framework is working fine", "[Catch2]")
@@ -12,4 +13,8 @@ TEST_CASE("Testing framework is working fine", "[Catch2]")
 }
 
 TEST_CASE("Rewards", VOID_REWARDS_TAG){
+}
+
+TEST_CASE("Replay loader", VOID_REPLAYS_TAG) {
+
 }

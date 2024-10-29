@@ -95,6 +95,7 @@ agent_config = AgentConfig(agent, json_config=JsonConfig())
 # endregion
 # region ========================= Live instance Settings =============================
 deterministic = True
+deterministic_odds = 0.0
 
 submodel = "Recovery"
 
@@ -146,9 +147,9 @@ def model_reload():
 
 
 def playstyle_switch():
-    global deterministic
+    global deterministic, deterministic_odds
 
-    deterministic = random.uniform(0, 1) > 1.0
+    deterministic = random.uniform(0, 1) < deterministic_odds
 
 
 def print_live_state():
@@ -179,10 +180,6 @@ if __name__ == "__main__":
         
         cnt_blue_count = len([0 for p in info["state"].players if p.team_num == BLUE_TEAM ])
         cnt_orange_count = cnt_blue_count if spawn_opponents else 0
-        
-        print("Number of blue agents: ", cnt_blue_count)
-        print("Number of orange agents: ", cnt_orange_count)
-        print("Total number of agents: ", cnt_blue_count + cnt_orange_count)
         
         while not terminated:
             if time.time() - refresh_time >= 1:
