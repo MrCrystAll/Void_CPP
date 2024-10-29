@@ -9,6 +9,11 @@
 
 USE_REPLAY_NS;
 
+ReplayLoader::ReplayLoader()
+{
+	RocketSim::Init("./collision_meshes");
+}
+
 Replay ReplayLoader::LoadReplay(std::string path, int endDelay, bool saveReplay)
 {
 	int retCode = CallCarball(path);

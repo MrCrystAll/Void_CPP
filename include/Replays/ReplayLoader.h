@@ -15,19 +15,23 @@
 #include "../../RLGymPPO_CPP/libsrc/json/nlohmann/json.hpp"
 #include <istream>
 
+#define REPLAY_LOADER_VERBOSE 0
+
 using json = nlohmann::json;
 
 START_REPLAY_NS
 
-#define REPLAY_LOADER_LOG(content) VOID_LOG("[REPLAY LOADER] " << content)
-#define REPLAY_LOADER_WARN(content) VOID_WARN("[REPLAY LOADER] " << content)
-#define REPLAY_LOADER_ERR(content) VOID_ERR("[REPLAY LOADER] " << content)
+#define REPLAY_LOADER_LOG(content) {if (REPLAY_LOADER_VERBOSE) VOID_LOG("[REPLAY LOADER] " << content);};
+#define REPLAY_LOADER_WARN(content) {if (REPLAY_LOADER_VERBOSE) VOID_WARN("[REPLAY LOADER] " << content);};
+#define REPLAY_LOADER_ERR(content) {if (REPLAY_LOADER_VERBOSE) VOID_ERR("[REPLAY LOADER] " << content);};
 
 /// <summary>
 /// A class that allows you to load replays
 /// </summary>
 class ReplayLoader {
 public:
+	ReplayLoader();
+
 	/// <summary>
 	/// Loads a replay given a file
 	/// </summary>

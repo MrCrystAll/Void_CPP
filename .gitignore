@@ -78,3 +78,7 @@ checkpoints
 //Tests
 /tests/Catch2
 /tests/DartConfiguration.tcl
+/tests/python_scripts
+/tests/replays
+/tests/Configs
+/tests/submodels
