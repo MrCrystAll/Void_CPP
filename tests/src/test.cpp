@@ -12,6 +12,10 @@ TEST_CASE("Testing framework is working fine", "[Catch2]")
     REQUIRE(true);
 }
 
+TEST_CASE("Utils", VOID_TESTS_TAG) {
+
+}
+
 TEST_CASE("Rewards", VOID_REWARDS_TAG){
 }
 
