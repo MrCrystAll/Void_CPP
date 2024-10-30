@@ -1,4 +1,6 @@
 #include <Replays/ReplaysUtils.h>
+#include <Replays/RCF/RCFUtils.h>
+#include <catch2/catch_all.hpp>
 
 RLGSC::GameState StateGenerator::CreateGroundState(int nBluePlayers, int nOrangePlayers)
 {
@@ -9,6 +11,7 @@ RLGSC::GameState StateGenerator::CreateGroundState(int nBluePlayers, int nOrange
         cs.isOnGround = true;
 
         c->SetState(cs);
+        break;
     }
 
     return RLGSC::GameState(arena);
@@ -23,6 +26,7 @@ RLGSC::GameState StateGenerator::CreateAirState(int nBluePlayers, int nOrangePla
         cs.isOnGround = false;
 
         c->SetState(cs);
+        break;
     }
 
     return RLGSC::GameState(arena);
@@ -40,6 +44,7 @@ RLGSC::GameState StateGenerator::CreateOnWallState(int nBluePlayers, int nOrange
         cs.isOnGround = true;
 
         c->SetState(cs);
+        break;
     }
 
     return RLGSC::GameState(arena);
@@ -57,6 +62,7 @@ RLGSC::GameState StateGenerator::CreateOnCeilingState(int nBluePlayers, int nOra
         cs.isOnGround = true;
 
         c->SetState(cs);
+        break;
     }
 
     return RLGSC::GameState(arena);
@@ -74,6 +80,7 @@ RLGSC::GameState StateGenerator::CreateOnCornerState(int nBluePlayers, int nOran
         cs.isOnGround = true;
 
         c->SetState(cs);
+        break;
     }
 
     return RLGSC::GameState(arena);
@@ -92,4 +99,41 @@ RocketSim::Arena* StateGenerator::CreateArena(int nBluePlayers, int nOrangePlaye
     }
 
     return arena;
+}
+
+TEST_CASE("States are correctly created", VOID_REPLAYS_TAG) {
+
+    SECTION("Ground state") {
+        RLGSC::GameState groundState = StateGenerator::CreateGroundState(1, 1);
+
+        CHECK(groundState.players[0].carState.isOnGround);
+        CHECK_THAT(groundState.players[0].phys.pos.z, Catch::Matchers::WithinAbs(RLConst::CAR_SPAWN_REST_Z, 0.5));
+    }
+    
+    SECTION("Air state") {
+        RLGSC::GameState airState = StateGenerator::CreateAirState(1, 1);
+
+        CHECK(!airState.players[0].carState.isOnGround);
+        CHECK(airState.players[0].phys.pos.z > 100);
+    }
+
+    SECTION("Wall state") {
+        RLGSC::GameState wallState = StateGenerator::CreateOnWallState(1, 1);
+
+        CHECK(wallState.players[0].carState.isOnGround);
+        CHECK(Void::Replays::RCF::IsOnWall(wallState.players[0]));
+    }
+
+    SECTION("Ceiling state") {
+        RLGSC::GameState ceilingState = StateGenerator::CreateOnCeilingState(1, 1);
+
+        CHECK(ceilingState.players[0].carState.isOnGround);
+        CHECK(Void::Replays::RCF::IsOnCeiling(ceilingState.players[0]));
+    }
+
+    SECTION("Corner state") {
+        RLGSC::GameState cornerState = StateGenerator::CreateOnCornerState(1, 1);
+        CHECK(cornerState.players[0].carState.isOnGround);
+        CHECK(Void::Replays::RCF::isOnCorner(cornerState.players[0]));
+    }
 }
