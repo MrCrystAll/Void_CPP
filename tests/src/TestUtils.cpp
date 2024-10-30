@@ -1,4 +1,4 @@
-#include <Replays/ReplaysUtils.h>
+#include <TestsUtils.h>
 #include <Replays/RCF/RCFUtils.h>
 #include <catch2/catch_all.hpp>
 
@@ -37,7 +37,7 @@ RLGSC::GameState StateGenerator::CreateOnWallState(int nBluePlayers, int nOrange
     Arena* arena = StateGenerator::CreateArena(nBluePlayers, nOrangePlayers);
     for (Car* c : arena->GetCars()) {
         CarState cs = {};
-        cs.pos = { - RLGSC::CommonValues::SIDE_WALL_X, 2000, 650 };
+        cs.pos = { -RLGSC::CommonValues::SIDE_WALL_X, 2000, 650 };
         Angle angle = Angle(0, 0, -M_PI_2);
 
         cs.rotMat = angle.ToRotMat();
@@ -101,7 +101,7 @@ RocketSim::Arena* StateGenerator::CreateArena(int nBluePlayers, int nOrangePlaye
     return arena;
 }
 
-TEST_CASE("States are correctly created", VOID_REPLAYS_TAG) {
+TEST_CASE("States are correctly created", VOID_TESTS_TAG) {
 
     SECTION("Ground state") {
         RLGSC::GameState groundState = StateGenerator::CreateGroundState(1, 1);
@@ -109,7 +109,7 @@ TEST_CASE("States are correctly created", VOID_REPLAYS_TAG) {
         CHECK(groundState.players[0].carState.isOnGround);
         CHECK_THAT(groundState.players[0].phys.pos.z, Catch::Matchers::WithinAbs(RLConst::CAR_SPAWN_REST_Z, 0.5));
     }
-    
+
     SECTION("Air state") {
         RLGSC::GameState airState = StateGenerator::CreateAirState(1, 1);
 
