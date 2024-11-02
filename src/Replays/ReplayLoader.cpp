@@ -20,7 +20,11 @@ Replay ReplayLoader::LoadReplay(std::string path, int endDelay, bool saveReplay)
 {
 	fs::path stem = fs::path(path).stem();
 	fs::path outputPath = std::filesystem::path(DEFAULT_CARBALL_RESULT_PATH) / stem;
-	fs::create_directory(outputPath);
+
+	if (not fs::exists(outputPath)) {
+		fs::create_directory(outputPath);
+	}
+
 	int retCode = CallCarball(path, outputPath.string());
 
 	ConvertedReplay replay = ConvertedReplay();
