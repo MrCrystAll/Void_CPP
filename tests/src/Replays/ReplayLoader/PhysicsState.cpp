@@ -1,10 +1,11 @@
 #include <Replays/ReplayLoader/PhysicsState.h>
 #include <RLGymSim_CPP/Utils/BasicTypes/Quat.h>
+#include <Replays/ReplaysUtils.h>
 
-
-ReplayLoader loader = ReplayLoader();
 
 TEST_CASE("Physical state is correctly converted", VOID_REPLAYS_TAG) {
+	ReplayLoader loader = ReplayLoader();
+
 	Replay r = loader.LoadReplay("replays/tests/da07cdec-d058-48cd-add4-26dba8cebaba.replay", 150);
 
 	RLGSC::GameState firstState = r.states[0];

@@ -106,3 +106,14 @@ int ReplayAnalysis::GetNumberOfPlayableFrames() const
 	}
 	return sum;
 }
+
+ReplayMetadata::PlayerMetadata ReplayMetadata::GetPlayerWithId(std::string id)
+{
+	for (ReplayMetadata::PlayerMetadata p : bluePlayers) {
+		if (p.unique_id == id) return p;
+	}
+	for (ReplayMetadata::PlayerMetadata p : orangePlayers) {
+		if (p.unique_id == id) return p;
+	}
+	VOID_ERR("Player with id \"" << id << "\" doesn't exist in this replay");
+}
