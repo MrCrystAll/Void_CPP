@@ -9,6 +9,8 @@
 
 USE_REPLAY_NS;
 
+namespace fs = std::filesystem;
+
 ReplayLoader::ReplayLoader()
 {
 	RocketSim::Init("./collision_meshes");
@@ -16,23 +18,27 @@ ReplayLoader::ReplayLoader()
 
 Replay ReplayLoader::LoadReplay(std::string path, int endDelay, bool saveReplay)
 {
-	int retCode = CallCarball(path);
+	fs::path stem = fs::path(path).stem();
+	fs::path outputPath = std::filesystem::path(DEFAULT_CARBALL_RESULT_PATH) / stem;
+	fs::create_directory(outputPath);
+	int retCode = CallCarball(path, outputPath.string());
 
 	ConvertedReplay replay = ConvertedReplay();
+	replay.replayId = stem.string();
 
 	if (retCode != 0) return Replay();
 
 	
-	ReplayAnalysis analysis = this->LoadAnalysis(DEFAULT_CARBALL_RESULT_PATH, endDelay);
-	ReplayMetadata metadata = this->LoadMetadata(DEFAULT_CARBALL_RESULT_PATH, analysis);
+	ReplayAnalysis analysis = this->LoadAnalysis(outputPath.string(), endDelay);
+	ReplayMetadata metadata = this->LoadMetadata(outputPath.string(), analysis);
 
 	REPLAY_LOADER_LOG("Loaded metadata and analysis");
 
-	std::vector<GameFrame> gameFrames = this->LoadGameFrames(DEFAULT_CARBALL_RESULT_PATH, analysis);
+	std::vector<GameFrame> gameFrames = this->LoadGameFrames(outputPath.string(), analysis);
 	REPLAY_LOADER_LOG("Found " << gameFrames.size() << " game frames");
-	std::vector<BallFrame> ballFrames = this->LoadBallFrames(DEFAULT_CARBALL_RESULT_PATH, analysis);
+	std::vector<BallFrame> ballFrames = this->LoadBallFrames(outputPath.string(), analysis);
 	REPLAY_LOADER_LOG("Found " << ballFrames.size() << " ball frames");
-	std::vector<std::vector<PlayerFrame>> playersFrames = this->LoadPlayersFrames(DEFAULT_CARBALL_RESULT_PATH, analysis);
+	std::vector<std::vector<PlayerFrame>> playersFrames = this->LoadPlayersFrames(outputPath.string(), analysis);
 	REPLAY_LOADER_LOG("Found " << playersFrames.size() << " group of players frames");
 
 	for (int i = 0; i < gameFrames.size(); i++) {
@@ -280,6 +286,17 @@ ReplayMetadata ReplayLoader::LoadMetadata(std::string path, ReplayAnalysis analy
 
 	replayMetadata.scoreLine = scoreLine;
 
+	//Players
+	auto replayPlayers = metadata.at("players");
+	std::vector<ReplayMetadata::PlayerMetadata> players = replayPlayers;
+
+	int nBlue = 1, nOrange = 5;
+
+	for (auto p : players) {
+		p.is_orange ? replayMetadata.orangePlayers.push_back(p) : replayMetadata.bluePlayers.push_back(p);
+		p.match_id = p.is_orange ? nOrange++ : nBlue++;
+	}
+
 	std::vector<GoalFrame> metadataGoalFrames = {};
 
 	for (size_t i = 0; i < goalFrames.size(); i++)
@@ -339,6 +356,18 @@ void ReplayFrameToState(ReplayFrame frame, Arena* arena)
 	}
 }
 
+void ReplayFrameToGameState(ReplayFrame frame, RLGSC::GameState& gameState) {
+	for (int i = 0; i < gameState.players.size(); i++) {
+		RLGSC::PlayerData& player = gameState.players[i];
+		PlayerFrame pFrame = frame.players[i];
+
+		player.matchAssists = pFrame.matchAssists;
+		player.matchGoals = pFrame.matchGoals;
+		player.matchSaves = pFrame.matchSaves;
+		player.matchShots = pFrame.matchShots;
+	}
+}
+
 std::vector<RLGSC::GameState> ReplayLoader::InterpolateReplays(ConvertedReplay replay)
 {
 	//Fuck that already
@@ -362,7 +391,9 @@ std::vector<RLGSC::GameState> ReplayLoader::InterpolateReplays(ConvertedReplay r
 	for (const ReplayFrame rf : replay.frames) {
 		ReplayFrameToState(rf, arena);
 		arena->Step();
-		states[i] = RLGSC::GameState(arena);
+		RLGSC::GameState state = RLGSC::GameState(arena);
+		ReplayFrameToGameState(rf, state);
+		states[i] = state;
 		i++;
 	}
 	REPLAY_LOADER_LOG("Interpolation complete");

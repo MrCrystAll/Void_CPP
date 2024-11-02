@@ -6,8 +6,6 @@
 
 using namespace RLGSC;
 
-#include <RLGymSim_CPP/Utils/Gamestates/GameState.h>
-
 class StateGenerator {
 public:
 	/// <summary>
