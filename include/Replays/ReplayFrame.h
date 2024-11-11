@@ -70,14 +70,23 @@ struct GameFrame {
 /// </summary>
 struct PlayerFrame: PhysicsFrame {
 	Vec dodgeJumpTorque = Vec(), dodgeTorque = Vec();
-	int throttle = 0, steer = 0, matchScore = 0, matchGoals = 0, matchAssists = 0, matchSaves = 0, matchShots = 0, team = 0, boostPickup = 0;
-	bool handbrake = false, isBoostActive = false, isJumpActive = false, isDoubleJumpActive = false, isFlipCarActive = false, isDodgeActive = false;
+	int matchScore = 0, matchGoals = 0, matchAssists = 0, matchSaves = 0, matchShots = 0, team = 0, boostPickup = 0;
+	bool isBoostActive = false, isJumpActive = false, isDoubleJumpActive = false, isFlipCarActive = false, isDodgeActive = false;
 	float boostAmount = 0.0f;
 
-	NLOHMANN_DEFINE_TYPE_INTRUSIVE(PlayerFrame, pos, vel, angVel, rot, isSleeping, dodgeJumpTorque, dodgeTorque, throttle, steer, matchScore, matchAssists, matchSaves, matchShots, team, boostPickup, handbrake, isBoostActive, isJumpActive, isDoubleJumpActive, isFlipCarActive, isDodgeActive, boostAmount)
+	struct PlayerFrameControls {
+		float throttle, steer, pitch, yaw, roll;
+		bool jump, boost, handbrake;
 
-	static RLGSC::PlayerData ToPlayerData(const PlayerFrame& playerFrame);
-	static RocketSim::CarState ToCarState(const PlayerFrame& playerFrame);
+		NLOHMANN_DEFINE_TYPE_INTRUSIVE(PlayerFrameControls, throttle, steer, pitch, yaw, roll, jump, boost, handbrake)
+	};
+
+	PlayerFrameControls controls = {};
+
+	NLOHMANN_DEFINE_TYPE_INTRUSIVE(PlayerFrame, pos, vel, angVel, rot, isSleeping, dodgeJumpTorque, dodgeTorque, matchScore, matchAssists, matchSaves, matchShots, team, boostPickup, isBoostActive, isJumpActive, isDoubleJumpActive, isFlipCarActive, isDodgeActive, boostAmount, controls)
+
+	static RLGSC::PlayerData ToPlayerData(const PlayerFrame& playerFrame, const PlayerFrameControls lastControls);
+	static RocketSim::CarState ToCarState(const PlayerFrame& playerFrame, const PlayerFrame& lastPlayerState, const RLGSC::PlayerData& lastPdata);
 };
 
 /// <summary>

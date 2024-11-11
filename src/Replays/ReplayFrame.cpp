@@ -14,7 +14,7 @@ BallState BallFrame::ToBallState(const BallFrame& ballFrame)
 	return bs;
 }
 
-RLGSC::PlayerData PlayerFrame::ToPlayerData(const PlayerFrame& playerFrame)
+RLGSC::PlayerData PlayerFrame::ToPlayerData(const PlayerFrame& playerFrame, const PlayerFrameControls lastControls)
 {
 	RLGSC::PlayerData playerData = {};
 	playerData.team = (Team)(playerFrame.team - 15);
@@ -32,8 +32,17 @@ RLGSC::PlayerData PlayerFrame::ToPlayerData(const PlayerFrame& playerFrame)
 	cs.boost = playerFrame.boostAmount / 100;
 	cs.isFlipping = playerFrame.isFlipCarActive;
 	cs.isDemoed = playerFrame.isSleeping;
-	cs.handbrakeVal = playerFrame.handbrake;
+	cs.handbrakeVal = playerFrame.controls.handbrake;
 	cs.isJumping = playerFrame.isJumpActive;
+
+	cs.lastControls.jump = lastControls.jump;
+	cs.lastControls.boost = lastControls.boost;
+	cs.lastControls.handbrake = lastControls.handbrake;
+	cs.lastControls.throttle = lastControls.throttle;
+	cs.lastControls.steer = lastControls.steer;
+	cs.lastControls.pitch = lastControls.pitch;
+	cs.lastControls.yaw = lastControls.yaw;
+	cs.lastControls.roll = lastControls.roll;
 	
 	playerData.matchSaves = playerFrame.matchSaves;
 	playerData.matchShots = playerFrame.matchShots;
@@ -45,17 +54,33 @@ RLGSC::PlayerData PlayerFrame::ToPlayerData(const PlayerFrame& playerFrame)
 	return playerData;
 }
 
-RocketSim::CarState PlayerFrame::ToCarState(const PlayerFrame& playerFrame)
+RocketSim::CarState PlayerFrame::ToCarState(const PlayerFrame& playerFrame, const PlayerFrame& lastPlayerState, const RLGSC::PlayerData& lastPdata)
 {
 	PhysState ps = PlayerFrame::ToPhysState(playerFrame);
 	CarState cs = {};
+
 	cs.pos = ps.pos;
 	cs.vel = ps.vel;
-	cs.rotMat = ps.rotMat;
 	cs.angVel = ps.angVel;
+	cs.rotMat = ps.rotMat;
 
-	cs.boost = playerFrame.boostAmount;
+	cs.boost = playerFrame.boostAmount / 100;
 	cs.isFlipping = playerFrame.isFlipCarActive;
+	cs.isDemoed = playerFrame.isSleeping;
+	cs.handbrakeVal = playerFrame.controls.handbrake;
+	cs.isJumping = playerFrame.isJumpActive;
+
+	PlayerFrameControls lastControls = lastPlayerState.controls;
+
+	cs.lastControls = CarControls();
+	cs.lastControls.jump = lastControls.jump;
+	cs.lastControls.boost = lastControls.boost;
+	cs.lastControls.handbrake = lastControls.handbrake;
+	cs.lastControls.throttle = lastControls.throttle;
+	cs.lastControls.steer = lastControls.steer;
+	cs.lastControls.pitch = lastControls.pitch;
+	cs.lastControls.yaw = lastControls.yaw;
+	cs.lastControls.roll = lastControls.roll;
 
 	return cs;
 }
