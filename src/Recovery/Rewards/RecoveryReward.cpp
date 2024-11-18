@@ -8,16 +8,22 @@ void RecoveryReward::PreStep(const GameState& state)
 {
 	LoggableReward::PreStep(state);
 
-	for (const PlayerData& p : state.players) {
+	for (const PlayerData& p : state.players) 
+	{
 
 		if (not this->lastHasFlipped.contains(p.carId)) {
 			this->lastHasFlipped[p.carId] = p.carState.hasFlipped;
 			this->lastIsOnGround[p.carId] = p.carState.isOnGround;
+			this->gotFlipFromDash[p.carId] = false;
 			this->dashStreaks[p.carId] = 0;
 		}
 		else {
 			if (not p.carState.isOnGround and not p.carState.hasJumped and this->lastHasFlipped[p.carId] and this->lastIsOnGround[p.carId]) {
 				this->dashStreaks[p.carId]++;
+				this->gotFlipFromDash[p.carId] = true;
+			}
+			if (p.carState.hasJumped) {
+				this->gotFlipFromDash[p.carId] = false;
 			}
 		}
 
@@ -133,12 +139,18 @@ void RecoveryReward::HeightLimitPunishment(const PlayerData& player)
 
 void RecoveryReward::DashStreakReward(const PlayerData& player)
 {
-	this->reward += { this->dashStreaks.contains(player.carId) and this->dashStreaks[player.carId] > 0 ? std::exp(this->dashStreaks[player.carId]) * 100 : 0, "Dash streak"};
+	this->reward += { this->dashStreaks.contains(player.carId) and this->dashStreaks[player.carId] > 0 ? std::exp(this->dashStreaks[player.carId]) : 0, "Dash streak"};
 }
 
 void RecoveryReward::DashReward(const PlayerData& player)
 {
-	this->reward += { this->dashStreaks.contains(player.carId) and this->dashStreaks[player.carId] > 0 ? 1000 : 0, "Dash"};
+	this->reward += { this->dashStreaks.contains(player.carId) and this->dashStreaks[player.carId] > 0 ? 10 : 0, "Dash"};
+}
+
+void RecoveryReward::DashResultReward(const PlayerData& player)
+{
+	this->reward += {this->gotFlipFromDash.contains(player.carId) and this->gotFlipFromDash[player.carId] ? (this->lastLinVel[player.carId] - player.phys.vel.Length()) * 200 : 0, "Dash acceleration"};
+	this->reward += {this->gotFlipFromDash.contains(player.carId) ? this->gotFlipFromDash[player.carId] * config.dashResultWeight : 0, "Flip from dash"};
 }
 
 float RecoveryReward::GetReward(const PlayerData& player, const GameState& state, const Action& prevAction)
@@ -159,11 +171,12 @@ float RecoveryReward::GetReward(const PlayerData& player, const GameState& state
 	//this->FlipDelayReward(player);
 	this->FlipTimeReward(player);
 
-	//Only jump is held too long
-	//this->OnlyJumpHeldTooLongPunishment(player);
-	//this->DashStreakReward(player);
+	this->OnlyJumpHeldTooLongPunishment(player);
+	this->DashStreakReward(player);
 
 	this->DashReward(player);
+
+	this->DashResultReward(player);
 
 	this->HeightLimitPunishment(player);
 
@@ -172,6 +185,8 @@ float RecoveryReward::GetReward(const PlayerData& player, const GameState& state
 
 	this->lastIsOnGround[player.carId] = player.carState.isOnGround;
 	this->lastHasFlipped[player.carId] = player.carState.hasFlipped;
+	this->lastLinVel[player.carId] = player.carState.vel.Length();
+	
 
 	return this->ComputeReward();
 }
@@ -184,4 +199,6 @@ void RecoveryReward::Reset(const GameState& initialState)
 	this->dashStreaks.clear();
 	this->lastHasFlipped.clear();
 	this->lastIsOnGround.clear();
+	this->gotFlipFromDash.clear();
+	this->lastLinVel.clear();
 }

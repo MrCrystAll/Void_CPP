@@ -1,7 +1,7 @@
 config:
   process-config:
-    numThreads: 2
-    numGamesPerThread: 4
+    numThreads: 8
+    numGamesPerThread: 16
 
   buffer-config:
     timestepsPerIteration: 500000

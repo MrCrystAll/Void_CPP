@@ -111,9 +111,22 @@ struct ReplayMetadata {
 	int nBlue = 0, nOrange = 0;
 	RLGSC::ScoreLine scoreLine;
 
+	struct PlayerMetadata {
+		std::string unique_id;
+		std::string name;
+		int match_goals, match_assists, match_shots, match_saves;
+		bool is_orange;
+		int match_id = -1;
+
+		NLOHMANN_DEFINE_TYPE_INTRUSIVE(PlayerMetadata, unique_id, name, match_goals, match_assists, match_shots, match_saves, is_orange)
+	};
+
+	std::vector<PlayerMetadata> bluePlayers = {}, orangePlayers = {};
 	std::vector<GoalFrame> goalFrames;
 
-	NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReplayMetadata, numberOfFrames, numberOfPlayableFrames, scoreLine, goalFrames, nBlue, nOrange)
+	PlayerMetadata GetPlayerWithId(std::string id);
+
+	NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReplayMetadata, numberOfFrames, numberOfPlayableFrames, scoreLine, goalFrames, nBlue, nOrange, bluePlayers, orangePlayers)
 };
 
 /// <summary>
@@ -154,14 +167,14 @@ public:
 /// </summary>
 class ConvertedReplay {
 public:
-
+	std::string replayId;
 	ReplayMetadata metadata;
 	ReplayAnalysis analysis;
 	std::vector<ReplayFrame> frames = {};
 
 	void AddFrame(ReplayFrame frame) { this->frames.push_back(frame); }
 
-	NLOHMANN_DEFINE_TYPE_INTRUSIVE(ConvertedReplay, metadata, analysis, frames)
+	NLOHMANN_DEFINE_TYPE_INTRUSIVE(ConvertedReplay, replayId, metadata, analysis, frames)
 };
 
 /// <summary>

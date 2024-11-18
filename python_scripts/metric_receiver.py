@@ -3,6 +3,22 @@ import site
 import sys
 import os
 
+lib_path_from_root = os.path.join(os.getcwd(), ".venv/Lib/site-packages")
+lib_path_from_release = os.path.join(os.getcwd(), "../.venv/Lib/site-packages")
+
+if os.path.exists(lib_path_from_release):
+    sys.path.append(lib_path_from_release)
+
+if os.path.exists(lib_path_from_root):
+    sys.path.append(lib_path_from_root)
+
+
+def log(*content):
+    print("[PYTHON] -", *content, flush=True)
+    
+def err_log(*content):
+    log("[ERROR]", content)
+
 wandb_run = None
 
 def log(*content):
