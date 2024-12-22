@@ -169,7 +169,7 @@ EnvCreateResult EnvCreateFunc() {
 	auto rewards = new LoggedCombinedReward( // Format is { RewardFunc, weight (optional, default = 1), name (optional for loggable rewards, mandatory for non loggable) }
 		{
 			{new VelocityPlayerToBallReward(), 1.5f, "Velocity player to ball" },
-			{new RecoveryReward({.distanceToBallWeight = 0.0f, .flipTimeWeight = 1.0f, .velocityWeight = 10.0f,  .doubleJumpWeight = 1.0f, .facingUpWeight = 3.0f}), 1.0f},
+			{new RecoveryReward({.distanceToBallWeight = 0.0f, .flipTimeWeight = 1.0f, .velocityWeight = 10.0f,  .doubleJumpWeight = 1.0f, .facingUpWeight = 10.0f, .dashResultWeight = 1000.0f}), 1.0f},
 			{new EventReward({.touch = 10.0f}), 1.0f, "Event"}
 		}
 	);

@@ -66,43 +66,6 @@ struct GameFrame {
 };
 
 /// <summary>
-/// Represents a single player's data of the frame
-/// </summary>
-struct PlayerFrame: PhysicsFrame {
-	Vec dodgeJumpTorque = Vec(), dodgeTorque = Vec();
-	int matchScore = 0, matchGoals = 0, matchAssists = 0, matchSaves = 0, matchShots = 0, team = 0, boostPickup = 0;
-	bool isBoostActive = false, isJumpActive = false, isDoubleJumpActive = false, isFlipCarActive = false, isDodgeActive = false;
-	float boostAmount = 0.0f;
-
-	struct PlayerFrameControls {
-		float throttle, steer, pitch, yaw, roll;
-		bool jump, boost, handbrake;
-
-		NLOHMANN_DEFINE_TYPE_INTRUSIVE(PlayerFrameControls, throttle, steer, pitch, yaw, roll, jump, boost, handbrake)
-	};
-
-	PlayerFrameControls controls = {};
-
-	NLOHMANN_DEFINE_TYPE_INTRUSIVE(PlayerFrame, pos, vel, angVel, rot, isSleeping, dodgeJumpTorque, dodgeTorque, matchScore, matchAssists, matchSaves, matchShots, team, boostPickup, isBoostActive, isJumpActive, isDoubleJumpActive, isFlipCarActive, isDodgeActive, boostAmount, controls)
-
-	static RLGSC::PlayerData ToPlayerData(const PlayerFrame& playerFrame, const PlayerFrameControls lastControls);
-	static RocketSim::CarState ToCarState(const PlayerFrame& playerFrame, const PlayerFrame& lastPlayerState, const RLGSC::PlayerData& lastPdata);
-};
-
-/// <summary>
-/// A frame of a replay
-/// </summary>
-class ReplayFrame {
-public:
-	BallFrame ball;
-	GameFrame game;
-
-	std::vector<PlayerFrame> players;
-
-	NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReplayFrame, ball, game, players)
-};
-
-/// <summary>
 /// A frame where a goal occurred
 /// </summary>
 struct GoalFrame {
@@ -136,6 +99,44 @@ struct ReplayMetadata {
 	PlayerMetadata GetPlayerWithId(std::string id);
 
 	NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReplayMetadata, numberOfFrames, numberOfPlayableFrames, scoreLine, goalFrames, nBlue, nOrange, bluePlayers, orangePlayers)
+};
+
+/// <summary>
+/// Represents a single player's data of the frame
+/// </summary>
+struct PlayerFrame : PhysicsFrame {
+	Vec dodgeJumpTorque = Vec(), dodgeTorque = Vec();
+	int matchScore = 0, matchGoals = 0, matchAssists = 0, matchSaves = 0, matchShots = 0, team = 0, boostPickup = 0;
+	bool isBoostActive = false, isJumpActive = false, isDoubleJumpActive = false, isFlipCarActive = false, isDodgeActive = false;
+	float boostAmount = 0.0f;
+	int timeSpentBoosting = 0;
+
+	struct PlayerFrameControls {
+		float throttle, steer, pitch, yaw, roll;
+		bool jump, boost, handbrake;
+
+		NLOHMANN_DEFINE_TYPE_INTRUSIVE(PlayerFrameControls, throttle, steer, pitch, yaw, roll, jump, boost, handbrake)
+	};
+
+	PlayerFrameControls controls = {};
+
+	NLOHMANN_DEFINE_TYPE_INTRUSIVE(PlayerFrame, pos, vel, angVel, rot, isSleeping, dodgeJumpTorque, dodgeTorque, matchScore, matchAssists, matchSaves, matchShots, team, boostPickup, isBoostActive, isJumpActive, isDoubleJumpActive, isFlipCarActive, isDodgeActive, boostAmount, controls, timeSpentBoosting)
+
+	static RLGSC::PlayerData ToPlayerData(int carId, ReplayMetadata metadata, const PlayerFrame& playerFrame, const PlayerFrameControls lastControls);
+	static RocketSim::CarState ToCarState(const PlayerFrame& playerFrame, const PlayerFrameControls lastControls);
+};
+
+/// <summary>
+/// A frame of a replay
+/// </summary>
+class ReplayFrame {
+public:
+	BallFrame ball;
+	GameFrame game;
+
+	std::vector<PlayerFrame> players;
+
+	NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReplayFrame, ball, game, players)
 };
 
 /// <summary>
