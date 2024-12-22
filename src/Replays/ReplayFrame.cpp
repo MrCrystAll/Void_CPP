@@ -17,25 +17,11 @@ BallState BallFrame::ToBallState(const BallFrame& ballFrame)
 RLGSC::PlayerData PlayerFrame::ToPlayerData(const PlayerFrame& playerFrame)
 {
 	RLGSC::PlayerData playerData = {};
+	RocketSim::CarState cs = PlayerFrame::ToCarState(playerFrame);
+
 	playerData.team = (Team)(playerFrame.team - 15);
 	playerData.boostPickups = playerFrame.boostPickup;
 	playerData.boostFraction = playerFrame.boostAmount / 100;
-
-	PhysState ps = PlayerFrame::ToPhysState(playerFrame);
-	CarState cs = {};
-
-	cs.pos = ps.pos;
-	cs.vel = ps.vel;
-	cs.angVel = ps.angVel;
-	cs.rotMat = ps.rotMat;
-
-	cs.boost = playerFrame.boostAmount / 100;
-	cs.isFlipping = playerFrame.isFlipCarActive;
-	cs.isDemoed = playerFrame.isSleeping;
-	cs.handbrakeVal = playerFrame.handbrake;
-	cs.isJumping = playerFrame.isJumpActive;
-
-	cs.timeSpentBoosting = playerFrame.timeSpentBoosting;
 	
 	playerData.matchSaves = playerFrame.matchSaves;
 	playerData.matchShots = playerFrame.matchShots;
@@ -53,11 +39,15 @@ RocketSim::CarState PlayerFrame::ToCarState(const PlayerFrame& playerFrame)
 	CarState cs = {};
 	cs.pos = ps.pos;
 	cs.vel = ps.vel;
-	cs.rotMat = ps.rotMat;
 	cs.angVel = ps.angVel;
+	cs.rotMat = ps.rotMat;
 
 	cs.boost = playerFrame.boostAmount;
 	cs.isFlipping = playerFrame.isFlipCarActive;
+	cs.isDemoed = playerFrame.isSleeping;
+	cs.handbrakeVal = playerFrame.handbrake;
+	cs.isJumping = playerFrame.isJumpActive;
+
 	cs.timeSpentBoosting = playerFrame.timeSpentBoosting;
 
 	return cs;

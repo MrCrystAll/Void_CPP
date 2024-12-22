@@ -372,64 +372,47 @@ ReplayAnalysis ReplayLoader::LoadAnalysis(std::string path, int endDelay)
 	return analysis;
 }
 
-void ReplayFrameToState(ReplayFrame frame, RLGSC::GameState& state)
+void ReplayFrameToState(ReplayMetadata metadata, ReplayFrame frame, RLGSC::GameState& state)
 {
 	BallState bs = BallFrame::ToBallState(frame.ball);
-
+	int nBlue = 0, nOrange = 0;
 	for (int i = 0; i < frame.players.size(); i++) {
 		CarState cs = PlayerFrame::ToCarState(frame.players[i]);
+		PlayerFrame pFrame = frame.players[i];
 		RLGSC::PlayerData pData = RLGSC::PlayerData();
 		pData.team = (RocketSim::Team)frame.players[i].team;
 
 		pData.carState = cs;
 		pData.phys = cs;
+		if (pData.team == Team::BLUE) {
+			pData.carId = metadata.bluePlayers[nBlue++].match_id;
+		}
+		else {
+
+			pData.carId = metadata.orangePlayers[nOrange++].match_id;
+		}
+
+		pData.matchAssists = pFrame.matchAssists;
+		pData.matchGoals = pFrame.matchGoals;
+		pData.matchSaves = pFrame.matchSaves;
+		pData.matchShots = pFrame.matchShots;
+
+		pData.boostFraction = pFrame.boostAmount / 100.0;
+		pData.boostPickups = pFrame.boostPickup;
 
 		state.players.push_back(pData);
 	}
 }
 
-void ReplayFrameToGameState(ReplayMetadata metadata, ReplayFrame frame, RLGSC::GameState& gameState) {
-
-	int nBlue = 0, nOrange = 0;
-	for (int i = 0; i < gameState.players.size(); i++) {
-		RLGSC::PlayerData& player = gameState.players[i];
-		PlayerFrame pFrame = frame.players[i];
-
-		if (player.team == Team::BLUE) {
-			player.carId = metadata.bluePlayers[nBlue++].match_id;
-		}
-		else{
-
-			player.carId = metadata.orangePlayers[nOrange++].match_id;
-		}
-
-		player.matchAssists = pFrame.matchAssists;
-		player.matchGoals = pFrame.matchGoals;
-		player.matchSaves = pFrame.matchSaves;
-		player.matchShots = pFrame.matchShots;
-
-		player.boostFraction = pFrame.boostAmount / 100.0;
-		player.boostPickups = pFrame.boostPickup;
-	}
-}
-
 std::vector<RLGSC::GameState> ReplayLoader::InterpolateReplays(ConvertedReplay replay)
 {
-	//Fuck that already
-	int nbBlue, nbOrange;
-
-	nbBlue = replay.metadata.nBlue;
-	nbOrange = replay.metadata.nOrange;
-	
 	std::vector<RLGSC::GameState> states = std::vector<RLGSC::GameState>(replay.metadata.numberOfPlayableFrames);
 	int i = 0;
 
 	REPLAY_LOADER_LOG("Interpolating...");
 	for (const ReplayFrame rf : replay.frames) {
 		RLGSC::GameState state = RLGSC::GameState();
-
-		ReplayFrameToState(rf, state);
-		ReplayFrameToGameState(replay.metadata, rf, state);
+		ReplayFrameToState(replay.metadata, rf, state);
 		states[i] = state;
 		i++;
 	}
