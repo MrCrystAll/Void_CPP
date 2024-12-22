@@ -22,7 +22,7 @@ void RecoveryReward::PreStep(const GameState& state)
 				this->dashStreaks[p.carId]++;
 				this->gotFlipFromDash[p.carId] = true;
 			}
-			if (p.carState.hasJumped) {
+			if (not p.carState.hasFlipped) {
 				this->gotFlipFromDash[p.carId] = false;
 			}
 		}
@@ -139,17 +139,17 @@ void RecoveryReward::HeightLimitPunishment(const PlayerData& player)
 
 void RecoveryReward::DashStreakReward(const PlayerData& player)
 {
-	this->reward += { this->dashStreaks.contains(player.carId) and this->dashStreaks[player.carId] > 0 ? std::exp(this->dashStreaks[player.carId]) : 0, "Dash streak"};
+	this->reward += { this->dashStreaks.contains(player.carId) and this->dashStreaks[player.carId] > 0 ? std::exp(this->dashStreaks[player.carId]) * 10 : 0, "Dash streak"};
 }
 
 void RecoveryReward::DashReward(const PlayerData& player)
 {
-	this->reward += { this->dashStreaks.contains(player.carId) and this->dashStreaks[player.carId] > 0 ? 10 : 0, "Dash"};
+	this->reward += { this->dashStreaks.contains(player.carId) and this->dashStreaks[player.carId] > 0 ? 100 : 0, "Dash"};
 }
 
 void RecoveryReward::DashResultReward(const PlayerData& player)
 {
-	this->reward += {this->gotFlipFromDash.contains(player.carId) and this->gotFlipFromDash[player.carId] ? (this->lastLinVel[player.carId] - player.phys.vel.Length()) * 200 : 0, "Dash acceleration"};
+	this->reward += {this->gotFlipFromDash.contains(player.carId) and this->gotFlipFromDash[player.carId] ? (this->lastLinVel[player.carId] - player.phys.vel.Length()) / 200 : 0, "Dash acceleration"};
 	this->reward += {this->gotFlipFromDash.contains(player.carId) ? this->gotFlipFromDash[player.carId] * config.dashResultWeight : 0, "Flip from dash"};
 }
 
@@ -171,7 +171,8 @@ float RecoveryReward::GetReward(const PlayerData& player, const GameState& state
 	//this->FlipDelayReward(player);
 	this->FlipTimeReward(player);
 
-	this->OnlyJumpHeldTooLongPunishment(player);
+	//Only jump is held too long
+	//this->OnlyJumpHeldTooLongPunishment(player);
 	this->DashStreakReward(player);
 
 	this->DashReward(player);

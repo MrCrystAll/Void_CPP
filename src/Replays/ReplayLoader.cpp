@@ -15,6 +15,7 @@ namespace fs = std::filesystem;
 
 ReplayLoader::ReplayLoader()
 {
+	RocketSim::Init("./collision_meshes");
 }
 
 Replay ReplayLoader::LoadReplay(std::string path, int endDelay, bool saveReplay)
@@ -43,7 +44,7 @@ Replay ReplayLoader::LoadReplay(std::string path, int endDelay, bool saveReplay)
 	REPLAY_LOADER_LOG("Found " << gameFrames.size() << " game frames");
 	std::vector<BallFrame> ballFrames = this->LoadBallFrames(outputPath.string(), analysis);
 	REPLAY_LOADER_LOG("Found " << ballFrames.size() << " ball frames");
-	std::vector<std::vector<PlayerFrame>> playersFrames = this->LoadPlayersFrames(outputPath.string(), analysis, metadata);
+	std::vector<std::vector<PlayerFrame>> playersFrames = this->LoadPlayersFrames(gameFrames, outputPath.string(), analysis);
 	REPLAY_LOADER_LOG("Found " << playersFrames.size() << " group of players frames");
 
 	for (int i = 0; i < gameFrames.size(); i++) {
@@ -160,12 +161,7 @@ std::vector<BallFrame> ReplayLoader::LoadBallFrames(std::string path, ReplayAnal
 	return ballFrames;
 }
 
-struct PlayerLoadingData {
-	int teamId = 0;
-	std::string filepath;
-};
-
-std::vector<std::vector<PlayerFrame>> ReplayLoader::LoadPlayersFrames(std::string path, ReplayAnalysis analysis, ReplayMetadata metadata)
+std::vector<std::vector<PlayerFrame>> ReplayLoader::LoadPlayersFrames(std::vector<GameFrame> gameFrames, std::string path, ReplayAnalysis analysis)
 {
 	std::vector<std::vector<PlayerFrame>> playerFrames = {};
 
@@ -174,7 +170,7 @@ std::vector<std::vector<PlayerFrame>> ReplayLoader::LoadPlayersFrames(std::strin
 	json jf = json::parse(ifs);
 
 	auto players = jf["players"];
-	std::vector<PlayerLoadingData> playerFiles = {};
+	std::vector<std::string> playerFiles = {};
 
 	int nbPlayers = players.size();
 
@@ -187,33 +183,22 @@ std::vector<std::vector<PlayerFrame>> ReplayLoader::LoadPlayersFrames(std::strin
 		else bluePlayers.push_back(playerUniqueId);
 	}
 
-	std::sort(bluePlayers.begin(), bluePlayers.end());
-	std::sort(orangePlayers.begin(), orangePlayers.end());
-
 	for (std::string pUID : bluePlayers) {
-		playerFiles.push_back({
-			.teamId = 0,
-			.filepath = "player_" + pUID + ".csv"
-			});
+		playerFiles.push_back("player_" + pUID + ".csv");
 	}
 
 	for (std::string pUID : orangePlayers) {
-		playerFiles.push_back({
-			.teamId = 1,
-			.filepath = "player_" + pUID + ".csv"
-			});
+		playerFiles.push_back("player_" + pUID + ".csv");
 	}
 
 	//Profit
 	int i = 0;
 
 
-	for (PlayerLoadingData playerLoadingData : playerFiles) {
+	for (std::string playerPath : playerFiles) {
 		int playersFrameIn = 0;
 		int totalPlayersFrameIn = 0;
-		std::string playerFilePath = path + "/" + playerLoadingData.filepath;
-
-		PlayerFrame lastFrame = {};		
+		std::string playerFilePath = path + "/" + playerPath;
 
 		io::CSVReader<37> reader = io::CSVReader<37>(playerFilePath);
 
@@ -267,12 +252,10 @@ std::vector<std::vector<PlayerFrame>> ReplayLoader::LoadPlayersFrames(std::strin
 			pf.isFlipCarActive = flip_car_is_active;
 			pf.isJumpActive = jump_is_active;
 
-			pf.team = playerLoadingData.teamId;
+			pf.team = team;
 
 			pf.boostAmount = boost_amount;
 			pf.boostPickup = boost_pickup;
-
-			pf.timeSpentBoosting = pf.isBoostActive ? lastFrame.timeSpentBoosting + 1 : 0;
 
 			if (i == 0) {
 				playerFrames.push_back({ pf });
@@ -286,8 +269,6 @@ std::vector<std::vector<PlayerFrame>> ReplayLoader::LoadPlayersFrames(std::strin
 
 			playersFrameIn++;
 			totalPlayersFrameIn++;
-
-			lastFrame = pf;
 
 		}
 		i++;
@@ -325,20 +306,14 @@ ReplayMetadata ReplayLoader::LoadMetadata(std::string path, ReplayAnalysis analy
 	replayMetadata.scoreLine = scoreLine;
 
 	//Players
-	std::vector<ReplayMetadata::PlayerMetadata> replayPlayers = metadata.at("players");
+	auto replayPlayers = metadata.at("players");
+	std::vector<ReplayMetadata::PlayerMetadata> players = replayPlayers;
 
 	int nBlue = 1, nOrange = 5;
 
-	for (ReplayMetadata::PlayerMetadata& p : replayPlayers) {
+	for (auto p : players) {
 		p.is_orange ? replayMetadata.orangePlayers.push_back(p) : replayMetadata.bluePlayers.push_back(p);
-	}
-
-	for (ReplayMetadata::PlayerMetadata& p : replayMetadata.bluePlayers) {
-		p.match_id = nBlue++;
-	}
-
-	for (ReplayMetadata::PlayerMetadata& p : replayMetadata.orangePlayers) {
-		p.match_id = nOrange++;
+		p.match_id = p.is_orange ? nOrange++ : nBlue++;
 	}
 
 	std::vector<GoalFrame> metadataGoalFrames = {};
@@ -387,47 +362,89 @@ ReplayAnalysis ReplayLoader::LoadAnalysis(std::string path, int endDelay)
 	return analysis;
 }
 
-void ReplayFrameToState(ReplayMetadata metadata, ReplayFrame frame, RLGSC::GameState& state)
+void ReplayFrameToState(ReplayFrame frame, Arena* arena, ReplayFrame lastState, RLGSC::GameState lastGameState)
 {
 	BallState bs = BallFrame::ToBallState(frame.ball);
-	int nBlue = 0, nOrange = 0;
-	for (int i = 0; i < frame.players.size(); i++) {
-		CarState cs = PlayerFrame::ToCarState(frame.players[i]);
+	arena->ball->SetState(bs);
+
+	int i = 0;
+	for (Car* c : arena->GetCars()) {
+		CarState cs = PlayerFrame::ToCarState(frame.players[i], lastState.players[i], lastGameState.players[i]);
+		c->SetState(cs);
+		i++;
+	}
+}
+
+void ReplayFrameToGameState(ReplayFrame frame, RLGSC::GameState& gameState) {
+	for (int i = 0; i < gameState.players.size(); i++) {
+		RLGSC::PlayerData& player = gameState.players[i];
 		PlayerFrame pFrame = frame.players[i];
-		RLGSC::PlayerData pData = RLGSC::PlayerData();
-		pData.team = (RocketSim::Team)frame.players[i].team;
 
-		pData.carState = cs;
-		pData.phys = cs;
-		if (pData.team == Team::BLUE) {
-			pData.carId = metadata.bluePlayers[nBlue++].match_id;
-		}
-		else {
-
-			pData.carId = metadata.orangePlayers[nOrange++].match_id;
-		}
-
-		pData.matchAssists = pFrame.matchAssists;
-		pData.matchGoals = pFrame.matchGoals;
-		pData.matchSaves = pFrame.matchSaves;
-		pData.matchShots = pFrame.matchShots;
-
-		pData.boostFraction = pFrame.boostAmount / 100.0;
-		pData.boostPickups = pFrame.boostPickup;
-
-		state.players.push_back(pData);
+		player.matchAssists = pFrame.matchAssists;
+		player.matchGoals = pFrame.matchGoals;
+		player.matchSaves = pFrame.matchSaves;
+		player.matchShots = pFrame.matchShots;
 	}
 }
 
 std::vector<RLGSC::GameState> ReplayLoader::InterpolateReplays(ConvertedReplay replay)
 {
+	//Fuck that already
+	int nbBlue, nbOrange;
+
+	nbBlue = replay.metadata.nBlue;
+	nbOrange = replay.metadata.nOrange;
+
+	RocketSim::Arena* arena = RocketSim::Arena::Create(GameMode::SOCCAR);
+	for (int i = 0; i < nbBlue; i++) {
+		arena->AddCar(Team::BLUE);
+	}
+	for (int i = 0; i < nbOrange; i++) {
+		arena->AddCar(Team::ORANGE);
+	}
+	
 	std::vector<RLGSC::GameState> states = std::vector<RLGSC::GameState>(replay.metadata.numberOfPlayableFrames);
 	int i = 0;
 
 	REPLAY_LOADER_LOG("Interpolating...");
 	for (const ReplayFrame rf : replay.frames) {
-		RLGSC::GameState state = RLGSC::GameState();
-		ReplayFrameToState(replay.metadata, rf, state);
+		ReplayFrame lastState = {};
+		RLGSC::GameState lastGameState = {};
+		if (i > 0) {
+			lastState = replay.frames[i - 1];
+			lastGameState = states[i - 1];
+		}
+		else {
+			lastState = replay.frames[0];
+			lastGameState = RLGSC::GameState(arena);
+		}
+
+		int set_i = 0;
+		//VOID_LOG("Frame " << i);
+		for (Car* c : arena->GetCars()) {
+			PlayerFrame pFrame = rf.players[set_i];
+			c->controls = CarControls();
+
+			c->controls.jump = pFrame.controls.jump;
+			c->controls.boost = pFrame.controls.boost;
+			c->controls.handbrake = pFrame.controls.handbrake;
+			c->controls.throttle = pFrame.controls.throttle;
+			c->controls.steer = pFrame.controls.steer;
+			c->controls.pitch = pFrame.controls.pitch;
+			c->controls.yaw = pFrame.controls.yaw;
+			c->controls.roll = pFrame.controls.roll;
+
+			//VOID_LOG("Player " << set_i << ": [" << pFrame.controls.pitch << ", " << pFrame.controls.yaw << ", " << pFrame.controls.roll << "]");
+
+			set_i++;
+		}
+
+
+		ReplayFrameToState(rf, arena, lastState, lastGameState);
+		arena->Step(std::round(rf.game.delta / (1.0 / 120.0)));
+		RLGSC::GameState state = RLGSC::GameState(arena);
+		ReplayFrameToGameState(rf, state);
+
 		states[i] = state;
 
 		i++;

@@ -82,7 +82,3 @@ checkpoints
 /tests/replays
 /tests/Configs
 /tests/submodels
-
-/replays/tmp/*
-
-*.dir

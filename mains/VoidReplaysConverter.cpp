@@ -5,7 +5,7 @@
 USE_REPLAY_NS;
 
 int main(){
-	std::string INPUT_PATH = "replays/tests"; //Can be replay or directory
+	std::string INPUT_PATH = "replays"; //Can be replay or directory
 	std::string OUTPUT_PATH = "3v3.json"; //Has to be json
 
 	bool isDirectory = std::filesystem::is_directory(INPUT_PATH);
@@ -33,5 +33,5 @@ int main(){
 		replays = { r };
 	}
 
-	//saver.SaveReplays(OUTPUT_PATH, replays);
+	saver.SaveReplays(OUTPUT_PATH, replays);
 }
