@@ -15,7 +15,7 @@
 #include <RLGymSim_CPP/Utils/OBSBuilders/OBSBuilder.h>
 #include <RLGymSim_CPP/Utils/OBSBuilders/DefaultOBS.h>
 
-#include <RLGymPPO_CPP/Util/PolicyInferUnit.h>
+#include <RLGymPPO_CPP/Util/InferUnit.h>
 #include <Selector/SelectorUtils.h>
 
 START_SELECTOR_NS
@@ -70,7 +70,7 @@ struct SubmodelArgs {
 /// </summary>
 class Submodel {
 public:
-	Submodel(SubmodelArgs args) : obsBuilder(args.obsBuilder), parser(args.parser), agent(args.obsBuilder, args.parser, args.path, args.obsSize, args.policyLayerSizes, args.deterministic), name(args.name), weight(args.weight), deterministic(args.deterministic) {
+	Submodel(SubmodelArgs args) : obsBuilder(args.obsBuilder), parser(args.parser), agent(args.obsBuilder, args.parser, args.path, true, args.obsSize, args.policyLayerSizes, args.deterministic), name(args.name), weight(args.weight), deterministic(args.deterministic) {
 
 	};
 
@@ -92,7 +92,7 @@ public:
 private:
 	RLGSC::ActionParser* parser;
 	RLGSC::OBSBuilder* obsBuilder;
-	RLGPC::PolicyInferUnit agent;
+	RLGPC::InferUnit agent;
 	std::string name;
 	float weight;
 	bool deterministic;

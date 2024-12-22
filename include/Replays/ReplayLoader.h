@@ -53,7 +53,7 @@ private:
 
 	std::vector<GameFrame> LoadGameFrames(std::string path, ReplayAnalysis analysis);
 	std::vector<BallFrame> LoadBallFrames(std::string path, ReplayAnalysis analysis);
-	std::vector<std::vector<PlayerFrame>> LoadPlayersFrames(std::vector<GameFrame> gameFrames, std::string path, ReplayAnalysis analysis);
+	std::vector<std::vector<PlayerFrame>> LoadPlayersFrames(std::string path, ReplayAnalysis analysis, ReplayMetadata metadata);
 	ReplayMetadata LoadMetadata(std::string path, ReplayAnalysis analysis);
 	ReplayAnalysis LoadAnalysis(std::string path, int endDelay);
 	std::vector<RLGSC::GameState> InterpolateReplays(ConvertedReplay replay);

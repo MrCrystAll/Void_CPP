@@ -73,6 +73,7 @@ struct PlayerFrame: PhysicsFrame {
 	int matchScore = 0, matchGoals = 0, matchAssists = 0, matchSaves = 0, matchShots = 0, team = 0, boostPickup = 0;
 	bool isBoostActive = false, isJumpActive = false, isDoubleJumpActive = false, isFlipCarActive = false, isDodgeActive = false;
 	float boostAmount = 0.0f;
+	int timeSpentBoosting = 0;
 
 	struct PlayerFrameControls {
 		float throttle, steer, pitch, yaw, roll;
