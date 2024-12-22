@@ -73,6 +73,7 @@ struct PlayerFrame: PhysicsFrame {
 	int throttle = 0, steer = 0, matchScore = 0, matchGoals = 0, matchAssists = 0, matchSaves = 0, matchShots = 0, team = 0, boostPickup = 0;
 	bool handbrake = false, isBoostActive = false, isJumpActive = false, isDoubleJumpActive = false, isFlipCarActive = false, isDodgeActive = false;
 	float boostAmount = 0.0f;
+	int timeSpentBoosting = 0;
 
 	NLOHMANN_DEFINE_TYPE_INTRUSIVE(PlayerFrame, pos, vel, angVel, rot, isSleeping, dodgeJumpTorque, dodgeTorque, throttle, steer, matchScore, matchAssists, matchSaves, matchShots, team, boostPickup, handbrake, isBoostActive, isJumpActive, isDoubleJumpActive, isFlipCarActive, isDodgeActive, boostAmount)
 

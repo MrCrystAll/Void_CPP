@@ -1,5 +1,4 @@
 #include <Replays/ReplayLoader/MatchData.h>
-#include <Replays/ReplaysUtils.h>
 
 
 TEST_CASE("Match data per player is being correctly assigned", VOID_REPLAYS_TAG) {
@@ -39,15 +38,12 @@ TEST_CASE("Match data per player is being correctly assigned", VOID_REPLAYS_TAG)
 		RLGSC::GameState p1AssistState = replay2s.states[1097];
 		RLGSC::GameState p4AssistState = replay2s.states[3950];
 
-		int p1Id = replay2s.metadata.GetPlayerWithId("10536032516836881354").match_id;
-		int p4Id = replay2s.metadata.GetPlayerWithId("8361322074309366347").match_id;
-
 		for (const RLGSC::PlayerData& p : p1AssistState.players) {
-			if(p.carId == p1Id) CHECK(p.matchAssists == 1);
+			if(p.carId == 1) CHECK(p.matchAssists == 1);
 		}
 
 		for (const RLGSC::PlayerData& p : p4AssistState.players) {
-			if (p.carId == p4Id) CHECK(p.matchAssists == 1);
+			if (p.carId == 6) CHECK(p.matchAssists == 1);
 		}
 	}
 }
