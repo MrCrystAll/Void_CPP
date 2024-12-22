@@ -34,6 +34,8 @@ RLGSC::PlayerData PlayerFrame::ToPlayerData(const PlayerFrame& playerFrame)
 	cs.isDemoed = playerFrame.isSleeping;
 	cs.handbrakeVal = playerFrame.handbrake;
 	cs.isJumping = playerFrame.isJumpActive;
+
+	cs.timeSpentBoosting = playerFrame.timeSpentBoosting;
 	
 	playerData.matchSaves = playerFrame.matchSaves;
 	playerData.matchShots = playerFrame.matchShots;
@@ -56,6 +58,7 @@ RocketSim::CarState PlayerFrame::ToCarState(const PlayerFrame& playerFrame)
 
 	cs.boost = playerFrame.boostAmount;
 	cs.isFlipping = playerFrame.isFlipCarActive;
+	cs.timeSpentBoosting = playerFrame.timeSpentBoosting;
 
 	return cs;
 }
