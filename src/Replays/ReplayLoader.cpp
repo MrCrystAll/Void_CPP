@@ -1,4 +1,5 @@
 #include <Replays/ReplayLoader.h>
+#include <Replays/ReplayUtils.h>
 #include <RLGymSim_CPP/Gym.h>
 
 #include <ctime>
@@ -6,6 +7,7 @@
 #include <RLGymSim_CPP/Utils/RewardFunctions/CommonRewards.h>
 #include <RLGymSim_CPP/Utils/OBSBuilders/DefaultOBS.h>
 #include <RLGymSim_CPP/Utils/ActionParsers/DiscreteAction.h>
+#include <RLGymSim_CPP/Utils/BasicTypes/Quat.h>
 
 USE_REPLAY_NS;
 
@@ -41,7 +43,7 @@ Replay ReplayLoader::LoadReplay(std::string path, int endDelay, bool saveReplay)
 	REPLAY_LOADER_LOG("Found " << gameFrames.size() << " game frames");
 	std::vector<BallFrame> ballFrames = this->LoadBallFrames(outputPath.string(), analysis);
 	REPLAY_LOADER_LOG("Found " << ballFrames.size() << " ball frames");
-	std::vector<std::vector<PlayerFrame>> playersFrames = this->LoadPlayersFrames(outputPath.string(), analysis, metadata);
+	std::vector<std::vector<PlayerFrame>> playersFrames = this->LoadPlayersFrames(gameFrames, outputPath.string(), analysis);
 	REPLAY_LOADER_LOG("Found " << playersFrames.size() << " group of players frames");
 
 	for (int i = 0; i < gameFrames.size(); i++) {
@@ -163,7 +165,7 @@ struct PlayerLoadingData {
 	std::string filepath;
 };
 
-std::vector<std::vector<PlayerFrame>> ReplayLoader::LoadPlayersFrames(std::string path, ReplayAnalysis analysis, ReplayMetadata metadata)
+std::vector<std::vector<PlayerFrame>> ReplayLoader::LoadPlayersFrames(std::vector<GameFrame> gameFrames, std::string path, ReplayAnalysis analysis)
 {
 	std::vector<std::vector<PlayerFrame>> playerFrames = {};
 
@@ -216,6 +218,8 @@ std::vector<std::vector<PlayerFrame>> ReplayLoader::LoadPlayersFrames(std::strin
 		io::CSVReader<37> reader = io::CSVReader<37>(playerFilePath);
 
 		reader.read_header(io::ignore_missing_column, "is_sleeping", "pos_x", "pos_y", "pos_z", "vel_x", "vel_y", "vel_z", "quat_w", "quat_x", "quat_y", "quat_z", "ang_vel_x", "ang_vel_y", "ang_vel_z", "throttle", "steer", "handbrake", "match_score", "match_goals", "match_assists", "match_saves", "match_shots", "team", "ping", "boost_is_active", "boost_amount", "boost_pickup", "jump_is_active", "double_jump_is_active", "flip_car_is_active", "dodge_is_active", "double_jump_torque_x", "double_jump_torque_y", "double_jump_torque_z", "dodge_torque_x", "dodge_torque_y", "dodge_torque_z");
+		Vec lastAngVel = Vec();
+		RotMat lastRotMat = {};
 
 		//Forgive me for that
 		float pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, rot_x, rot_y, rot_z, rot_w, angVel_x, angVel_y, angVel_z, boost_amount, double_jump_torque_x, double_jump_torque_y, double_jump_torque_z, dodge_torque_x, dodge_torque_y, dodge_torque_z;
@@ -236,9 +240,17 @@ std::vector<std::vector<PlayerFrame>> ReplayLoader::LoadPlayersFrames(std::strin
 			pf.rot = Vec(rot_x, rot_y, rot_z, rot_w);
 
 			pf.isSleeping = isSleeping;
-			pf.throttle = throttle;
-			pf.steer = steer;
-			std::istringstream(handbrake) >> std::boolalpha >> pf.handbrake;
+			pf.controls.throttle = throttle / 255.0;
+			pf.controls.steer = steer / 255.0;
+			pf.controls.boost = boost_is_active;
+			pf.controls.jump = jump_is_active;
+			std::istringstream(handbrake) >> std::boolalpha >> pf.controls.handbrake;
+
+			std::vector<float> airInputs = AerialInputs(lastAngVel, pf.angVel, lastRotMat, RLGSC::Quat(pf.rot._w, pf.rot.x, pf.rot.y, pf.rot.z).ToRotMat(), gameFrames[i].delta, dodge_is_active);
+
+			pf.controls.pitch = airInputs[0];
+			pf.controls.yaw = airInputs[1];
+			pf.controls.roll = airInputs[2];
 
 			pf.matchScore = match_score;
 			pf.matchAssists = match_assists;
@@ -268,6 +280,9 @@ std::vector<std::vector<PlayerFrame>> ReplayLoader::LoadPlayersFrames(std::strin
 			else {
 				playerFrames[playersFrameIn].push_back(pf);
 			}
+
+			lastAngVel = { angVel_x, angVel_y, angVel_z };
+			lastRotMat = RLGSC::Quat(rot_w, rot_x, rot_y, rot_z).ToRotMat();
 
 			playersFrameIn++;
 			totalPlayersFrameIn++;
@@ -372,33 +387,20 @@ ReplayAnalysis ReplayLoader::LoadAnalysis(std::string path, int endDelay)
 	return analysis;
 }
 
-void ReplayFrameToState(ReplayMetadata metadata, ReplayFrame frame, RLGSC::GameState& state)
+void ReplayFrameToState(ReplayMetadata metadata, ReplayFrame frame, ReplayFrame lastState, RLGSC::GameState& state)
 {
 	BallState bs = BallFrame::ToBallState(frame.ball);
 	int nBlue = 0, nOrange = 0;
 	for (int i = 0; i < frame.players.size(); i++) {
-		CarState cs = PlayerFrame::ToCarState(frame.players[i]);
+		int carId = 0;
 		PlayerFrame pFrame = frame.players[i];
-		RLGSC::PlayerData pData = RLGSC::PlayerData();
-		pData.team = (RocketSim::Team)frame.players[i].team;
-
-		pData.carState = cs;
-		pData.phys = cs;
-		if (pData.team == Team::BLUE) {
-			pData.carId = metadata.bluePlayers[nBlue++].match_id;
+		if ((RocketSim::Team)pFrame.team == Team::BLUE) {
+			carId = metadata.bluePlayers[nBlue++].match_id;
 		}
 		else {
-
-			pData.carId = metadata.orangePlayers[nOrange++].match_id;
+			carId = metadata.orangePlayers[nOrange++].match_id;
 		}
-
-		pData.matchAssists = pFrame.matchAssists;
-		pData.matchGoals = pFrame.matchGoals;
-		pData.matchSaves = pFrame.matchSaves;
-		pData.matchShots = pFrame.matchShots;
-
-		pData.boostFraction = pFrame.boostAmount / 100.0;
-		pData.boostPickups = pFrame.boostPickup;
+		RLGSC::PlayerData pData = PlayerFrame::ToPlayerData(carId, metadata, frame.players[i], lastState.players[i].controls);
 
 		state.players.push_back(pData);
 	}
@@ -411,9 +413,18 @@ std::vector<RLGSC::GameState> ReplayLoader::InterpolateReplays(ConvertedReplay r
 
 	REPLAY_LOADER_LOG("Interpolating...");
 	for (const ReplayFrame rf : replay.frames) {
+		ReplayFrame lastState = {};
+		RLGSC::GameState lastGameState = {};
+		if (i > 0) {
+			lastState = replay.frames[i - 1];
+		}
+		else {
+			lastState = replay.frames[0];
+		}
 		RLGSC::GameState state = RLGSC::GameState();
-		ReplayFrameToState(replay.metadata, rf, state);
+		ReplayFrameToState(replay.metadata, rf, lastState, state);
 		states[i] = state;
+
 		i++;
 	}
 	REPLAY_LOADER_LOG("Interpolation complete");

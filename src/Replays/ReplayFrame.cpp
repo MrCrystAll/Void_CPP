@@ -14,29 +14,34 @@ BallState BallFrame::ToBallState(const BallFrame& ballFrame)
 	return bs;
 }
 
-RLGSC::PlayerData PlayerFrame::ToPlayerData(const PlayerFrame& playerFrame)
+RLGSC::PlayerData PlayerFrame::ToPlayerData(int carId, ReplayMetadata metadata, const PlayerFrame& playerFrame, const PlayerFrameControls lastControls)
 {
 	RLGSC::PlayerData playerData = {};
-	RocketSim::CarState cs = PlayerFrame::ToCarState(playerFrame);
+	RocketSim::CarState cs = PlayerFrame::ToCarState(playerFrame, lastControls);
 
-	playerData.team = (Team)(playerFrame.team - 15);
-	playerData.boostPickups = playerFrame.boostPickup;
-	playerData.boostFraction = playerFrame.boostAmount / 100;
-	
-	playerData.matchSaves = playerFrame.matchSaves;
-	playerData.matchShots = playerFrame.matchShots;
-	playerData.matchGoals = playerFrame.matchGoals;
-	playerData.matchAssists = playerFrame.matchAssists;
+	playerData.team = (RocketSim::Team)playerFrame.team;
 
 	playerData.carState = cs;
+	playerData.phys = cs;
+
+	playerData.carId = carId;
+
+	playerData.matchAssists = playerFrame.matchAssists;
+	playerData.matchGoals = playerFrame.matchGoals;
+	playerData.matchSaves = playerFrame.matchSaves;
+	playerData.matchShots = playerFrame.matchShots;
+
+	playerData.boostFraction = playerFrame.boostAmount / 100.0;
+	playerData.boostPickups = playerFrame.boostPickup;
 
 	return playerData;
 }
 
-RocketSim::CarState PlayerFrame::ToCarState(const PlayerFrame& playerFrame)
+RocketSim::CarState PlayerFrame::ToCarState(const PlayerFrame& playerFrame, const PlayerFrameControls lastControls)
 {
 	PhysState ps = PlayerFrame::ToPhysState(playerFrame);
 	CarState cs = {};
+
 	cs.pos = ps.pos;
 	cs.vel = ps.vel;
 	cs.angVel = ps.angVel;
@@ -45,10 +50,20 @@ RocketSim::CarState PlayerFrame::ToCarState(const PlayerFrame& playerFrame)
 	cs.boost = playerFrame.boostAmount;
 	cs.isFlipping = playerFrame.isFlipCarActive;
 	cs.isDemoed = playerFrame.isSleeping;
-	cs.handbrakeVal = playerFrame.handbrake;
+	cs.handbrakeVal = playerFrame.controls.handbrake;
 	cs.isJumping = playerFrame.isJumpActive;
 
 	cs.timeSpentBoosting = playerFrame.timeSpentBoosting;
+
+	cs.lastControls = CarControls();
+	cs.lastControls.jump = lastControls.jump;
+	cs.lastControls.boost = lastControls.boost;
+	cs.lastControls.handbrake = lastControls.handbrake;
+	cs.lastControls.throttle = lastControls.throttle;
+	cs.lastControls.steer = lastControls.steer;
+	cs.lastControls.pitch = lastControls.pitch;
+	cs.lastControls.yaw = lastControls.yaw;
+	cs.lastControls.roll = lastControls.roll;
 
 	return cs;
 }
