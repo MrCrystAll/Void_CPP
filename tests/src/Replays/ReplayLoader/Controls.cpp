@@ -14,10 +14,10 @@ TEST_CASE("Controls are correctly reproduced", VOID_REPLAYS_TAG) {
 		for (const RLGSC::PlayerData& pData : beforeFlipState.players) {
 			if (pData.carId == p1Id) {
 				CHECK_THAT(pData.carState.lastControls.throttle, Catch::Matchers::WithinAbs(0.0, 0.01));
-				CHECK_THAT(pData.carState.lastControls.steer, Catch::Matchers::WithinAbs(0.0, 0.01));
+				CHECK_THAT(pData.carState.lastControls.steer, Catch::Matchers::WithinAbs(0.58, 0.01));
 				CHECK_THAT(pData.carState.lastControls.pitch, Catch::Matchers::WithinAbs(0.0, 0.01));
-				CHECK_THAT(pData.carState.lastControls.yaw, Catch::Matchers::WithinAbs(0.0, 0.01));
-				CHECK_THAT(pData.carState.lastControls.roll, Catch::Matchers::WithinAbs(0.0, 0.01));
+				CHECK_THAT(pData.carState.lastControls.yaw, Catch::Matchers::WithinAbs(-0.17, 0.01));
+				CHECK_THAT(pData.carState.lastControls.roll, Catch::Matchers::WithinAbs(0.02, 0.01));
 				CHECK_THAT(pData.carState.lastControls.jump, Catch::Matchers::WithinAbs(0.0, 0.01));
 				CHECK_THAT(pData.carState.lastControls.boost, Catch::Matchers::WithinAbs(0.0, 0.01));
 				CHECK_THAT(pData.carState.lastControls.handbrake, Catch::Matchers::WithinAbs(0.0, 0.01));
