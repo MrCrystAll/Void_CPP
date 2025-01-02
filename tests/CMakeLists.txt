@@ -9,7 +9,15 @@ file(GLOB_RECURSE FILES_H_TESTS "include/*.h")
 set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
 
-add_subdirectory(Catch2)
+include(FetchContent)
+
+FetchContent_Declare(
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG v3.7.1 # or a later release
+)
+
+FetchContent_MakeAvailable(Catch2)
 add_executable (Tests ${FILES_SRC_TESTS} ${FILES_H_TESTS})
 GroupSourcesByFolder(Tests)
 
