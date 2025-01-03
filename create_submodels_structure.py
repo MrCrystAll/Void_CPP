@@ -145,6 +145,7 @@ def create_reward_file(path: str, name: str, header: bool):
             f.write("\n")
             
             f.write("using namespace RLGSC;\n\n")
+            f.write(use_macro("LOGGING") + ";\n")
             
             f.write(start_macro(name, REWARD_NS_NAME) + "\n\n")
             f.write(f"class {capitalized_name}Reward: public LoggableReward" + "{\n")
@@ -337,6 +338,7 @@ if __name__ == "__main__":
     args = arg_parser.parse_args()
     
     name = args.name
+    name = str(name).capitalize()
     
     create_folder_structure(os.path.join(os.getcwd(), "include"), name, True)
     create_folder_structure(os.path.join(os.getcwd(), "src"), name, False)

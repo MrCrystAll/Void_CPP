@@ -72,6 +72,105 @@ void SetupConfig(RLGPC::LearnerConfig& cfg, std::string configPath) {
 	#pragma endregion
 }
 
+float maxBallVel = 0.;
+
+// This is our step callback, it's called every step from every RocketSim game
+// WARNING: This is called from multiple threads, often simultaneously, 
+//	so don't access things apart from these arguments unless you know what you're doing.
+// gameMetrics: The metrics for this specific game
+void BaseOnStep(GameInst* gameInst, const RLGSC::Gym::StepResult& stepResult, Report& gameMetrics, std::vector<Logger*> loggers) {
+	auto& gameState = stepResult.state;
+	LoggableReward* lrw = dynamic_cast<LoggableReward*>(gameInst->match->rewardFn);
+	if (lrw != nullptr) {
+		lrw->LogAll(gameMetrics, stepResult.done, "", 1.0f);
+	}
+
+	float ballVel = gameState.ball.vel.Length();
+
+	if (ballVel > maxBallVel) {
+		maxBallVel = ballVel;
+	}
+
+	for (Logger* l : loggers) {
+		l->Log(gameMetrics, gameState);
+	}
+}
+
+// This is our iteration callback, it's called every time we complete an iteration, after learning
+// Here we can add custom metrics to the metrics report, for example
+void BaseOnIteration(Learner* learner, Report& allMetrics, std::vector<Logger*> loggers) {
+	std::map<std::string, AvgTracker> mTrackersAvg = {};
+	std::map<std::string, float> mTrackers = {};
+	std::map<std::string, AvgTracker> rTrackers = {};
+
+	// Get metrics for every gameInst
+	auto allGameMetrics = learner->GetAllGameMetrics();
+
+	VOID_LOG("Creating keys...");
+
+	for (auto& [key, val] : allGameMetrics[0].data) {
+		if (key.starts_with(REWARD_HEADER)) {
+			if (key.ends_with("_avg_total")) {
+				rTrackers[key.substr(0, key.size() - 10)] += val / allGameMetrics[0].data[key.substr(0, key.size() - 10) + "_avg_count"];
+			}
+		}
+	}
+
+	for (const Logger* l : loggers) {
+		for (const Metric& m : l->metrics) {
+			if (m.isAvg) {
+				mTrackersAvg[METRICS_HEADER + m.name] += 0;
+			}
+			else {
+				mTrackers[METRICS_HEADER + m.name] += 0;
+			}
+		}
+	}
+	VOID_LOG("Calculating values...");
+
+
+	for (int i = 1; i < allGameMetrics.size(); i++) {
+		Report& gameReport = allGameMetrics[i];
+
+		for (auto& val : mTrackers) {
+			val.second += gameReport[val.first];
+		}
+
+		for (auto& tracker : mTrackersAvg) {
+
+			if (gameReport.Has(tracker.first) or gameReport.Has(tracker.first + "_avg_total"))
+			{
+				tracker.second += gameReport.GetAvg(tracker.first);
+			}
+		}
+
+		for (auto& tracker : rTrackers) {
+			if (gameReport.Has(tracker.first) or gameReport.Has(tracker.first + "_avg_total"))
+			{
+				tracker.second += gameReport.GetAvg(tracker.first);
+			}
+		}
+	}
+
+	VOID_LOG("Creating final report...");
+
+	for (const auto& tracker : rTrackers) {
+		allMetrics[tracker.first] = tracker.second.Get();
+	}
+
+	for (const auto& tracker : mTrackers) {
+		allMetrics[tracker.first] = tracker.second;
+	}
+
+	for (const auto& tracker : mTrackersAvg) {
+		allMetrics[tracker.first] = tracker.second.Get();
+	}
+
+	allMetrics[METRICS_HEADER + std::string("max_ball_speed")] = maxBallVel / CommonValues::BALL_MAX_SPEED * 216;
+	maxBallVel = 0;
+	std::cout << "End of iteration callback" << std::endl;
+}
+
 template<typename T>
 inline T GetYamlProperty(YAML::Node node, std::string propertyName, T defaultValue)
 {

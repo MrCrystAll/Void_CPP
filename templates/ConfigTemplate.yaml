@@ -43,4 +43,4 @@ config:
     metricsRunName: # Insert name
 
   skill-tracker-config:
-    enabled: true
+    enabled: false

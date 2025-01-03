@@ -2,6 +2,9 @@
 #include <Loggers.h>
 USE_LOGGERS_NS;
 
+#include <Logging/LoggedCombinedReward.h>
+USE_LOGGING_NS;
+
 //The learner
 #include <RLGymPPO_CPP/Learner.h>
 
@@ -13,85 +16,12 @@ USE_VOID_NS;
 std::vector<Logger*> loggers = {
 };
 
-// This is our step callback, it's called every step from every RocketSim game
-// WARNING: This is called from multiple threads, often simultaneously, 
-//	so don't access things apart from these arguments unless you know what you're doing.
-// gameMetrics: The metrics for this specific game
-void OnStep(GameInst* gameInst, const RLGSC::Gym::StepResult& stepResult, Report& gameMetrics) {
-	auto& gameState = stepResult.state;
-	LoggedCombinedReward* lrw = dynamic_cast<LoggedCombinedReward*>(gameInst->match->rewardFn);
-	if (lrw != nullptr) {
-		lrw->LogAll(gameMetrics, stepResult.done);
-	}
-
-	for (Logger* l : loggers) {
-		l->Log(gameMetrics, gameState);
-	}
+static void OnStep(GameInst* gameInst, const RLGSC::Gym::StepResult& stepResult, Report& gameMetrics) {
+	BaseOnStep(gameInst, stepResult, gameMetrics, loggers);
 }
 
-// This is our iteration callback, it's called every time we complete an iteration, after learning
-// Here we can add custom metrics to the metrics report, for example
-void OnIteration(Learner* learner, Report& allMetrics) {
-	std::map<std::string, AvgTracker> mTrackersAvg = {};
-	std::map<std::string, float> mTrackers = {};
-	std::map<std::string, AvgTracker> rTrackers = {};
-
-	// Get metrics for every gameInst
-	auto allGameMetrics = learner->GetAllGameMetrics();
-
-
-	for (auto& [key, val] : allGameMetrics[0].data) {
-		if (key.starts_with(REWARD_HEADER)) {
-			if (key.ends_with("_avg_total")) {
-				rTrackers[key.substr(0, key.size() - 10)] += val / allGameMetrics[0].data[key.substr(0, key.size() - 10) + "_avg_count"];
-			}
-		}
-	}
-
-	for (const Logger* l : loggers) {
-		for (const Metric& m : l->metrics) {
-			if (m.isAvg) {
-				mTrackersAvg[METRICS_HEADER + m.name] += 0;
-			}
-			else {
-				mTrackers[METRICS_HEADER + m.name] += 0;
-			}
-		}
-	}
-
-
-	for (auto& gameReport : allGameMetrics) {
-		for (auto& val : mTrackers) {
-			val.second += gameReport[val.first];
-		}
-
-		for (auto& tracker : mTrackersAvg) {
-			if (gameReport.Has(tracker.first) or gameReport.Has(tracker.first + "_avg_total")){
-				tracker.second += gameReport.GetAvg(tracker.first);
-			}
-		}
-
-		for (auto& tracker : rTrackers) {
-			if (gameReport.Has(tracker.first) or gameReport.Has(tracker.first + "_avg_total"))
-			{
-				tracker.second += gameReport.GetAvg(tracker.first);
-			}
-		}
-	}
-
-	for (const auto& tracker : rTrackers) {
-		allMetrics[tracker.first] = tracker.second.Get();
-	}
-
-	for (const auto& tracker : mTrackers) {
-		allMetrics[tracker.first] = tracker.second;
-	}
-
-	for (const auto& tracker : mTrackersAvg) {
-		allMetrics[tracker.first] = tracker.second.Get();
-	}
-
-	std::cout << "End of iteration callback" << std::endl;
+static void OnIteration(Learner* learner, Report& allMetrics) {
+	BaseOnIteration(learner, allMetrics, loggers);
 }
 
 // Create the RLGymSim environment for each of our games
